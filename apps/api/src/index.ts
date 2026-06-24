@@ -1,6 +1,5 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
-import { adviceRoutes } from './routes/advice.js'
 import { healthRoutes } from './routes/health.js'
 
 const server = Fastify({ logger: true })
@@ -10,7 +9,6 @@ await server.register(cors, {
 })
 
 await server.register(healthRoutes)
-await server.register(adviceRoutes, { prefix: '/api/advice' })
 
 const port = Number(process.env.PORT) || 4000
 
