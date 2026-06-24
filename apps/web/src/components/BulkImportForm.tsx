@@ -4,7 +4,6 @@ import { useState } from 'react'
 import type { RosterImportRow } from '@pinequest/types'
 import { useBulkImport } from '@/hooks/useChildren'
 
-// Each line: "slot, firstName, lastName, birthYear[, M|F]"
 const parseRows = (text: string): RosterImportRow[] =>
   text
     .split('\n')
@@ -26,8 +25,8 @@ export const BulkImportForm = ({ classId }: { classId: string }) => {
   const [text, setText] = useState('')
 
   return (
-    <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-neutral-500">
+    <div className="flex flex-col gap-3">
+      <label className="text-sm font-medium text-text-muted">
         Ростер импорт — мөр бүр: суудал, нэр, овог, төрсөн он[, M/F]
       </label>
       <textarea
@@ -35,17 +34,17 @@ export const BulkImportForm = ({ classId }: { classId: string }) => {
         onChange={(e) => setText(e.target.value)}
         rows={4}
         placeholder={'1, Бат, Болд, 2017\n2, Сараа, Дорж, 2017, F'}
-        className="rounded-lg border border-neutral-300 p-2 font-mono text-sm"
+        className="rounded-lg border border-border bg-surface p-2 font-mono text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
       />
       <button
         onClick={() => bulk.mutate(parseRows(text))}
         disabled={bulk.isPending || !text.trim()}
-        className="self-start rounded-lg bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+        className="self-start rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-hover disabled:opacity-50"
       >
         Импортлох
       </button>
       {bulk.data ? (
-        <p className="text-sm text-neutral-700">
+        <p className="text-sm text-text-base">
           {bulk.data.created} хүүхэд нэмэгдлээ.
           {bulk.data.duplicates.length > 0
             ? ` Давхардсан: ${bulk.data.duplicates.map((d) => `суудал ${d.rosterSlot}`).join(', ')}`

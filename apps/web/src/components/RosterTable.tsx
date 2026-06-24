@@ -3,34 +3,39 @@ import type { Child } from '@pinequest/types'
 
 export const RosterTable = ({ rows }: { rows: Child[] }) => {
   if (rows.length === 0) {
-    return <p className="text-sm text-neutral-500">Хүүхэд бүртгэгдээгүй байна.</p>
+    return <p className="text-sm text-text-muted">Хүүхэд бүртгэгдээгүй байна.</p>
   }
   return (
-    <table className="w-full text-left text-sm">
-      <thead>
-        <tr className="border-b border-neutral-200 text-neutral-500">
-          <th className="py-2 font-medium">Суудал</th>
-          <th className="font-medium">Нэр</th>
-          <th className="font-medium">Төрсөн он</th>
-          <th />
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((c) => (
-          <tr key={c.id} className="border-b border-neutral-100">
-            <td className="py-2">{c.rosterSlot}</td>
-            <td>
-              {c.lastName} {c.firstName}
-            </td>
-            <td>{c.birthYear}</td>
-            <td>
-              <Link href={`/admin/children/${c.id}`} className="text-neutral-500 underline">
-                Дэлгэрэнгүй
-              </Link>
-            </td>
+    <div className="overflow-hidden rounded-lg border border-border bg-surface">
+      <table className="w-full text-left text-sm">
+        <thead>
+          <tr className="border-b border-border text-text-muted">
+            <th className="px-4 py-3 font-medium">Суудал</th>
+            <th className="px-4 py-3 font-medium">Нэр</th>
+            <th className="px-4 py-3 font-medium">Төрсөн он</th>
+            <th className="px-4 py-3" />
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.map((c) => (
+            <tr key={c.id} className="border-b border-border-muted last:border-0">
+              <td className="px-4 py-3 text-text-muted">{c.rosterSlot}</td>
+              <td className="px-4 py-3 text-text-base">
+                {c.lastName} {c.firstName}
+              </td>
+              <td className="px-4 py-3 text-text-muted">{c.birthYear}</td>
+              <td className="px-4 py-3">
+                <Link
+                  href={`/admin/children/${c.id}`}
+                  className="text-primary hover:text-primary-hover hover:underline"
+                >
+                  Дэлгэрэнгүй
+                </Link>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }

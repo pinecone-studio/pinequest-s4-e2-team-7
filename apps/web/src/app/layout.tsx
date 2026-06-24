@@ -7,8 +7,13 @@ export const metadata: Metadata = {
   description: 'Шүдний цоорол илрүүлэх скрининг — ростер ба хяналтын самбар',
 }
 
+const initThemeScript = `(function(){try{if(localStorage.getItem('screener.theme')==='dark')document.documentElement.classList.add('dark')}catch(_){}})()`
+
 const RootLayout = ({ children }: LayoutProps<'/'>) => (
   <html lang="mn">
+    <head>
+      <script dangerouslySetInnerHTML={{ __html: initThemeScript }} />
+    </head>
     <body>
       <Providers>{children}</Providers>
     </body>

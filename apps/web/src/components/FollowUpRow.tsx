@@ -24,10 +24,10 @@ const labels: Record<FollowUpStatus, string> = {
 export const FollowUpRow = ({ row }: { row: Row }) => {
   const update = useUpdateFollowUp()
   return (
-    <tr className="border-b border-neutral-100">
-      <td className="py-2">{row.childName ?? row.childKey}</td>
-      <td>{row.guardianPhone ?? '—'}</td>
-      <td>
+    <tr className="border-b border-border-muted">
+      <td className="px-4 py-3 text-text-base">{row.childName ?? row.childKey}</td>
+      <td className="px-4 py-3 text-text-muted">{row.guardianPhone ?? '—'}</td>
+      <td className="px-4 py-3">
         <select
           value={row.status}
           disabled={update.isPending}
@@ -38,7 +38,7 @@ export const FollowUpRow = ({ row }: { row: Row }) => {
               version: row.version,
             })
           }
-          className="rounded-lg border border-neutral-300 px-2 py-1 text-sm"
+          className="rounded-lg border border-border bg-surface px-2 py-1 text-sm text-text-base focus:outline-none focus:ring-2 focus:ring-primary"
         >
           {STATUSES.map((s) => (
             <option key={s} value={s}>

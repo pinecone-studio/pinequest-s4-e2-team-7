@@ -18,14 +18,16 @@ export const ReviewForm = ({
   const [note, setNote] = useState('')
 
   return (
-    <div className="flex flex-col gap-2">
-      <h2 className="text-sm font-medium text-neutral-500">Эмчийн дүгнэлт (баталгаажуулах / өөрчлөх)</h2>
+    <div className="flex flex-col gap-3">
+      <h2 className="text-sm font-medium text-text-muted">
+        Эмчийн дүгнэлт (баталгаажуулах / өөрчлөх)
+      </h2>
       <div className="flex gap-2">
         {LEVELS.map((l) => (
           <button
             key={l}
             onClick={() => setLevel(l)}
-            className={`rounded-lg border px-2 py-1 ${level === l ? 'border-neutral-900' : 'border-neutral-300'}`}
+            className={`rounded-lg border px-2 py-1 transition-colors ${level === l ? 'border-primary bg-primary-subtle' : 'border-border hover:border-primary/50'}`}
           >
             <TriageBadge level={l} />
           </button>
@@ -36,16 +38,18 @@ export const ReviewForm = ({
         onChange={(e) => setNote(e.target.value)}
         placeholder="Тэмдэглэл (заавал биш)"
         rows={2}
-        className="rounded-lg border border-neutral-300 p-2 text-sm"
+        className="rounded-lg border border-border bg-surface p-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
       />
       <button
         onClick={() => level && submit.mutate({ confirmedLevel: level, note: note || undefined })}
         disabled={!level || submit.isPending}
-        className="self-start rounded-lg bg-neutral-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+        className="self-start rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-hover disabled:opacity-50"
       >
         {submit.isPending ? 'Хадгалж байна…' : 'Хадгалах'}
       </button>
-      {submit.isSuccess ? <p className="text-sm text-green-700">Дүгнэлт хадгалагдлаа.</p> : null}
+      {submit.isSuccess ? (
+        <p className="text-sm text-triage-green">Дүгнэлт хадгалагдлаа.</p>
+      ) : null}
     </div>
   )
 }

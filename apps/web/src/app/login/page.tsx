@@ -9,7 +9,8 @@ import { useSession } from '@/components/providers'
 
 type AuthData = { token: string; user: { id: string; name: string; role: string } }
 
-const inputCls = 'rounded-lg border border-neutral-300 px-3 py-2'
+const inputCls =
+  'rounded-lg border border-border bg-surface px-3 py-2 text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary'
 
 const LoginPage = () => {
   const router = useRouter()
@@ -44,7 +45,13 @@ const LoginPage = () => {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 p-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Screener — Нэвтрэх</h1>
+      <div>
+        <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-xl font-bold text-text-on-primary">
+          S
+        </div>
+        <h1 className="text-2xl font-semibold tracking-tight text-text-base">Screener</h1>
+        <p className="mt-1 text-sm text-text-muted">Скрининг удирдлагын самбар</p>
+      </div>
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <input
           type="email"
@@ -60,18 +67,18 @@ const LoginPage = () => {
           placeholder="Нууц үг"
           className={inputCls}
         />
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm text-triage-red">{error}</p> : null}
         <button
           type="submit"
           disabled={busy}
-          className="rounded-lg bg-neutral-900 px-3 py-2 font-medium text-white disabled:opacity-50"
+          className="rounded-lg bg-primary px-3 py-2 font-medium text-text-on-primary transition-colors hover:bg-primary-hover disabled:opacity-50"
         >
           {busy ? 'Түр хүлээнэ үү…' : 'Нэвтрэх'}
         </button>
       </form>
-      <p className="text-sm text-neutral-600">
+      <p className="text-sm text-text-muted">
         Шинэ скрининг хийгч үү?{' '}
-        <Link href="/register" className="font-medium text-neutral-900 underline">
+        <Link href="/register" className="font-medium text-primary hover:underline">
           Бүртгүүлэх
         </Link>
       </p>

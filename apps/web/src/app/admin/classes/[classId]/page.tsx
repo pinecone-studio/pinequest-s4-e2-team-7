@@ -13,20 +13,23 @@ const ClassRosterPage = () => {
 
   return (
     <section className="flex flex-col gap-5">
-      <Link href="/admin" className="text-sm text-neutral-500 underline">
+      <Link href="/admin" className="text-sm text-primary hover:underline">
         ← Сургуулиуд
       </Link>
-      <h1 className="text-2xl font-semibold tracking-tight">Анги — ростер</h1>
+      <h1 className="text-2xl font-semibold tracking-tight text-text-base">Анги — ростер</h1>
 
-      <div>
-        <h2 className="mb-1 text-sm font-medium text-neutral-500">Триаж дүн</h2>
+      <div className="rounded-lg border border-border bg-surface p-4">
+        <h2 className="mb-3 text-sm font-medium text-text-muted">Триаж дүн</h2>
         <TriageRollup classId={classId} />
       </div>
 
-      <BulkImportForm classId={classId} />
+      <div className="rounded-lg border border-border bg-surface p-4">
+        <h2 className="mb-3 text-sm font-medium text-text-muted">Ростер импорт</h2>
+        <BulkImportForm classId={classId} />
+      </div>
 
       {isLoading ? (
-        <p className="text-neutral-500">Ачааллаж байна…</p>
+        <p className="text-sm text-text-muted">Ачааллаж байна…</p>
       ) : (
         <RosterTable rows={children ?? []} />
       )}
