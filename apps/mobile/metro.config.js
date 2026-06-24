@@ -10,5 +10,7 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
 ]
+// pnpm uses symlinks; Metro must follow them to find hoisted packages.
+config.resolver.unstable_enableSymlinks = true
 
 module.exports = config
