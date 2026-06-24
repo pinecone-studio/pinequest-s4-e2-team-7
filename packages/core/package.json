@@ -1,5 +1,5 @@
 {
-  "name": "@pinequest/types",
+  "name": "@pinequest/core",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -9,10 +9,17 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@noble/hashes": "^1.6.1",
+    "@pinequest/types": "workspace:*",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@pinequest/config": "workspace:*",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
   }
 }

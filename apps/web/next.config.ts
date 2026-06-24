@@ -1,12 +1,8 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@pinequest/types'],
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '10mb',
-    },
-  },
+  // Shared workspace packages ship TS source and must be transpiled by Next.
+  transpilePackages: ['@pinequest/types', '@pinequest/core'],
 }
 
 export default nextConfig

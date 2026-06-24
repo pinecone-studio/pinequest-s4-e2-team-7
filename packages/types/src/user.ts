@@ -1,16 +1,19 @@
+/**
+ * Roles. One record, role-scoped views (see @pinequest/core role guards):
+ * - screener:  capture + simple result + sync
+ * - dentist:   full per-tooth chart; confirm/override triage (audited)
+ * - follow_up: soum worklist; update follow-up status (audited)
+ * - admin:     rosters, content versions, users, metrics
+ */
+export type UserRole = 'screener' | 'dentist' | 'follow_up' | 'admin'
+
 export interface User {
   id: string
   email: string
   name: string
   role: UserRole
-  avatarUrl?: string
+  /** Scopes a non-admin user to one school/soum; undefined for admins. */
+  schoolId?: string
+  isActive: boolean
   createdAt: string
-}
-
-export type UserRole = 'patient' | 'dentist' | 'admin'
-
-export interface UserProfile extends User {
-  dateOfBirth?: string
-  phone?: string
-  dentalHistory?: string[]
 }
