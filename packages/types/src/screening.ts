@@ -1,5 +1,5 @@
-import type { BoundingBox, FindingClass, SeasonId, TriageLevel } from './common'
-import type { ChildKey } from './child'
+import type { BoundingBox, FindingClass, SeasonId, TriageLevel } from './common.js'
+import type { ChildKey } from './child.js'
 
 /** A single normalized YOLO detection (camelCase contract). */
 export interface InferenceDetection {

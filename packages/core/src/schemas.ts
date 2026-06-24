@@ -40,3 +40,55 @@ export const followUpUpdateSchema = z.object({
   notes: z.string().optional(),
 })
 export type FollowUpUpdateInput = z.infer<typeof followUpUpdateSchema>
+
+const boundingBoxSchema = z.object({
+  x1: z.number(),
+  y1: z.number(),
+  x2: z.number(),
+  y2: z.number(),
+})
+
+const findingClassSchema = z.enum(['caries', 'cavity', 'crack'])
+
+export const toothFindingSchema = z.object({
+  id: z.string(),
+  fdi: z.number().int().optional(),
+  className: findingClassSchema,
+  classId: z.number().int(),
+  confidence: z.number().min(0).max(1),
+  box: boundingBoxSchema,
+  longitudinal: z.enum(['new', 'worsened', 'stable', 'resolved']).optional(),
+})
+
+export const symptomSetSchema = z.object({
+  swelling: z.boolean().optional(),
+  painDisturbingSleepOrEating: z.boolean().optional(),
+  fever: z.boolean().optional(),
+  gumPimpleOrFistula: z.boolean().optional(),
+  trauma: z.boolean().optional(),
+})
+
+/** Validates the device's screening-create payload (the trust boundary). */
+export const screeningCreateSchema = z.object({
+  id: z.string(),
+  childKey: z.string(),
+  classId: z.string(),
+  schoolId: z.string(),
+  seasonId: z.string(),
+  screenedById: z.string(),
+  imageRefs: z.array(z.string()),
+  findings: z.array(toothFindingSchema),
+  symptoms: symptomSetSchema,
+  triage: z.object({
+    level: z.enum(['green', 'yellow', 'red']),
+    score: z.number(),
+    confidentWording: z.boolean(),
+    reason: z.string().optional(),
+  }),
+  modelName: z.string(),
+  modelVersion: z.string().optional(),
+  contentVersionId: z.string(),
+  capturedAt: z.string(),
+  deviceId: z.string().optional(),
+})
+export type ScreeningCreateInput = z.infer<typeof screeningCreateSchema>

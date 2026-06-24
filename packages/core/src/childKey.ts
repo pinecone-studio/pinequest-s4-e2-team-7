@@ -3,9 +3,7 @@ import { bytesToHex, utf8ToBytes } from '@noble/hashes/utils'
 import type { ChildKey, ChildKeyInput } from '@pinequest/types'
 
 /** Normalize the class label so the key is stable across casing/whitespace. */
-function normalizeClassName(name: string): string {
-  return name.trim().toLowerCase().replace(/\s+/g, ' ')
-}
+const normalizeClassName = (name: string): string => name.trim().toLowerCase().replace(/\s+/g, ' ')
 
 /**
  * Deterministic, anonymous child identity:
@@ -15,7 +13,7 @@ function normalizeClassName(name: string): string {
  * with no name in the key. Runs identically on mobile, web, and server, so it
  * MUST stay pure and dependency-stable (changing it orphans historical keys).
  */
-export function childKey(input: ChildKeyInput): ChildKey {
+export const childKey = (input: ChildKeyInput): ChildKey => {
   const canonical = [
     input.schoolId,
     normalizeClassName(input.className),

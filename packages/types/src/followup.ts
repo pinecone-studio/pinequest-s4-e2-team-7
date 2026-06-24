@@ -1,5 +1,5 @@
-import type { FollowUpStatus } from './common'
-import type { ChildKey } from './child'
+import type { FollowUpStatus } from './common.js'
+import type { ChildKey } from './child.js'
 
 /**
  * The ONLY mutable record. Belongs to a child across screenings.

@@ -2,8 +2,7 @@ import type { SymptomSet, ToothFinding, TriageResult } from '@pinequest/types'
 
 /**
  * Tunable thresholds. Tune for SENSITIVITY at the green→yellow boundary
- * (catching asymptomatic lesions), not at red. These are starting points and
- * need clinical calibration.
+ * (catching asymptomatic lesions), not at red. Starting points; need calibration.
  */
 export const TRIAGE_THRESHOLDS = {
   redConfidence: 0.75,
@@ -14,21 +13,16 @@ export const TRIAGE_THRESHOLDS = {
 } as const
 
 /** Symptoms that force red regardless of the photos. */
-function hasUrgentSymptom(s: SymptomSet): boolean {
-  return Boolean(
-    s.swelling ||
-      s.painDisturbingSleepOrEating ||
-      s.fever ||
-      s.gumPimpleOrFistula ||
-      s.trauma,
+const hasUrgentSymptom = (s: SymptomSet): boolean =>
+  Boolean(
+    s.swelling || s.painDisturbingSleepOrEating || s.fever || s.gumPimpleOrFistula || s.trauma,
   )
-}
 
 /**
  * Compute triage from findings + symptoms. Lives in TS (not the model) so the
  * rule can evolve without retraining and all three platforms agree.
  */
-export function triage(findings: ToothFinding[], symptoms: SymptomSet): TriageResult {
+export const triage = (findings: ToothFinding[], symptoms: SymptomSet): TriageResult => {
   const maxConfidence = findings.reduce((m, f) => Math.max(m, f.confidence), 0)
   const confidentWording = maxConfidence >= TRIAGE_THRESHOLDS.confidentWording
 
@@ -42,12 +36,7 @@ export function triage(findings: ToothFinding[], symptoms: SymptomSet): TriageRe
     findings.length >= TRIAGE_THRESHOLDS.redFindingCount ||
     maxConfidence >= TRIAGE_THRESHOLDS.redConfidence
   ) {
-    return {
-      level: 'red',
-      score: Math.max(0.8, maxConfidence),
-      confidentWording,
-      reason: 'high_findings',
-    }
+    return { level: 'red', score: Math.max(0.8, maxConfidence), confidentWording, reason: 'high_findings' }
   }
   if (maxConfidence >= TRIAGE_THRESHOLDS.yellowConfidence) {
     return { level: 'yellow', score: maxConfidence, confidentWording, reason: 'moderate_findings' }

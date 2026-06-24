@@ -1,4 +1,4 @@
-import type { SeasonId } from './common'
+import type { SeasonId } from './common.js'
 
 /** A school or soum location node that holds rosters. */
 export interface School {

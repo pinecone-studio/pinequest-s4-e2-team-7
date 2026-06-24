@@ -10,6 +10,7 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "typecheck": "turbo typecheck",
+    "test": "pnpm -r --if-present test",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
