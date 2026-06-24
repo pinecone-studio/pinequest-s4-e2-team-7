@@ -1,0 +1,33 @@
+{
+  "name": "pinequest-s4-e2-team-7",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n web,inference -c cyan,magenta \"npm run dev:web\" \"npm run dev:inference\"",
+    "dev:web": "next dev --turbopack",
+    "dev:inference": "cd inference && python3 server.py",
+    "dev:stop": "lsof -ti:3000,3001,8765 2>/dev/null | xargs kill -9 2>/dev/null || true",
+    "setup": "npm install && npm run setup:model",
+    "setup:model": "cd inference && python3 download_model.py",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^15.3.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@tailwindcss/postcss": "^4.1.8",
+    "@types/node": "^22.15.29",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "concurrently": "^9.1.2",
+    "eslint": "^9.28.0",
+    "eslint-config-next": "^15.3.3",
+    "tailwindcss": "^4.1.8",
+    "typescript": "^5.8.3"
+  }
+}
