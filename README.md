@@ -2,6 +2,8 @@
 
 Шүдний эрүүл мэндийн зөвөлгөө, чиглүүлэл өгдөг апп. Web болон Mobile хоёуланг нь агуулсан monorepo.
 
+> **Анхааруулга:** Энэ нь screening/demo систем бөгөгд эмчийн онош биш.
+
 ## Бүтэц
 
 ```
@@ -10,6 +12,7 @@ pinequest/
 │   ├── web/       # Next.js 15 — веб апп (localhost:3000)
 │   ├── mobile/    # Expo 52 — iOS / Android апп
 │   └── api/       # Fastify — backend API (localhost:4000)
+├── inference/     # Python YOLOv8 — шүдний зургийн AI шинжилгээ (localhost:8765)
 └── packages/
     ├── config/    # Хуваалцсан TypeScript тохиргоо
     └── types/     # Хуваалцсан TypeScript types
@@ -19,49 +22,36 @@ pinequest/
 
 ## Шаардлагатай суулгацууд
 
-Эхлэхийн өмнө доорх хэрэгслүүд таны машинд суусан байх ёстой.
+### 1. Node.js (v20+)
 
-### 1. Node.js (v20 ба түүнээс дээш)
-
-Хувилбар шалгах:
 ```bash
 node -v
 ```
 
 Суугаагүй бол [nodejs.org](https://nodejs.org) → **LTS** хувилбарыг татаж суулгана.
 
----
-
-### 2. pnpm (v9 ба түүнээс дээш)
+### 2. pnpm (v9+)
 
 ```bash
 npm install -g pnpm
-```
-
-Шалгах:
-```bash
 pnpm -v
 ```
 
----
+### 3. Python (3.10+) — inference сервер ажиллуулахад
 
-### 3. Git
+```bash
+python3 --version
+```
+
+### 4. Git
 
 ```bash
 git --version
 ```
 
-Суугаагүй бол [git-scm.com](https://git-scm.com) → татаж суулгана.
+### 5. (Mobile хөгжүүлэхэд) Expo Go апп
 
----
-
-### 4. (Mobile хөгжүүлэхэд) Expo CLI
-
-```bash
-npm install -g expo-cli
-```
-
-iOS симулятор хэрэглэхэд **Xcode** (Mac), Android эмулятор хэрэглэхэд **Android Studio** хэрэгтэй.
+Утсандаа **Expo Go** аппыг суулгана — [iOS](https://apps.apple.com/app/expo-go/id982107779) / [Android](https://play.google.com/store/apps/details?id=host.exp.exponent)
 
 ---
 
@@ -74,55 +64,73 @@ git clone <repository-url>
 cd pinequest-s4-e2-team-7
 ```
 
-### 2. Dependency суулгах
+### 2. Node dependency суулгах
 
 ```bash
 pnpm install --ignore-scripts
 pnpm rebuild esbuild sharp
 ```
 
-> `--ignore-scripts` тугийг заавал хэрэглэнэ. Дараа нь `rebuild` командаар native package-уудыг build хийнэ.
+### 3. Python inference суулгах
 
-### 3. Environment файл тохируулах
-
-**API:**
 ```bash
-cp apps/api/.env.example apps/api/.env
+pip3 install -r inference/requirements.txt
 ```
 
-**Web:**
+YOLO загвар татах (эхний удаа):
+
 ```bash
+cd inference && python3 download_model.py && cd ..
+```
+
+### 4. Environment файл тохируулах
+
+```bash
+cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 ```
 
-`.env` файлуудын дотор утгуудыг багийн admin-аас авна.
+`.env` файлуудын утгуудыг багийн admin-аас авна.
 
-### 4. Ажиллуулах
+### 5. Ажиллуулах
 
-**Бүгдийг хамт эхлүүлэх (зөвлөмж):**
+**Бүгдийг хамт эхлүүлэх:**
 ```bash
 pnpm dev
 ```
 
-**Тусад нь ажиллуулах:**
+**Inference серверийг тусад нь:**
 ```bash
-# Зөвхөн web
-pnpm --filter @pinequest/web dev
-
-# Зөвхөн API
-pnpm --filter @pinequest/api dev
-
-# Зөвхөн mobile
-pnpm --filter @pinequest/mobile dev
+cd inference && python3 server.py
 ```
 
-### 5. Хаяг
+### 6. Хаяг
 
 | Апп | Хаяг |
 |-----|------|
 | Web | http://localhost:3000 |
 | API | http://localhost:4000 |
-| Mobile | Expo Go апп → QR уншуулна |
+| Inference (AI) | http://localhost:8765 |
+| Mobile | Expo Go → QR уншуулна |
+
+---
+
+## AI Screener ашиглах
+
+1. Шүдний зураг файл оруулах эсвэл камер ашиглах
+2. **AI шинжилгээ хийх** товч дарах
+3. Caries / cavity / crack илрүүлсэн box, triage зөвлөмж харах
+
+### Архитектур
+
+```
+Browser → Next.js /api/analyze → Python FastAPI (YOLOv8) → JSON → Triage UI
+```
+
+### Загвар
+
+Одоогоор [yolov8_caries_detector](https://github.com/AndreyGermanov/yolov8_caries_detector) загварыг ашиглана.
+Ирээдүйд Монгол локал өгөгдлөөр fine-tune хийсэн загвараар солих боломжтой — `inference/best.pt` файлыг солино.
 
 ---
 
@@ -141,21 +149,24 @@ pnpm format
 # Шинэ package нэмэх (жишээ: web-д)
 pnpm --filter @pinequest/web add <package-name>
 
-# Шинэ dev package нэмэх
-pnpm --filter @pinequest/api add -D <package-name>
+# Inference сервер тусад нь дахин эхлүүлэх
+cd inference && python3 server.py
+
+# Port эзлэгдсэн бол
+lsof -ti:3000,4000,8765 2>/dev/null | xargs kill -9 2>/dev/null || true
 ```
 
 ---
 
 ## Асуудал гарвал
 
-**`pnpm: command not found`** → `npm install -g pnpm` дахин ажиллуулна
-
-**Port аль хэдийн ашиглагдаж байна** → `lsof -i :3000` командаар хэн ашиглаж байгааг шалгана
-
-**Expo QR ажиллахгүй** → утас болон компьютер ижил WiFi-д байх ёстой
-
-**TypeScript алдаа** → `pnpm install --ignore-scripts` дахин ажиллуулна
+| Алдаа | Шийдэл |
+|-------|--------|
+| `pnpm: command not found` | `npm install -g pnpm` |
+| Port аль хэдийн ашиглагдаж байна | `lsof -i :3000` — хэн ашиглаж байгааг шалга |
+| Expo QR ажиллахгүй | Утас + компьютер ижил WiFi-д байх ёстой |
+| `inference/best.pt` олдохгүй | `cd inference && python3 download_model.py` |
+| Python module олдохгүй | `pip3 install -r inference/requirements.txt` |
 
 ---
 
