@@ -1,7 +1,6 @@
 # Dependencies
-node_modules
+node_modules/
 .pnp
-.pnp.js
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -9,58 +8,32 @@ node_modules
 !.yarn/releases
 !.yarn/versions
 
-# Build outputs
-dist
-build
-.next
-out
+# Next.js
+.next/
+out/
 
-# Turbo
-.turbo
-
-# Expo
-.expo
-ios
-android
-
-# Python / inference
+# Python / model
 inference/__pycache__/
 inference/.venv/
 inference/best.pt
-__pycache__/
-*.py[cod]
+.metrics-tool/
 
-# Environment
-.env
-.env.local
-.env.*.local
+# Env
+.env*
 !.env.example
 
-# npm lockfile (using pnpm)
-package-lock.json
-
-# Logs
-*.log
+# Debug
 npm-debug.log*
-pnpm-debug.log*
-
-# OS
 .DS_Store
-Thumbs.db
 *.pem
 
-# Editor
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-.idea/
-
-# TypeScript
-*.tsbuildinfo
+# Typescript
 next-env.d.ts
+*.tsbuildinfo
 
 # Vercel
 .vercel
 
-# Metrics
-.metrics-tool/
+# IDE
+.idea/
+.vscode/

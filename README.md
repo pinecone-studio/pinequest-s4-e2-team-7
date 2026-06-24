@@ -1,175 +1,72 @@
-# PineQuest — Шүдний зөвөлгөө платформ
+# Шүдний AI Screener
 
-Шүдний эрүүл мэндийн зөвөлгөө, чиглүүлэл өгдөг апп. Web болон Mobile хоёуланг нь агуулсан monorepo.
+Next.js вэб апп + Python YOLOv8 inference сервер. Шүдний зураг оруулах эсвэл камераар аваад caries / cavity / crack илрүүлж triage зөвлөмж өгнө.
 
-> **Анхааруулга:** Энэ нь screening/demo систем бөгөгд эмчийн онош биш.
+> **Анхааруулга:** Энэ нь screening/demo систем бөгөөд эмчийн онош биш.
 
-## Бүтэц
+## Шаардлага
 
-```
-pinequest/
-├── apps/
-│   ├── web/       # Next.js 15 — веб апп (localhost:3000)
-│   ├── mobile/    # Expo 52 — iOS / Android апп
-│   └── api/       # Fastify — backend API (localhost:4000)
-├── inference/     # Python YOLOv8 — шүдний зургийн AI шинжилгээ (localhost:8765)
-└── packages/
-    ├── config/    # Хуваалцсан TypeScript тохиргоо
-    └── types/     # Хуваалцсан TypeScript types
-```
+- Node.js 20+
+- Python 3.10+
+- `pip` эсвэл `python3 -m pip`
 
----
-
-## Шаардлагатай суулгацууд
-
-### 1. Node.js (v20+)
+## Суулгах
 
 ```bash
-node -v
-```
-
-Суугаагүй бол [nodejs.org](https://nodejs.org) → **LTS** хувилбарыг татаж суулгана.
-
-### 2. pnpm (v9+)
-
-```bash
-npm install -g pnpm
-pnpm -v
-```
-
-### 3. Python (3.10+) — inference сервер ажиллуулахад
-
-```bash
-python3 --version
-```
-
-### 4. Git
-
-```bash
-git --version
-```
-
-### 5. (Mobile хөгжүүлэхэд) Expo Go апп
-
-Утсандаа **Expo Go** аппыг суулгана — [iOS](https://apps.apple.com/app/expo-go/id982107779) / [Android](https://play.google.com/store/apps/details?id=host.exp.exponent)
-
----
-
-## Эхлэх заавар
-
-### 1. Repository татах
-
-```bash
-git clone <repository-url>
-cd pinequest-s4-e2-team-7
-```
-
-### 2. Node dependency суулгах
-
-```bash
-pnpm install --ignore-scripts
-pnpm rebuild esbuild sharp
-```
-
-### 3. Python inference суулгах
-
-```bash
+npm install
 pip3 install -r inference/requirements.txt
+npm run setup:model
 ```
 
-YOLO загвар татах (эхний удаа):
+Эхний удаа `setup:model` YOLO жинийг (~6MB) татаж `inference/best.pt` болгон хадгална.
+
+## Ажиллуулах
 
 ```bash
-cd inference && python3 download_model.py && cd ..
+npm run dev
 ```
 
-### 4. Environment файл тохируулах
+- Web: [http://localhost:3000](http://localhost:3000)
+- Inference API: [http://127.0.0.1:8765/health](http://127.0.0.1:8765/health)
+
+**Порт эзлэгдсэн / `Killed: 9` алдаа гарвал:**
 
 ```bash
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env.local
+npm run dev:stop   # хуучин процессуудыг зогсооно
+npm run dev        # дахин асаана
 ```
 
-`.env` файлуудын утгуудыг багийн admin-аас авна.
+Эсвэл 2 тусдаа терминал ашиглана (илүү тогтвортой):
 
-### 5. Ажиллуулах
-
-**Бүгдийг хамт эхлүүлэх:**
 ```bash
-pnpm dev
+# Терминал 1
+npm run dev:inference
+
+# Терминал 2
+npm run dev:web
 ```
 
-**Inference серверийг тусад нь:**
-```bash
-cd inference && python3 server.py
-```
+## Ашиглах
 
-### 6. Хаяг
-
-| Апп | Хаяг |
-|-----|------|
-| Web | http://localhost:3000 |
-| API | http://localhost:4000 |
-| Inference (AI) | http://localhost:8765 |
-| Mobile | Expo Go → QR уншуулна |
-
----
-
-## AI Screener ашиглах
-
-1. Шүдний зураг файл оруулах эсвэл камер ашиглах
+1. Зураг файл оруулах эсвэл камер ашиглах
 2. **AI шинжилгээ хийх** товч дарах
-3. Caries / cavity / crack илрүүлсэн box, triage зөвлөмж харах
+3. Box, triage (улаан/шар/ногоон), зөвлөмж харах
 
-### Архитектур
+## Архитектур
 
 ```
-Browser → Next.js /api/analyze → Python FastAPI (YOLOv8) → JSON → Triage UI
+Browser → Next.js /api/analyze → Python FastAPI (YOLOv8) → JSON detections → Triage UI
 ```
 
-### Загвар
+## Загвар
 
-Одоогоор [yolov8_caries_detector](https://github.com/AndreyGermanov/yolov8_caries_detector) загварыг ашиглана.
-Ирээдүйд Монгол локал өгөгдлөөр fine-tune хийсэн загвараар солих боломжтой — `inference/best.pt` файлыг солино.
+Одоогоор [yolov8_caries_detector](https://github.com/AndreyGermanov/yolov8_caries_detector) intraoral загварыг ашиглана (caries, cavity, crack).
 
----
+Ирээдүйд Zenodo + Монгол локал өгөгдлөөр fine-tune хийсэн загвараар солих боломжтой — `inference/best.pt` файлыг солино.
 
-## Хэрэгтэй командууд
+## Production
 
-```bash
-# TypeScript алдаа шалгах
-pnpm typecheck
+Vercel дээр Python inference шууд ажиллахгүй. Production-д:
 
-# Бүгдийг build хийх
-pnpm build
-
-# Code format хийх
-pnpm format
-
-# Шинэ package нэмэх (жишээ: web-д)
-pnpm --filter @pinequest/web add <package-name>
-
-# Inference сервер тусад нь дахин эхлүүлэх
-cd inference && python3 server.py
-
-# Port эзлэгдсэн бол
-lsof -ti:3000,4000,8765 2>/dev/null | xargs kill -9 2>/dev/null || true
-```
-
----
-
-## Асуудал гарвал
-
-| Алдаа | Шийдэл |
-|-------|--------|
-| `pnpm: command not found` | `npm install -g pnpm` |
-| Port аль хэдийн ашиглагдаж байна | `lsof -i :3000` — хэн ашиглаж байгааг шалга |
-| Expo QR ажиллахгүй | Утас + компьютер ижил WiFi-д байх ёстой |
-| `inference/best.pt` олдохгүй | `cd inference && python3 download_model.py` |
-| Python module олдохгүй | `pip3 install -r inference/requirements.txt` |
-
----
-
-## Холбоо барих
-
-Асуудал гарвал баг дотроо мессеж бичнэ үү.
+- Inference-ийг тусад нь сервер/Container дээр ажиллуулна
+- `INFERENCE_URL` env-ээр Next.js руу заана
