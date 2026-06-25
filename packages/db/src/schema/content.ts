@@ -8,6 +8,8 @@ export const contentVersions = sqliteTable('ContentVersion', {
   id: uuid(),
   version: text('version').notNull(),
   locale: text('locale').notNull(),
+  status: text('status').notNull().default('published'), // 'draft' | 'published'
+  notes: text('notes'),
   publishedAt: ts('publishedAt').notNull().$defaultFn(() => new Date()),
   publishedById: text('publishedById').notNull(),
 })

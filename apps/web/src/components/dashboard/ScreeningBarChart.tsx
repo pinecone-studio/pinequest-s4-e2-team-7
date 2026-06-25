@@ -34,9 +34,9 @@ const ScreeningBarChart = () => {
   const { seasonId } = useSeason()
   const { data, isLoading } = useTimeseries(range, seasonId)
 
-  if (isLoading || !data) return <SkeletonChart />
+  if (isLoading) return <SkeletonChart />
 
-  const buckets = data.buckets
+  const buckets = data?.buckets ?? []
   const totalScreened = buckets.reduce((s, b) => s + b.screened, 0)
   const totalFlagged  = buckets.reduce((s, b) => s + b.flagged, 0)
   const hasData = totalScreened > 0

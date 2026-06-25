@@ -19,9 +19,9 @@ const sparkPath = (vals: number[]) => {
 const MonthlyOverviewCard = () => {
   const { seasonId } = useSeason()
   const { data, isLoading } = useTimeseries('M', seasonId)
-  if (isLoading || !data) return <SkeletonCard rows={2} />
+  if (isLoading) return <SkeletonCard rows={2} />
 
-  const b = data.buckets
+  const b = data?.buckets ?? []
   const thisM = b.at(-1)?.screened ?? 0
   const lastM = b.at(-2)?.screened ?? 0
   const delta = lastM > 0 ? Math.round(((thisM - lastM) / lastM) * 100) : thisM > 0 ? 100 : 0

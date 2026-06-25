@@ -29,6 +29,8 @@ apps/inference/best.pt
 .dev.vars
 .wrangler/
 .mf/
+.open-next/
+cloudflare-env.d.ts
 
 # Debug
 npm-debug.log*

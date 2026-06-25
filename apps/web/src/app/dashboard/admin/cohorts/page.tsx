@@ -1,12 +1,12 @@
 'use client'
 
-import Link from 'next/link'
 import { useState, type FormEvent } from 'react'
 import { PlusIcon, BuildingLibraryIcon } from '@heroicons/react/24/outline'
 import { useSchools, useCreateSchool } from '@/hooks/useSchools'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import EmptyState from '@/components/ui/EmptyState'
+import CohortCard from '@/components/dashboard/CohortCard'
 
 // Schools/cohorts — relocated here from the admin board (Phase 0 decision).
 const CohortsPage = () => {
@@ -53,16 +53,7 @@ const CohortsPage = () => {
         <Card><EmptyState Icon={BuildingLibraryIcon} title="Сургууль алга" hint="Эхний сургуулиа нэмж скрининг хамралтыг эхлүүл." /></Card>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {schools.map((s) => (
-            <Link key={s.id} href={`/dashboard/admin/schools/${s.id}`}>
-              <Card interactive className="flex items-center gap-3 hover:border-primary">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-subtle text-[12px] font-bold text-primary">
-                  {s.name.slice(0, 2).toUpperCase()}
-                </div>
-                <span className="flex-1 truncate text-[13px] font-medium text-text-base">{s.name}</span>
-              </Card>
-            </Link>
-          ))}
+          {schools.map((s) => <CohortCard key={s.id} school={s} />)}
         </div>
       )}
     </div>

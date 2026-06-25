@@ -51,6 +51,10 @@ export const useSubmitReview = (id: string) => {
   return useMutation({
     mutationFn: (body: { confirmedLevel: string; note?: string }) =>
       apiFetch(`/api/screenings/${id}/review`, { token, method: 'PUT', body }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['screening', id] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['screening', id] })
+      qc.invalidateQueries({ queryKey: ['review-queue'] }) // reviewed item leaves the queue
+      qc.invalidateQueries({ queryKey: ['screenings'] })
+    },
   })
 }

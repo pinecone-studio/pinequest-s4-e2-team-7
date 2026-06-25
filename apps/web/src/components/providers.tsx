@@ -21,7 +21,15 @@ export const useSession = (): Session => {
   return ctx
 }
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,        // cache for 30s; stable refs (schools/seasons) cache longer per-hook
+      retry: 1,                 // fail fast → components fall through to empty/error state
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 export const Providers = ({ children }: { children: ReactNode }) => {
   const [token, setTokenState] = useState<string | null>(null)

@@ -3,6 +3,7 @@ import { and, asc, count, desc, eq, inArray } from 'drizzle-orm'
 import { childKey } from '@pinequest/core'
 import { schoolClasses, children, screenings } from '@pinequest/db/d1'
 import { authenticate, authorize } from '../middleware/auth.js'
+import { inChunks } from '../lib/chunk.js'
 import type { AppEnv } from '../types.js'
 
 export const classRoutes = new Hono<AppEnv>()
@@ -67,13 +68,11 @@ classRoutes.post('/classes/:classId/carry-forward', authorize('screener', 'admin
     sourceClassId: source.id, scheduledAt: scheduledAt ? new Date(scheduledAt) : null, reminderPhone: reminderPhone ?? null,
   }).returning()
 
-  if (sourceChildren.length) {
-    await db.insert(children).values(sourceChildren.map((ch) => ({
-      classId: created.id, schoolId: source.schoolId,
-      childKey: childKey({ schoolId: source.schoolId, className: created.name, rosterSlot: ch.rosterSlot, birthYear: ch.birthYear }),
-      firstName: ch.firstName, lastName: ch.lastName, birthYear: ch.birthYear,
-      rosterSlot: ch.rosterSlot, gender: ch.gender, guardianPhone: ch.guardianPhone,
-    })))
-  }
+  await inChunks(sourceChildren.map((ch) => ({
+    classId: created.id, schoolId: source.schoolId,
+    childKey: childKey({ schoolId: source.schoolId, className: created.name, rosterSlot: ch.rosterSlot, birthYear: ch.birthYear }),
+    firstName: ch.firstName, lastName: ch.lastName, birthYear: ch.birthYear,
+    rosterSlot: ch.rosterSlot, gender: ch.gender, guardianPhone: ch.guardianPhone,
+  })), (b) => db.insert(children).values(b))
   return c.json({ success: true, data: { ...created, enrolled: sourceChildren.length, screened: 0 } }, 201)
 })

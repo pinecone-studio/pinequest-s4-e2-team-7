@@ -8,7 +8,7 @@ import { SkeletonTable } from '@/components/ui/Skeleton'
 import EmptyState from '@/components/ui/EmptyState'
 import StatusPill, { type Tone } from '@/components/ui/StatusPill'
 
-type Props = { screenings: ScreeningRow[] | undefined }
+type Props = { screenings: ScreeningRow[] | undefined; loading?: boolean }
 type Sort  = 'recent' | 'oldest' | 'level'
 
 const AVA:   Record<string, string> = { green: 'bg-triage-green-bg text-triage-green', yellow: 'bg-triage-yellow-bg text-triage-yellow', red: 'bg-triage-red-bg text-triage-red' }
@@ -21,13 +21,13 @@ const COLS = 'grid grid-cols-[1.5fr_1.1fr_1.6fr_1.2fr_1fr] items-center gap-3'
 
 const conf = (s: ScreeningRow) => (s.findings.length ? Math.round(Math.max(...s.findings.map((f) => f.confidence)) * 100) : null)
 
-const RecentScreeningsTable = ({ screenings }: Props) => {
+const RecentScreeningsTable = ({ screenings, loading }: Props) => {
   const [sort, setSort]         = useState<Sort>('level')
   const [sortOpen, setSortOpen] = useState(false)
 
-  if (!screenings) return <SkeletonTable />
+  if (loading) return <SkeletonTable />
 
-  const sorted = [...screenings].sort((a, b) => {
+  const sorted = [...(screenings ?? [])].sort((a, b) => {
     if (sort === 'oldest') return new Date(a.capturedAt).getTime() - new Date(b.capturedAt).getTime()
     if (sort === 'level')  return (RANK[a.triageLevel] ?? 9) - (RANK[b.triageLevel] ?? 9)
     return new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime()

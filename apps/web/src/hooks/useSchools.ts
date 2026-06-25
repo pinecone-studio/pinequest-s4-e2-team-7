@@ -30,3 +30,16 @@ export const useCreateSchool = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['schools'] }),
   })
 }
+
+/** Rename or archive (isActive:false) a school — powers Cohorts edit/delete. */
+export const usePatchSchool = () => {
+  const { token } = useSession()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (vars: { id: string; name?: string; isActive?: boolean }) => {
+      const { id, ...body } = vars
+      return apiFetch<School>(`/api/schools/${id}`, { token, method: 'PATCH', body })
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['schools'] }),
+  })
+}
