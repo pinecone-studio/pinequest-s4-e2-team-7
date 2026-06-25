@@ -1,5 +1,6 @@
+import { eq, desc, count } from 'drizzle-orm'
 import { buildChildSummary } from '@pinequest/core'
-import { prisma } from '@pinequest/db'
+import { children, screenings, type DB } from '@pinequest/db/d1'
 import type {
   ChildScreeningSummary,
   FindingClass,
@@ -38,7 +39,7 @@ const toFinding = (f: {
 const toSymptoms = (q: {
   swelling: boolean | null; painDisturbingSleepOrEating: boolean | null
   fever: boolean | null; gumPimpleOrFistula: boolean | null; trauma: boolean | null
-} | null): SymptomSet => ({
+} | null | undefined): SymptomSet => ({
   swelling: q?.swelling ?? false,
   painDisturbingSleepOrEating: q?.painDisturbingSleepOrEating ?? false,
   fever: q?.fever ?? false,
@@ -46,17 +47,17 @@ const toSymptoms = (q: {
   trauma: q?.trauma ?? false,
 })
 
-export const loadChildSummary = async (id: string): Promise<ChildSummaryPayload | null> => {
-  const child = await prisma.child.findUnique({ where: { id } })
+export const loadChildSummary = async (db: DB, id: string): Promise<ChildSummaryPayload | null> => {
+  const child = await db.query.children.findFirst({ where: eq(children.id, id) })
   if (!child) return null
 
-  const [latest, screeningCount] = await Promise.all([
-    prisma.screening.findFirst({
-      where: { childKey: child.childKey },
-      orderBy: { capturedAt: 'desc' },
-      include: { findings: true, questionnaire: true, review: true },
+  const [latest, cnt] = await Promise.all([
+    db.query.screenings.findFirst({
+      where: eq(screenings.childKey, child.childKey),
+      orderBy: desc(screenings.capturedAt),
+      with: { findings: true, questionnaire: true, review: true },
     }),
-    prisma.screening.count({ where: { childKey: child.childKey } }),
+    db.select({ c: count() }).from(screenings).where(eq(screenings.childKey, child.childKey)),
   ])
 
   const summary = latest
@@ -84,6 +85,6 @@ export const loadChildSummary = async (id: string): Promise<ChildSummaryPayload 
       guardianEmail: child.guardianEmail,
     },
     summary,
-    screeningCount,
+    screeningCount: cnt[0]?.c ?? 0,
   }
 }

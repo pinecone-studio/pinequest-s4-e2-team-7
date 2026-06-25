@@ -25,6 +25,11 @@ apps/inference/best.pt
 .env*
 !.env.example
 
+# Cloudflare Workers / wrangler (local state + secrets)
+.dev.vars
+.wrangler/
+.mf/
+
 # Debug
 npm-debug.log*
 .DS_Store

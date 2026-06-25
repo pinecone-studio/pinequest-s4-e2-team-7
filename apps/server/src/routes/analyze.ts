@@ -7,7 +7,7 @@ import type { AppEnv } from '../types.js'
 export const analyzeRoutes = new Hono<AppEnv>()
 
 analyzeRoutes.post('/analyze', authenticate, async (c) => {
-  const inferenceUrl = process.env.INFERENCE_URL
+  const inferenceUrl = c.env.INFERENCE_URL
   if (!inferenceUrl) return c.json({ success: false, data: null, message: 'inference_not_configured' }, 503)
 
   const body = await c.req.parseBody()
@@ -22,9 +22,8 @@ analyzeRoutes.post('/analyze', authenticate, async (c) => {
     return c.json({ success: false, data: null, message: 'missing_required_fields' }, 400)
   }
 
-  const imageBuffer = Buffer.from(await image.arrayBuffer())
   const form = new FormData()
-  form.append('image', new Blob([imageBuffer], { type: 'image/jpeg' }), 'capture.jpg')
+  form.append('image', new Blob([await image.arrayBuffer()], { type: 'image/jpeg' }), 'capture.jpg')
 
   const inferRes = await fetch(inferenceUrl, { method: 'POST', body: form })
   if (!inferRes.ok) return c.json({ success: false, data: null, message: 'inference_failed' }, 502)
@@ -36,6 +35,7 @@ analyzeRoutes.post('/analyze', authenticate, async (c) => {
   const screeningId = crypto.randomUUID()
 
   await persistScreening(
+    c.get('db'),
     {
       id: screeningId, childKey, classId, schoolId, seasonId,
       imageRefs: [`analyze:${screeningId}`],

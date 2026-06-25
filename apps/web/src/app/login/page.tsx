@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
@@ -36,7 +37,7 @@ const LoginPage = () => {
       setError(
         err instanceof Error && err.message === 'invalid_credentials'
           ? 'Имэйл эсвэл нууц үг буруу байна'
-          : 'Серверт холбогдсонгүй — API (:4000) ажиллаж байгаа эсэхийг шалгана уу',
+          : 'Серверт холбогдсонгүй — API (:8787) ажиллаж байгаа эсэхийг шалгана уу',
       )
     } finally {
       setBusy(false)
@@ -46,10 +47,7 @@ const LoginPage = () => {
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 p-8">
       <div>
-        <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-xl font-bold text-text-on-primary">
-          S
-        </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-text-base">Screener</h1>
+        <Image src="/smilo.png" alt="Smilo" width={140} height={64} priority className="mb-3 h-auto w-[140px]" />
         <p className="mt-1 text-sm text-text-muted">Скрининг удирдлагын самбар</p>
       </div>
       <form onSubmit={onSubmit} className="flex flex-col gap-3">

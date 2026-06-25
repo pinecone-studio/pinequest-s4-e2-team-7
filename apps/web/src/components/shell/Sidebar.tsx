@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
@@ -25,12 +26,7 @@ const Sidebar = () => {
 
   return (
     <div className="flex w-20 flex-col items-center gap-1 py-5">
-      <div
-        className="mb-5 flex size-9 items-center justify-center rounded-xl text-[15px] font-bold shadow-(--shadow-card)"
-        style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
-      >
-        Smilo
-      </div>
+      <Image src="/smilo.png" alt="Smilo" width={52} height={24} priority className="mb-5 h-auto w-[52px]" />
 
       <nav className="flex flex-1 flex-col items-center gap-1.5" aria-label="Үндсэн цэс">
         {items.map((item) => {

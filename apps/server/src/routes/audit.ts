@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
-import { prisma } from '@pinequest/db'
+import { and, desc, eq } from 'drizzle-orm'
+import { auditLogs } from '@pinequest/db/d1'
 import { authorize } from '../middleware/auth.js'
 import type { AppEnv } from '../types.js'
 
@@ -7,15 +8,16 @@ export const auditRoutes = new Hono<AppEnv>()
 
 auditRoutes.get('/', authorize('admin', 'dentist'), async (c) => {
   const { entityType, entityId, userId, limit } = c.req.query()
-  const logs = await prisma.auditLog.findMany({
-    where: {
-      entityType: entityType || undefined,
-      entityId: entityId || undefined,
-      userId: userId || undefined,
-    },
-    orderBy: { createdAt: 'desc' },
-    take: Math.min(Number(limit) || 50, 200),
-    include: { user: { select: { id: true, name: true, role: true } } },
+  const conds = [
+    entityType ? eq(auditLogs.entityType, entityType) : undefined,
+    entityId ? eq(auditLogs.entityId, entityId) : undefined,
+    userId ? eq(auditLogs.userId, userId) : undefined,
+  ].filter(Boolean)
+  const logs = await c.get('db').query.auditLogs.findMany({
+    where: conds.length ? and(...conds) : undefined,
+    orderBy: desc(auditLogs.createdAt),
+    limit: Math.min(Number(limit) || 50, 200),
+    with: { user: { columns: { id: true, name: true, role: true } } },
   })
   return c.json({ success: true, data: logs })
 })

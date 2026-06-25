@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { apiFetch } from '@/lib/api'
@@ -38,7 +38,7 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
       <View style={[s.card, { backgroundColor: colors.surface }]}>
-        <Text style={[s.title, { color: colors.sidebar }]}>Screener</Text>
+        <Image source={require('../assets/smilo.png')} style={s.logo} resizeMode="contain" />
         <Text style={[s.sub, { color: colors.textMuted }]}>Хүүхдийн шүд ба амны хөндийн скиринг</Text>
         <TextInput style={[s.input, { borderColor: colors.border }]} placeholder="Имэйл" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
         <TextInput style={[s.input, { borderColor: colors.border }]} placeholder="Нууц үг" value={password} onChangeText={setPassword} secureTextEntry />
@@ -54,7 +54,7 @@ export default function LoginScreen() {
 const s = StyleSheet.create({
   root: { flex: 1, justifyContent: 'center' },
   card: { margin: 24, borderRadius: 16, padding: 24, gap: 12 },
-  title: { fontSize: 28, fontWeight: '700', textAlign: 'center' },
+  logo: { width: 168, height: 77, alignSelf: 'center' },
   sub: { fontSize: 14, textAlign: 'center', marginBottom: 8 },
   input: { borderWidth: 1, borderRadius: 10, padding: 12, fontSize: 16 },
   error: { color: '#ef4444', fontSize: 14 },

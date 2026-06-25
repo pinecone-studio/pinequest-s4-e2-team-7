@@ -26,6 +26,7 @@ const AdminUsersPage = () => {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [phone, setPhone] = useState('')
   const [role, setRole] = useState<UserRole>('screener')
   const [schoolId, setSchoolId] = useState('')
   const [classId, setClassId] = useState('')
@@ -35,8 +36,8 @@ const AdminUsersPage = () => {
     e.preventDefault()
     if (!name || !email || !password) return
     createUser.mutate(
-      { name, email, password, role, schoolId: schoolId || undefined, classId: classId || undefined },
-      { onSuccess: () => { setName(''); setEmail(''); setPassword(''); setSchoolId(''); setClassId('') } },
+      { name, email, password, role, phone: phone || undefined, schoolId: schoolId || undefined, classId: classId || undefined },
+      { onSuccess: () => { setName(''); setEmail(''); setPassword(''); setPhone(''); setSchoolId(''); setClassId('') } },
     )
   }
 
@@ -50,6 +51,7 @@ const AdminUsersPage = () => {
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Нэр" className={inp} />
           <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="И-мэйл" type="email" className={inp} autoComplete="off" />
           <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Нууц үг (≥6)" type="password" className={inp} autoComplete="new-password" />
+          <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Утас" type="tel" className={inp} autoComplete="off" />
           <select value={role} onChange={(e) => setRole(e.target.value as UserRole)} className={inp}>
             {ROLES.map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
           </select>

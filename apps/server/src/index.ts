@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { serve } from '@hono/node-server'
 import type { AppEnv } from './types.js'
+import { withDb } from './middleware/db.js'
 import { healthRoutes } from './routes/health.js'
 import { authRoutes } from './routes/auth.js'
 import { schoolRoutes } from './routes/schools.js'
@@ -14,10 +14,15 @@ import { userRoutes } from './routes/users.js'
 import { statsRoutes } from './routes/stats.js'
 import { seasonRoutes } from './routes/seasons.js'
 import { auditRoutes } from './routes/audit.js'
+import { devRoutes } from './routes/dev.js'
 
 const app = new Hono<AppEnv>()
 
-app.use('*', cors({ origin: process.env.CORS_ORIGIN ?? 'http://localhost:3000', credentials: true }))
+app.use('*', cors({
+  origin: (_origin, c) => c.env.CORS_ORIGIN ?? 'http://localhost:3000',
+  credentials: true,
+}))
+app.use('*', withDb) // attach the per-request D1-backed Drizzle client
 
 app.route('/', healthRoutes)
 app.route('/api/auth', authRoutes)
@@ -31,13 +36,11 @@ app.route('/api/users', userRoutes)
 app.route('/api/stats', statsRoutes)
 app.route('/api/seasons', seasonRoutes)
 app.route('/api/audit', auditRoutes)
+app.route('/api/dev', devRoutes)
 
 app.onError((err, c) => {
   console.error(err)
   return c.json({ success: false, data: null, message: (err as Error).message ?? 'internal_error' }, 500)
 })
 
-const port = Number(process.env.PORT) || 4000
-serve({ fetch: app.fetch, port }, () => {
-  console.log(`API server running at http://localhost:${port}`)
-})
+export default app
