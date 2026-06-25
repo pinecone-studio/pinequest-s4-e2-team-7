@@ -10,14 +10,14 @@ const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0, 0, 0, 0);
 
 // Today + next 2 days strip, plus the follow-ups scheduled in that window.
 const NextFollowUpsCard = () => {
-  const { data } = useFollowUps()
-  if (!data) return <SkeletonCard rows={2} />
+  const { data, isLoading } = useFollowUps()
+  if (isLoading) return <SkeletonCard rows={2} />
 
   const today = startOfDay(new Date())
   const windowEnd = new Date(today); windowEnd.setDate(windowEnd.getDate() + 3)
   const tiles = [0, 1, 2].map((k) => { const d = new Date(today); d.setDate(d.getDate() + k); return d })
 
-  const upcoming = data
+  const upcoming = (data ?? [])
     .filter((f) => f.appointmentAt && new Date(f.appointmentAt) >= today && new Date(f.appointmentAt) < windowEnd)
     .sort((a, b) => new Date(a.appointmentAt!).getTime() - new Date(b.appointmentAt!).getTime())
     .slice(0, 3)

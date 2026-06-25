@@ -13,7 +13,7 @@ import Disclaimer from '@/components/dashboard/Disclaimer'
 
 const AdminDashboardPage = () => {
   const { seasonId } = useSeason()
-  const { data: screenings } = useScreenings({ seasonId })
+  const { data: screenings, isLoading: screeningsLoading } = useScreenings({ seasonId })
 
   return (
     <div className="flex flex-col gap-5">
@@ -36,7 +36,7 @@ const AdminDashboardPage = () => {
       </div>
 
       {/* Full-width prioritized worklist */}
-      <RecentScreeningsTable screenings={screenings} />
+      <RecentScreeningsTable screenings={screenings} loading={screeningsLoading} />
 
       <Disclaimer />
     </div>

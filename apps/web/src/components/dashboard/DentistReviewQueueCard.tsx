@@ -13,10 +13,10 @@ const daysSince = (iso: string) => Math.floor((Date.now() - new Date(iso).getTim
 // Clinical approval gate: screenings awaiting dentist confirm (review == null).
 const DentistReviewQueueCard = () => {
   const { seasonId } = useSeason()
-  const { data } = useReviewQueue(seasonId)
-  if (!data) return <SkeletonCard rows={1} />
+  const { data, isLoading } = useReviewQueue(seasonId)
+  if (isLoading) return <SkeletonCard rows={1} />
 
-  const awaiting = data.filter((r) => !r.review)
+  const awaiting = (data ?? []).filter((r) => !r.review)
   const highPri  = awaiting.filter((r) => r.triageLevel === 'red').length
   const oldest   = awaiting.reduce((m, r) => Math.max(m, daysSince(r.capturedAt)), 0)
 

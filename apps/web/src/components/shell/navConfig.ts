@@ -1,4 +1,4 @@
-import { Squares2X2Icon, ClipboardDocumentCheckIcon, ClipboardDocumentListIcon, UsersIcon, ClockIcon, BuildingLibraryIcon } from '@heroicons/react/24/outline'
+import { Squares2X2Icon, ClipboardDocumentCheckIcon, ClipboardDocumentListIcon, UsersIcon, ClockIcon, BuildingLibraryIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 import type { ComponentType, SVGProps } from 'react'
 import type { UserRole } from '@pinequest/types'
 
@@ -17,6 +17,7 @@ export const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { href: '/dashboard/admin/cohorts', label: 'Сургууль',  Icon: BuildingLibraryIcon },
     { href: '/dashboard/dentist',       label: 'Хяналт',   Icon: ClipboardDocumentCheckIcon, badgeKey: 'review' },
     { href: '/dashboard/follow-up',     label: 'Хяналт',    Icon: ClipboardDocumentListIcon,  badgeKey: 'followup' },
+    { href: '/dashboard/admin/content', label: 'Контент',   Icon: DocumentTextIcon },
     { href: '/dashboard/admin/users',   label: 'Хэрэглэгч', Icon: UsersIcon },
     { href: '/dashboard/admin/audit',   label: 'Нийт',     Icon: ClockIcon },
   ],

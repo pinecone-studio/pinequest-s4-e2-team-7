@@ -6,6 +6,7 @@ import { children, schoolClasses } from '@pinequest/db/d1'
 import type { DuplicateWarning } from '@pinequest/types'
 import { authenticate, authorize } from '../middleware/auth.js'
 import { loadChildSummary } from '../lib/childSummary.js'
+import { inChunks } from '../lib/chunk.js'
 import type { AppEnv } from '../types.js'
 
 export const childRoutes = new Hono<AppEnv>()
@@ -53,7 +54,7 @@ childRoutes.post('/classes/:classId/children/bulk', authorize('admin'), async (c
     slots.add(row.rosterSlot); keys.add(key)
     toCreate.push({ classId: klass.id, schoolId: klass.schoolId, childKey: key, firstName: row.firstName, lastName: row.lastName, birthYear: row.birthYear, rosterSlot: row.rosterSlot, gender: row.gender ?? null, guardianPhone: row.guardianPhone ?? null })
   }
-  if (toCreate.length) await db.insert(children).values(toCreate)
+  await inChunks(toCreate, (b) => db.insert(children).values(b))
   return c.json({ success: true, data: { created: toCreate.length, duplicates } }, 201)
 })
 
