@@ -97,35 +97,42 @@ Physical device: replace `localhost` with your computer's IP, e.g.
 `EXPO_PUBLIC_API_URL=http://192.168.1.50:4000`, and make sure the phone is on the
 same Wi‑Fi. If Metro shows a stale-bundle error, restart with `npx expo start -c`.
 
-## 5 · Model inference service (Python, optional)
+## 5 · Model inference service (Python)
 
-Only needed for the real photo-inference path (`/api/screenings/analyze`). Run it in
-its own virtualenv:
+YOLO weights live in `apps/model/`. For **web scan** (`/scan/camera`), the inference server starts **automatically** when you run the web app:
+
+```bash
+pnpm dev                    # turbo: web starts Next.js + Python model together
+pnpm --filter web dev       # web only (+ model)
+```
+
+First run may take a minute while `best.pt` downloads. Health check: http://127.0.0.1:8765/health
+
+One-time Python setup (if not done yet):
 
 ```bash
 cd apps/model
-python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-python3 download_model.py     # downloads YOLO weights → best.pt (once)
-python3 server.py             # http://127.0.0.1:8765/health
+python3 download_model.py
 ```
 
-Then set `INFERENCE_URL=http://127.0.0.1:8765/analyze` in `apps/server/.env` (step 2)
-and restart the server.
+For the **Hono API** screening path (`/api/screenings/analyze`), set `INFERENCE_URL=http://127.0.0.1:8765/analyze` in `apps/server/.env`.
+
+Manual model only: `pnpm dev:model`
 
 ## Run several at once (Turborepo)
 
 ```bash
-pnpm dev                                   # all JS apps: server + web + mobile (Expo is interactive)
+pnpm dev                                   # all JS apps; web bundle also starts YOLO inference
 pnpm --filter @pinequest/server --filter @pinequest/admin dev   # just API + board
 ```
 
-The Python model is not part of Turborepo — run it separately, or `pnpm dev:model` from root.
+Web scan AI does **not** need a separate terminal — `pnpm --filter web dev` (or root `pnpm dev`) starts the model with Next.js.
 
 ## Recommended startup order
 
 1. **DB** (once): `packages/db` migrate + seed
-2. **Model** (optional): `apps/model` `python3 server.py`
+2. **Dev**: `pnpm dev` (web auto-starts inference for `/scan/camera`)
 3. **API server**: `apps/server` (port 4000)
 4. **Admin board** (port 3000) and/or **Mobile** (Expo)
 
