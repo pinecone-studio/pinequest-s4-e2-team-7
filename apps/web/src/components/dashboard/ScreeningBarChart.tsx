@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ChartBarIcon } from '@heroicons/react/24/outline'
 import { useTimeseries } from '@/hooks/useStats'
+import { useSeason } from '@/components/SeasonProvider'
 import { SkeletonChart } from '@/components/ui/Skeleton'
 import EmptyState from '@/components/ui/EmptyState'
 
@@ -30,7 +31,8 @@ const fmtLabel = (ts: string, r: Range) => {
 
 const ScreeningBarChart = () => {
   const [range, setRange] = useState<Range>('M')
-  const { data, isLoading } = useTimeseries(range)
+  const { seasonId } = useSeason()
+  const { data, isLoading } = useTimeseries(range, seasonId)
 
   if (isLoading || !data) return <SkeletonChart />
 
@@ -59,9 +61,9 @@ const ScreeningBarChart = () => {
             <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-triage-yellow" />Тэмдэглэсэн {totalFlagged}</span>
           </div>
         </div>
-        <div className="flex overflow-hidden rounded-full border border-border bg-surface-raised p-0.5">
+        <div className="flex overflow-hidden rounded-full border border-border bg-surface-raised p-0.5" role="group" aria-label="Хугацааны хязгаар">
           {RANGES.map((r) => (
-            <button key={r} onClick={() => setRange(r)}
+            <button key={r} onClick={() => setRange(r)} aria-pressed={range === r}
               className={`btn rounded-full px-3 py-1 text-[11px] font-semibold transition-all duration-150 ${range === r ? 'bg-text-base text-surface shadow-sm' : 'text-text-muted hover:text-text-base'}`}>
               {r}
             </button>

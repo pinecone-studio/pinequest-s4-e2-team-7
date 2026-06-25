@@ -41,7 +41,7 @@ const RecentScreeningsTable = ({ screenings }: Props) => {
           <p className="text-[11px] text-text-muted">Эрсдэлээр эрэмбэлсэн · хамгийн яаралтай нь эхэнд</p>
         </div>
         <div className="relative">
-          <button onClick={() => setSortOpen((v) => !v)}
+          <button onClick={() => setSortOpen((v) => !v)} aria-haspopup="menu" aria-expanded={sortOpen} aria-label="Эрэмбэлэх"
             className="btn flex items-center gap-1 rounded-lg border border-border bg-surface-raised px-2.5 py-1.5 text-[11px] font-medium text-text-muted transition-all duration-150 hover:border-primary hover:text-primary">
             {SORT[sort]}
             <ChevronDownIcon className={`size-3 transition-transform duration-150 ${sortOpen ? 'rotate-180' : ''}`} />

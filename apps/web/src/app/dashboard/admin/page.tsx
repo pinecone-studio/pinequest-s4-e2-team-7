@@ -1,28 +1,33 @@
 'use client'
 
-import { useStats } from '@/hooks/useStats'
-import { useFollowUps } from '@/hooks/useFollowUps'
 import { useScreenings } from '@/hooks/useScreenings'
+import { useSeason } from '@/components/SeasonProvider'
 import ProfileCard from '@/components/dashboard/ProfileCard'
-import TriageCard from '@/components/dashboard/TriageCard'
+import DentistReviewQueueCard from '@/components/dashboard/DentistReviewQueueCard'
+import NextFollowUpsCard from '@/components/dashboard/NextFollowUpsCard'
 import ScreeningBarChart from '@/components/dashboard/ScreeningBarChart'
 import MonthlyOverviewCard from '@/components/dashboard/MonthlyOverviewCard'
-import FollowUpSummaryCard from '@/components/dashboard/FollowUpSummaryCard'
 import RecentScreeningsTable from '@/components/dashboard/RecentScreeningsTable'
+import SeasonSelector from '@/components/dashboard/SeasonSelector'
+import Disclaimer from '@/components/dashboard/Disclaimer'
 
 const AdminDashboardPage = () => {
-  const { data: stats } = useStats()
-  const { data: followUps } = useFollowUps()
-  const { data: screenings } = useScreenings({ limit: 5 })
+  const { seasonId } = useSeason()
+  const { data: screenings } = useScreenings({ seasonId })
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Top row — [left: profile + triage + follow-up] [center chart] [right gold KPI] */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-[20px] font-bold tracking-tight text-text-base">Мэдээлэл</h1>
+        <SeasonSelector />
+      </div>
+
+      {/* Top row — [left: profile + review queue + follow-ups] [center chart] [right gold KPI] */}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[280px_1fr_300px]">
         <div className="flex flex-col gap-5">
           <ProfileCard />
-          <TriageCard stats={stats} />
-          <FollowUpSummaryCard followUps={followUps} />
+          <DentistReviewQueueCard />
+          <NextFollowUpsCard />
         </div>
 
         <ScreeningBarChart />
@@ -32,6 +37,8 @@ const AdminDashboardPage = () => {
 
       {/* Full-width prioritized worklist */}
       <RecentScreeningsTable screenings={screenings} />
+
+      <Disclaimer />
     </div>
   )
 }

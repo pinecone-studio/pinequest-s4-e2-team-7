@@ -27,11 +27,12 @@ export const useStats = (opts: { seasonId?: string; schoolId?: string } = {}) =>
 }
 
 /** Screened-vs-Flagged buckets for the activity chart + monthly hero. */
-export const useTimeseries = (range: string) => {
+export const useTimeseries = (range: string, seasonId?: string) => {
   const { token } = useSession()
+  const qs = new URLSearchParams({ range, ...(seasonId ? { seasonId } : {}) }).toString()
   return useQuery({
-    queryKey: ['timeseries', range],
-    queryFn: () => apiStatFetch<Timeseries>(`/api/stats/timeseries?range=${range}`, { token, revalidate: 120 }),
+    queryKey: ['timeseries', range, seasonId ?? 'all'],
+    queryFn: () => apiStatFetch<Timeseries>(`/api/stats/timeseries?${qs}`, { token, revalidate: 120 }),
     enabled: !!token,
   })
 }

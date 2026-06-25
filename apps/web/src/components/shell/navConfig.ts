@@ -13,12 +13,12 @@ export type NavItem = {
 
 export const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
   admin: [
-    { href: '/dashboard/admin',         label: 'Самбар',    Icon: Squares2X2Icon },
+    { href: '/dashboard/admin',         label: 'Мэдээлэл',    Icon: Squares2X2Icon },
     { href: '/dashboard/admin/cohorts', label: 'Сургууль',  Icon: BuildingLibraryIcon },
-    { href: '/dashboard/dentist',       label: 'Шалгалт',   Icon: ClipboardDocumentCheckIcon, badgeKey: 'review' },
-    { href: '/dashboard/follow-up',     label: 'Дагалт',    Icon: ClipboardDocumentListIcon,  badgeKey: 'followup' },
+    { href: '/dashboard/dentist',       label: 'Хяналт',   Icon: ClipboardDocumentCheckIcon, badgeKey: 'review' },
+    { href: '/dashboard/follow-up',     label: 'Хяналт',    Icon: ClipboardDocumentListIcon,  badgeKey: 'followup' },
     { href: '/dashboard/admin/users',   label: 'Хэрэглэгч', Icon: UsersIcon },
-    { href: '/dashboard/admin/audit',   label: 'Аудит',     Icon: ClockIcon },
+    { href: '/dashboard/admin/audit',   label: 'Нийт',     Icon: ClockIcon },
   ],
   dentist: [
     { href: '/dashboard/dentist',   label: 'Шалгалт', Icon: ClipboardDocumentCheckIcon, badgeKey: 'review' },

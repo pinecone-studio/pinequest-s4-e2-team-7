@@ -3,6 +3,7 @@
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import { useMe } from '@/hooks/useMe'
 import { useStats } from '@/hooks/useStats'
+import { useSeason } from '@/components/SeasonProvider'
 import Card from '@/components/ui/Card'
 
 const initials = (name?: string) =>
@@ -10,8 +11,9 @@ const initials = (name?: string) =>
 
 // Top-left identity + real cohort-coverage (screened / total active children).
 const ProfileCard = () => {
+  const { seasonId } = useSeason()
   const { data: me } = useMe()
-  const { data: stats } = useStats()
+  const { data: stats } = useStats({ seasonId })
 
   const screened = stats?.coverage.screened ?? 0
   const total    = stats?.coverage.total ?? 0

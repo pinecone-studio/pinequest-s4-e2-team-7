@@ -29,7 +29,7 @@ const Sidebar = () => {
         className="mb-5 flex size-9 items-center justify-center rounded-xl text-[15px] font-bold shadow-(--shadow-card)"
         style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-text-on-primary)' }}
       >
-        S
+        Smilo
       </div>
 
       <nav className="flex flex-1 flex-col items-center gap-1.5" aria-label="Үндсэн цэс">

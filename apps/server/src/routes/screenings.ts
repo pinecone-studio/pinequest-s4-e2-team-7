@@ -28,7 +28,7 @@ screeningRoutes.get('/', authenticate, async (c) => {
       screenedById: screenedById || undefined,
     },
     orderBy: { capturedAt: 'desc' },
-    include: { findings: true },
+    include: { findings: true, review: { select: { confirmedLevel: true } } },
   })
   return c.json({ success: true, data: screenings })
 })

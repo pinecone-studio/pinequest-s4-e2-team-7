@@ -3,6 +3,7 @@
 import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '@heroicons/react/20/solid'
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import { useTimeseries } from '@/hooks/useStats'
+import { useSeason } from '@/components/SeasonProvider'
 import { SkeletonCard } from '@/components/ui/Skeleton'
 
 const SW = 240, SH = 48
@@ -16,7 +17,8 @@ const sparkPath = (vals: number[]) => {
 // Filled Honey-Gold hero: children screened THIS month + % vs last month +
 // sparkline. All from the real monthly time-series (no fabricated data).
 const MonthlyOverviewCard = () => {
-  const { data, isLoading } = useTimeseries('M')
+  const { seasonId } = useSeason()
+  const { data, isLoading } = useTimeseries('M', seasonId)
   if (isLoading || !data) return <SkeletonCard rows={2} />
 
   const b = data.buckets
