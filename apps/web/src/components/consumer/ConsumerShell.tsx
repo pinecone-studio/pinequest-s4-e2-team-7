@@ -21,7 +21,7 @@ export const ConsumerShell = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname()
   const { logout } = useSession()
   const { data: me } = useMe()
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
 
   const initial = me?.name?.charAt(0)?.toUpperCase() ?? 'U'
   const displayName = me?.name ?? 'Хэрэглэгч'

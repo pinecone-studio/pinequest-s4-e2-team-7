@@ -13,13 +13,13 @@ export const SidebarToggleIcon = ({ collapsed }: { collapsed: boolean }) => (
       )}
       aria-hidden
     >
-      {/* Front — hamburger */}
+      {/* Front — left arrow (sidebar нээлттэй, хураах) */}
       <span className="absolute inset-0 flex items-center justify-center [backface-visibility:hidden]">
-        <Menu className="size-5" strokeWidth={2} />
-      </span>
-      {/* Back — left arrow (pre-rotated so it reads upright after flip) */}
-      <span className="absolute inset-0 flex [transform:rotateY(180deg)] items-center justify-center [backface-visibility:hidden]">
         <ArrowLeft className="size-5" strokeWidth={2} />
+      </span>
+      {/* Back — hamburger (sidebar хураагдсан, нээх) */}
+      <span className="absolute inset-0 flex [transform:rotateY(180deg)] items-center justify-center [backface-visibility:hidden]">
+        <Menu className="size-5" strokeWidth={2} />
       </span>
     </span>
   </span>
