@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
+import { ArrowTopRightOnSquareIcon, ChartPieIcon } from '@heroicons/react/24/outline'
 import type { DashStats } from '@/hooks/useStats'
 import { SkeletonCard } from '@/components/ui/Skeleton'
+import EmptyState from '@/components/ui/EmptyState'
 
 type Props = { stats: DashStats | undefined }
 
@@ -52,6 +53,9 @@ const TriageCard = ({ stats }: Props) => {
         </Link>
       </div>
 
+      {total === 0 ? (
+        <EmptyState Icon={ChartPieIcon} title="Тархалт алга" hint="Скрининг ирэхэд эрсдэлийн тархалт энд харагдана." compact />
+      ) : (
       <div className="flex flex-col gap-3">
         {LEVELS.map((lvl) => {
           const count = stats.triage[lvl.key]
@@ -73,6 +77,7 @@ const TriageCard = ({ stats }: Props) => {
           )
         })}
       </div>
+      )}
     </div>
   )
 }

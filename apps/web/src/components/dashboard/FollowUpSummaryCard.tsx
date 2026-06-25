@@ -1,18 +1,20 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
+import { ArrowTopRightOnSquareIcon, PhoneArrowUpRightIcon } from '@heroicons/react/24/outline'
 import type { FollowUpRow } from '@/hooks/useFollowUps'
 import { SkeletonCard } from '@/components/ui/Skeleton'
+import EmptyState from '@/components/ui/EmptyState'
 
 type Props = { followUps: FollowUpRow[] | undefined }
 
+// Status dot colors map to triage/brand tokens (no off-brand teal/amber).
 const STATUS_COLOR: Record<string, string> = {
-  flagged:             '#B83838',
-  contacted:           '#8A6500',
-  referred:            '#48A9B2',
-  treatment_completed: '#2A7D4F',
-  verified_resolved:   '#2A7D4F',
+  flagged:             'var(--color-triage-red)',
+  contacted:           'var(--color-triage-yellow)',
+  referred:            'var(--color-primary)',
+  treatment_completed: 'var(--color-triage-green)',
+  verified_resolved:   'var(--color-triage-green)',
 }
 
 const FollowUpSummaryCard = ({ followUps }: Props) => {
@@ -39,41 +41,43 @@ const FollowUpSummaryCard = ({ followUps }: Props) => {
           <ArrowTopRightOnSquareIcon className="size-4" />
         </Link>
       </div>
-      <p className="mb-3 text-[11px] text-text-muted">Сүүлийн дагалт бүртгэл</p>
+      {followUps.length === 0 ? (
+        <EmptyState Icon={PhoneArrowUpRightIcon} title="Дагалт бүртгэл алга" hint="Тэмдэглэгдсэн хүүхэд гарахад дагалт энд харагдана." compact />
+      ) : (
+        <>
+          <p className="mb-3 text-[11px] text-text-muted">Сүүлийн дагалт бүртгэл</p>
 
-      <div className="mb-4 flex items-center gap-2.5">
-        <p className="text-[28px] font-bold leading-none tracking-tight text-text-base">
-          {flagged.length}
-          <span className="ml-1.5 text-[15px] font-medium text-text-muted">хүлээгдэж буй</span>
-        </p>
-        {resolvePct > 0 && (
-          <span className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold"
-            style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-accent-fg)' }}>
-            +{resolvePct}%
-          </span>
-        )}
-      </div>
+          <div className="mb-4 flex items-center gap-2.5">
+            <p className="text-[28px] font-bold leading-none tracking-tight text-text-base">
+              {flagged.length}
+              <span className="ml-1.5 text-[15px] font-medium text-text-muted">хүлээгдэж буй</span>
+            </p>
+            {resolvePct > 0 && (
+              <span className="shrink-0 rounded-full bg-triage-green-bg px-2.5 py-1 text-[11px] font-bold text-triage-green">
+                +{resolvePct}%
+              </span>
+            )}
+          </div>
 
-      <div className="flex items-center gap-1.5">
-        {preview.map((f, i) => (
-          <div
-            key={f.id ?? i}
-            title={f.childName ?? f.childKey}
-            className="btn size-9 shrink-0 cursor-default rounded-full border-2 border-surface flex items-center justify-center text-[11px] font-bold text-white transition-transform duration-150 hover:scale-110"
-            style={{ backgroundColor: STATUS_COLOR[f.status] ?? '#8E8E93' }}
-          >
-            {(f.childName ?? f.childKey ?? '?').slice(0, 1).toUpperCase()}
+          <div className="flex items-center gap-1.5">
+            {preview.map((f, i) => (
+              <div
+                key={f.id ?? i}
+                title={f.childName ?? f.childKey}
+                className="btn size-9 shrink-0 cursor-default rounded-full border-2 border-surface flex items-center justify-center text-[11px] font-bold text-white transition-transform duration-150 hover:scale-110"
+                style={{ backgroundColor: STATUS_COLOR[f.status] ?? '#8E8E93' }}
+              >
+                {(f.childName ?? f.childKey ?? '?').slice(0, 1).toUpperCase()}
+              </div>
+            ))}
+            {extra > 0 && (
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-full border-2 border-surface bg-surface-raised">
+                <span className="text-[10px] font-semibold text-text-muted">+{extra}</span>
+              </div>
+            )}
           </div>
-        ))}
-        {extra > 0 && (
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-full border-2 border-surface bg-surface-raised">
-            <span className="text-[10px] font-semibold text-text-muted">+{extra}</span>
-          </div>
-        )}
-        {followUps.length === 0 && (
-          <p className="text-[12px] text-text-muted">Дагалт бүртгэл байхгүй</p>
-        )}
-      </div>
+        </>
+      )}
     </div>
   )
 }
