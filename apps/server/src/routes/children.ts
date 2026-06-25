@@ -1,7 +1,8 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
+import { and, asc, eq } from 'drizzle-orm'
 import { childKey, rosterImportRowSchema } from '@pinequest/core'
-import { Prisma, prisma } from '@pinequest/db'
+import { children, schoolClasses } from '@pinequest/db/d1'
 import type { DuplicateWarning } from '@pinequest/types'
 import { authenticate, authorize } from '../middleware/auth.js'
 import { loadChildSummary } from '../lib/childSummary.js'
@@ -10,22 +11,23 @@ import type { AppEnv } from '../types.js'
 export const childRoutes = new Hono<AppEnv>()
 
 childRoutes.get('/classes/:classId/children', authenticate, async (c) => {
-  const children = await prisma.child.findMany({
-    where: { classId: c.req.param('classId'), isActive: true },
-    orderBy: { rosterSlot: 'asc' },
-  })
-  return c.json({ success: true, data: children })
+  const data = await c.get('db').select().from(children)
+    .where(and(eq(children.classId, c.req.param('classId')), eq(children.isActive, true)))
+    .orderBy(asc(children.rosterSlot))
+  return c.json({ success: true, data })
 })
 
 childRoutes.post('/classes/:classId/children', authorize('admin'), async (c) => {
+  const db = c.get('db')
   const row = rosterImportRowSchema.parse(await c.req.json())
-  const klass = await prisma.schoolClass.findUnique({ where: { id: c.req.param('classId') } })
+  const klass = await db.query.schoolClasses.findFirst({ where: eq(schoolClasses.id, c.req.param('classId')) })
   if (!klass) return c.json({ success: false, data: null }, 404)
   const key = childKey({ schoolId: klass.schoolId, className: klass.name, rosterSlot: row.rosterSlot, birthYear: row.birthYear })
   try {
-    const child = await prisma.child.create({
-      data: { classId: klass.id, schoolId: klass.schoolId, childKey: key, firstName: row.firstName, lastName: row.lastName, birthYear: row.birthYear, rosterSlot: row.rosterSlot, gender: row.gender ?? null, guardianPhone: row.guardianPhone ?? null },
-    })
+    const [child] = await db.insert(children).values({
+      classId: klass.id, schoolId: klass.schoolId, childKey: key, firstName: row.firstName, lastName: row.lastName,
+      birthYear: row.birthYear, rosterSlot: row.rosterSlot, gender: row.gender ?? null, guardianPhone: row.guardianPhone ?? null,
+    }).returning()
     return c.json({ success: true, data: child }, 201)
   } catch {
     return c.json({ success: false, data: null, message: 'duplicate_child' }, 409)
@@ -33,15 +35,16 @@ childRoutes.post('/classes/:classId/children', authorize('admin'), async (c) => 
 })
 
 childRoutes.post('/classes/:classId/children/bulk', authorize('admin'), async (c) => {
+  const db = c.get('db')
   const rows = z.array(rosterImportRowSchema).parse(await c.req.json())
-  const klass = await prisma.schoolClass.findUnique({ where: { id: c.req.param('classId') } })
+  const klass = await db.query.schoolClasses.findFirst({ where: eq(schoolClasses.id, c.req.param('classId')) })
   if (!klass) return c.json({ success: false, data: null }, 404)
 
-  const existing = await prisma.child.findMany({ where: { classId: klass.id } })
+  const existing = await db.select().from(children).where(eq(children.classId, klass.id))
   const slots = new Set(existing.map((ch) => ch.rosterSlot))
   const keys = new Set(existing.map((ch) => ch.childKey))
   const duplicates: DuplicateWarning[] = []
-  const toCreate: Prisma.ChildCreateManyInput[] = []
+  const toCreate: (typeof children.$inferInsert)[] = []
 
   for (const row of rows) {
     const key = childKey({ schoolId: klass.schoolId, className: klass.name, rosterSlot: row.rosterSlot, birthYear: row.birthYear })
@@ -50,19 +53,18 @@ childRoutes.post('/classes/:classId/children/bulk', authorize('admin'), async (c
     slots.add(row.rosterSlot); keys.add(key)
     toCreate.push({ classId: klass.id, schoolId: klass.schoolId, childKey: key, firstName: row.firstName, lastName: row.lastName, birthYear: row.birthYear, rosterSlot: row.rosterSlot, gender: row.gender ?? null, guardianPhone: row.guardianPhone ?? null })
   }
-  if (toCreate.length) await prisma.child.createMany({ data: toCreate })
+  if (toCreate.length) await db.insert(children).values(toCreate)
   return c.json({ success: true, data: { created: toCreate.length, duplicates } }, 201)
 })
 
 childRoutes.get('/children/:id', authenticate, async (c) => {
-  const child = await prisma.child.findUnique({ where: { id: c.req.param('id') } })
+  const child = await c.get('db').query.children.findFirst({ where: eq(children.id, c.req.param('id')) })
   if (!child) return c.json({ success: false, data: null }, 404)
   return c.json({ success: true, data: child })
 })
 
-// Compliant per-child screening summary (latest screening), for the board.
 childRoutes.get('/children/:id/summary', authenticate, async (c) => {
-  const data = await loadChildSummary(c.req.param('id'))
+  const data = await loadChildSummary(c.get('db'), c.req.param('id'))
   if (!data) return c.json({ success: false, data: null }, 404)
   return c.json({ success: true, data })
 })
@@ -70,9 +72,9 @@ childRoutes.get('/children/:id/summary', authenticate, async (c) => {
 childRoutes.put('/children/:id', authorize('admin'), async (c) => {
   const { firstName, lastName, gender, guardianPhone, guardianEmail, consentObtained, isActive } =
     await c.req.json<{ firstName?: string; lastName?: string; gender?: 'M' | 'F'; guardianPhone?: string; guardianEmail?: string; consentObtained?: boolean; isActive?: boolean }>()
-  const child = await prisma.child.update({
-    where: { id: c.req.param('id') },
-    data: { firstName, lastName, gender, guardianPhone, guardianEmail, consentObtained, consentAt: consentObtained ? new Date() : undefined, isActive },
-  })
+  const [child] = await c.get('db').update(children).set({
+    firstName, lastName, gender, guardianPhone, guardianEmail, consentObtained,
+    consentAt: consentObtained ? new Date() : undefined, isActive,
+  }).where(eq(children.id, c.req.param('id'))).returning()
   return c.json({ success: true, data: child })
 })

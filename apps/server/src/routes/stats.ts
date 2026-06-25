@@ -1,20 +1,20 @@
 import { Hono } from 'hono'
-import { prisma } from '@pinequest/db'
+import { and, count, eq, inArray, isNull, ne } from 'drizzle-orm'
+import { screenings, children, followUps, screeningReviews } from '@pinequest/db/d1'
 import { authenticate } from '../middleware/auth.js'
-import { resolveScope, scopeOr } from '../lib/scopeFilter.js'
+import { resolveScope, scopeWhere } from '../lib/scopeFilter.js'
 import type { AppEnv } from '../types.js'
 
 export const statsRoutes = new Hono<AppEnv>()
 
-// --- Screened-vs-Flagged time-series (D/W/M/Y) ------------------------------
-// Bucketed in TS (not SQL) so the same code runs on SQLite (dev) + Postgres.
+// --- Screened-vs-Flagged time-series (bucketed in TS, DB-agnostic) ---------
 type Range = 'D' | 'W' | 'M' | 'Y'
 const SLOTS: Record<Range, number> = { D: 14, W: 8, M: 6, Y: 5 }
 
 const bucketStart = (date: Date, r: Range): Date => {
   const x = new Date(date)
   x.setHours(0, 0, 0, 0)
-  if (r === 'W') x.setDate(x.getDate() - ((x.getDay() + 6) % 7)) // Monday
+  if (r === 'W') x.setDate(x.getDate() - ((x.getDay() + 6) % 7))
   else if (r === 'M') x.setDate(1)
   else if (r === 'Y') x.setMonth(0, 1)
   return x
@@ -43,53 +43,46 @@ const bucketize = (rows: { capturedAt: Date; triageLevel: string }[], r: Range) 
 }
 
 statsRoutes.get('/timeseries', authenticate, async (c) => {
+  const db = c.get('db')
   const { range, seasonId, schoolId: querySchoolId } = c.req.query()
   const r: Range = (['D', 'W', 'M', 'Y'] as const).includes(range as Range) ? (range as Range) : 'M'
-  const or = scopeOr(await resolveScope(c.get('jwtPayload')))
-  const rows = await prisma.screening.findMany({
-    where: { AND: [or ? { OR: or } : {}, { seasonId: seasonId || undefined, schoolId: querySchoolId || undefined }] },
-    select: { capturedAt: true, triageLevel: true },
-  })
+  const scSc = scopeWhere(await resolveScope(db, c.get('jwtPayload')), { classId: screenings.classId, schoolId: screenings.schoolId })
+  const rows = await db.select({ capturedAt: screenings.capturedAt, triageLevel: screenings.triageLevel }).from(screenings)
+    .where(and(scSc, seasonId ? eq(screenings.seasonId, seasonId) : undefined, querySchoolId ? eq(screenings.schoolId, querySchoolId) : undefined))
   return c.json({ success: true, data: { range: r, buckets: bucketize(rows, r) } })
 })
 
 statsRoutes.get('/', authenticate, async (c) => {
+  const db = c.get('db')
   const { seasonId, schoolId: querySchoolId } = c.req.query()
-  const scope = await resolveScope(c.get('jwtPayload'))
-  const or = scopeOr(scope)
-  const scopeClause = or ? { OR: or } : {}
-  const screeningWhere = { AND: [scopeClause, { seasonId: seasonId || undefined, schoolId: querySchoolId || undefined }] }
-  // FollowUp has no classId — school-level only. admin → all (or query school).
+  const scope = await resolveScope(db, c.get('jwtPayload'))
+  const scSc = scopeWhere(scope, { classId: screenings.classId, schoolId: screenings.schoolId })
+  const chSc = scopeWhere(scope, { classId: children.classId, schoolId: children.schoolId })
+  const seasonCond = seasonId ? eq(screenings.seasonId, seasonId) : undefined
+  const querySchool = querySchoolId ? eq(screenings.schoolId, querySchoolId) : undefined
   const fuSchool = scope.all
-    ? { schoolId: querySchoolId || undefined }
-    : { schoolId: { in: scope.schoolIds.length ? scope.schoolIds : ['__no_scope__'] } }
+    ? (querySchoolId ? eq(followUps.schoolId, querySchoolId) : undefined)
+    : inArray(followUps.schoolId, scope.schoolIds.length ? scope.schoolIds : ['__no_scope__'])
 
-  const [triajeGroups, totalChildren, pendingReview, flagged, resolved] = await Promise.all([
-    prisma.screening.groupBy({
-      by: ['triageLevel'],
-      where: screeningWhere,
-      _count: { id: true },
-    }),
-    prisma.child.count({ where: { AND: [scopeClause, { isActive: true, schoolId: querySchoolId || undefined }] } }),
-    prisma.screening.count({
-      where: { AND: [scopeClause, { seasonId: seasonId || undefined, schoolId: querySchoolId || undefined, review: null }] },
-    }),
-    prisma.followUp.count({ where: { ...fuSchool, status: 'flagged' } }),
-    prisma.followUp.count({ where: { ...fuSchool, status: { not: 'flagged' } } }),
+  const [triageGroups, childRow, pendingRow, flaggedRow, resolvedRow] = await Promise.all([
+    db.select({ triageLevel: screenings.triageLevel, c: count() }).from(screenings).where(and(scSc, seasonCond, querySchool)).groupBy(screenings.triageLevel),
+    db.select({ c: count() }).from(children).where(and(chSc, eq(children.isActive, true), querySchoolId ? eq(children.schoolId, querySchoolId) : undefined)),
+    db.select({ c: count() }).from(screenings).leftJoin(screeningReviews, eq(screeningReviews.screeningId, screenings.id)).where(and(scSc, seasonCond, querySchool, isNull(screeningReviews.id))),
+    db.select({ c: count() }).from(followUps).where(and(fuSchool, eq(followUps.status, 'flagged'))),
+    db.select({ c: count() }).from(followUps).where(and(fuSchool, ne(followUps.status, 'flagged'))),
   ])
 
-  const byLevel = Object.fromEntries(triajeGroups.map((g) => [g.triageLevel, g._count.id]))
+  const byLevel = Object.fromEntries(triageGroups.map((g) => [g.triageLevel, g.c]))
   const totalScreened = (byLevel.green ?? 0) + (byLevel.yellow ?? 0) + (byLevel.red ?? 0)
-
   return c.json({
     success: true,
     data: {
       totalScreened,
       triage: { green: byLevel.green ?? 0, yellow: byLevel.yellow ?? 0, red: byLevel.red ?? 0 },
-      coverage: { screened: totalScreened, total: totalChildren },
-      pendingReview,
-      flaggedFollowUps: flagged,
-      resolvedFollowUps: resolved,
+      coverage: { screened: totalScreened, total: childRow[0]?.c ?? 0 },
+      pendingReview: pendingRow[0]?.c ?? 0,
+      flaggedFollowUps: flaggedRow[0]?.c ?? 0,
+      resolvedFollowUps: resolvedRow[0]?.c ?? 0,
     },
   })
 })

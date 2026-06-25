@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
@@ -15,7 +16,7 @@ const inputCls =
 const errorText = (msg: string): string => {
   if (msg === 'email_taken') return 'Энэ имэйл аль хэдийн бүртгэлтэй байна'
   if (msg === 'invalid_input') return 'Нэр, имэйл болон 6+ тэмдэгт нууц үг шаардлагатай'
-  return 'Серверт холбогдсонгүй — API (:4000) ажиллаж байгаа эсэхийг шалгана уу'
+  return 'Серверт холбогдсонгүй — API (:8787) ажиллаж байгаа эсэхийг шалгана уу'
 }
 
 const RegisterPage = () => {
@@ -23,6 +24,7 @@ const RegisterPage = () => {
   const { refresh } = useSession()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -34,7 +36,7 @@ const RegisterPage = () => {
     try {
       const data = await apiFetch<AuthData>('/api/auth/register', {
         method: 'POST',
-        body: { name, email, password },
+        body: { name, email, password, phone },
       })
       setToken(data.token)
       refresh()
@@ -48,6 +50,7 @@ const RegisterPage = () => {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 p-8">
+      <Image src="/smilo.png" alt="Smilo" width={132} height={60} priority className="h-auto w-[132px]" />
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold tracking-tight text-text-base">
           Скрининг хийгчээр бүртгүүлэх
@@ -68,6 +71,13 @@ const RegisterPage = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Имэйл"
+          className={inputCls}
+        />
+        <input
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="Утасны дугаар"
           className={inputCls}
         />
         <input

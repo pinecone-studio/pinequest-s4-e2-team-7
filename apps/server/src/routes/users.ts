@@ -1,51 +1,49 @@
 import { Hono } from 'hono'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { and, desc, eq, inArray } from 'drizzle-orm'
 import type { UserRole } from '@pinequest/types'
-import { prisma } from '@pinequest/db'
+import { users, userScopes, type DB } from '@pinequest/db/d1'
 import { authorize } from '../middleware/auth.js'
 import type { AppEnv } from '../types.js'
 
 export const userRoutes = new Hono<AppEnv>()
 
 const ROLES: UserRole[] = ['screener', 'dentist', 'follow_up', 'admin']
+const userCols = { id: users.id, name: users.name, email: users.email, role: users.role, phone: users.phone, schoolId: users.schoolId, isActive: users.isActive }
 
 // Replace a user's single class grant (admin assigns teacher → class).
-const setClassScope = async (userId: string, classId: string | null | undefined, grantedBy: string) => {
+const setClassScope = async (db: DB, userId: string, classId: string | null | undefined, grantedBy: string) => {
   if (classId === undefined) return
-  await prisma.userScope.deleteMany({ where: { userId, scopeKind: 'class' } })
-  if (classId) {
-    await prisma.userScope.create({ data: { userId, scopeKind: 'class', scopeId: classId, grantedBy } })
-  }
+  await db.delete(userScopes).where(and(eq(userScopes.userId, userId), eq(userScopes.scopeKind, 'class')))
+  if (classId) await db.insert(userScopes).values({ userId, scopeKind: 'class', scopeId: classId, grantedBy })
 }
 
 userRoutes.get('/', authorize('admin'), async (c) => {
-  const users = await prisma.user.findMany({
-    select: { id: true, name: true, email: true, role: true, schoolId: true, isActive: true, createdAt: true },
-    orderBy: { createdAt: 'desc' },
-  })
-  const scopes = await prisma.userScope.findMany({
-    where: { scopeKind: 'class', userId: { in: users.map((u) => u.id) } },
-    select: { userId: true, scopeId: true },
-  })
+  const db = c.get('db')
+  const list = await db.select({ ...userCols, createdAt: users.createdAt }).from(users).orderBy(desc(users.createdAt))
+  const scopes = list.length
+    ? await db.select({ userId: userScopes.userId, scopeId: userScopes.scopeId }).from(userScopes)
+        .where(and(eq(userScopes.scopeKind, 'class'), inArray(userScopes.userId, list.map((u) => u.id))))
+    : []
   const classByUser = new Map(scopes.map((s) => [s.userId, s.scopeId]))
-  return c.json({ success: true, data: users.map((u) => ({ ...u, classId: classByUser.get(u.id) ?? null })) })
+  return c.json({ success: true, data: list.map((u) => ({ ...u, classId: classByUser.get(u.id) ?? null })) })
 })
 
 userRoutes.post('/', authorize('admin'), async (c) => {
-  const { name, email, password, role, schoolId, classId } =
-    await c.req.json<{ name: string; email: string; password: string; role: UserRole; schoolId?: string; classId?: string }>()
+  const db = c.get('db')
+  const { name, email, password, role, phone, schoolId, classId } =
+    await c.req.json<{ name: string; email: string; password: string; role: UserRole; phone?: string; schoolId?: string; classId?: string }>()
   if (!name || !email || !password || password.length < 6 || !ROLES.includes(role)) {
     return c.json({ success: false, data: null, message: 'invalid_input' }, 400)
   }
-  const existing = await prisma.user.findUnique({ where: { email } })
+  const existing = await db.query.users.findFirst({ where: eq(users.email, email) })
   if (existing) return c.json({ success: false, data: null, message: 'email_taken' }, 409)
   const passwordHash = await bcrypt.hash(password, 10)
-  const user = await prisma.user.create({
-    data: { name, email, role, passwordHash, schoolId: schoolId ?? null },
-    select: { id: true, name: true, email: true, role: true, schoolId: true, isActive: true },
-  })
-  await setClassScope(user.id, classId, c.get('jwtPayload').sub)
+  const [user] = await db.insert(users)
+    .values({ name, email, role, phone: phone?.trim() || null, passwordHash, schoolId: schoolId ?? null })
+    .returning(userCols)
+  await setClassScope(db, user.id, classId, c.get('jwtPayload').sub)
   return c.json({ success: true, data: { ...user, classId: classId ?? null } }, 201)
 })
 
@@ -57,15 +55,12 @@ const patchSchema = z.object({
 })
 
 userRoutes.patch('/:id', authorize('admin'), async (c) => {
+  const db = c.get('db')
   const parsed = patchSchema.safeParse(await c.req.json())
   if (!parsed.success) return c.json({ success: false, data: null, message: 'invalid_input' }, 400)
   const { role, isActive, schoolId, classId } = parsed.data
   const id = c.req.param('id')
-  const user = await prisma.user.update({
-    where: { id },
-    data: { role, isActive, schoolId },
-    select: { id: true, name: true, email: true, role: true, schoolId: true, isActive: true },
-  })
-  await setClassScope(id, classId, c.get('jwtPayload').sub)
+  const [user] = await db.update(users).set({ role, isActive, schoolId }).where(eq(users.id, id)).returning(userCols)
+  await setClassScope(db, id, classId, c.get('jwtPayload').sub)
   return c.json({ success: true, data: user })
 })

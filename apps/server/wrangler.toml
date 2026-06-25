@@ -1,0 +1,18 @@
+# Cloudflare Workers config for the Screener API (Hono on the edge).
+name = "screener-api"
+main = "src/index.ts"
+compatibility_date = "2026-06-25"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 (serverless SQLite) — the durable, non-local data store.
+# Run:  npx wrangler d1 create screener-db
+# then paste the printed database_id below.
+[[d1_databases]]
+binding = "DB"
+database_name = "screener-db"
+database_id = "cf904595-e46a-4ef2-ba00-df2e7736935e"
+migrations_dir = "../../packages/db/drizzle"
+
+# Secrets (set with `npx wrangler secret put JWT_SECRET`) — NOT committed.
+[vars]
+CORS_ORIGIN = "http://localhost:3000"

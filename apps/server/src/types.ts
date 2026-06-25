@@ -1,4 +1,6 @@
 import type { UserRole } from '@pinequest/types'
+import type { D1Database } from '@cloudflare/workers-types'
+import type { DB } from '@pinequest/db/d1'
 
 export type JwtPayload = {
   sub: string
@@ -7,7 +9,15 @@ export type JwtPayload = {
 }
 
 export type AppEnv = {
+  Bindings: {
+    DB: D1Database
+    JWT_SECRET?: string
+    CORS_ORIGIN?: string
+    INFERENCE_URL?: string
+    SEED_ENABLED?: string
+  }
   Variables: {
     jwtPayload: JwtPayload
+    db: DB
   }
 }
