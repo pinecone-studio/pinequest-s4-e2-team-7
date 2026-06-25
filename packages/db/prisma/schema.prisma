@@ -6,7 +6,7 @@
 
 datasource db {
   provider = "sqlite"
-
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -96,6 +96,9 @@ model SchoolClass {
   sourceClassId String?
   sourceClass   SchoolClass?  @relation("CarryForward", fields: [sourceClassId], references: [id])
   carriedTo     SchoolClass[] @relation("CarryForward")
+  // Screener-set schedule for the next-season screening visit + optional reminder phone.
+  scheduledAt   DateTime?
+  reminderPhone String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
 
@@ -117,6 +120,7 @@ model Child {
   rosterSlot      Int
   gender          String? // 'M' | 'F'
   guardianPhone   String? // PII
+  guardianEmail   String? // PII — parent summary delivery
   consentObtained Boolean   @default(false)
   consentAt       DateTime?
   isActive        Boolean   @default(true)
