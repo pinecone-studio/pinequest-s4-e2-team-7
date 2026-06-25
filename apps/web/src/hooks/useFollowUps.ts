@@ -28,3 +28,17 @@ export const useUpdateFollowUp = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['followups'] }),
   })
 }
+
+export const useNotify = () => {
+  const { token } = useSession()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (vars: { childKey: string; channel: string; note?: string }) =>
+      apiFetch<FollowUp>(`/api/followups/${vars.childKey}/notify`, {
+        token,
+        method: 'POST',
+        body: { channel: vars.channel, note: vars.note },
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['followups'] }),
+  })
+}

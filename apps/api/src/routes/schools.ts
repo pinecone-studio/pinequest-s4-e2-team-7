@@ -17,3 +17,18 @@ schoolRoutes.post('/', authorize('admin'), async (c) => {
   })
   return c.json({ success: true, data: school }, 201)
 })
+
+schoolRoutes.get('/:schoolId', authenticate, async (c) => {
+  const school = await prisma.school.findUnique({ where: { id: c.req.param('schoolId') } })
+  if (!school) return c.json({ success: false, data: null }, 404)
+  return c.json({ success: true, data: school })
+})
+
+schoolRoutes.patch('/:schoolId', authorize('admin'), async (c) => {
+  const { name, soumCode, district } = await c.req.json<{ name?: string; soumCode?: string; district?: string }>()
+  const school = await prisma.school.update({
+    where: { id: c.req.param('schoolId') },
+    data: { name, soumCode, district },
+  })
+  return c.json({ success: true, data: school })
+})

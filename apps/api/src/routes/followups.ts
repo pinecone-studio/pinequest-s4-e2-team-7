@@ -57,3 +57,24 @@ followUpRoutes.patch('/:childKey', authorize('follow_up', 'admin'), async (c) =>
   await writeAudit(c.get('jwtPayload').sub, 'FollowUp', saved.id, existing ? 'update' : 'create', existing, saved)
   return c.json({ success: true, data: saved })
 })
+
+followUpRoutes.post('/:childKey/notify', authorize('follow_up', 'admin'), async (c) => {
+  const { channel, note } = await c.req.json<{ channel: string; note?: string }>()
+  const ck = c.req.param('childKey')
+  const existing = await prisma.followUp.findUnique({ where: { childKey: ck } })
+  if (!existing) return c.json({ success: false, data: null, message: 'unknown_child' }, 404)
+
+  const updated = await prisma.followUp.update({
+    where: { childKey: ck },
+    data: {
+      notifiedAt: new Date(),
+      notificationChannel: channel,
+      notes: note ?? existing.notes,
+      status: existing.status === 'flagged' ? 'contacted' : existing.status,
+      updatedById: c.get('jwtPayload').sub,
+      version: existing.version + 1,
+    },
+  })
+  await writeAudit(c.get('jwtPayload').sub, 'FollowUp', updated.id, 'notify', existing, updated)
+  return c.json({ success: true, data: updated })
+})

@@ -3,6 +3,15 @@ import type { SchoolClass } from '@pinequest/types'
 import { apiFetch } from '@/lib/api'
 import { useSession } from '@/components/providers'
 
+export const useClass = (classId: string) => {
+  const { token } = useSession()
+  return useQuery({
+    queryKey: ['class', classId],
+    queryFn: () => apiFetch<SchoolClass>(`/api/classes/${classId}`, { token }),
+    enabled: !!token && !!classId,
+  })
+}
+
 export const useClasses = (schoolId: string) => {
   const { token } = useSession()
   return useQuery({

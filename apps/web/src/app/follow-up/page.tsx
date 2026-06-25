@@ -36,6 +36,7 @@ const FollowUpWorklistPage = () => {
                 <th className="px-4 py-3 font-medium text-text-muted">Хүүхэд</th>
                 <th className="px-4 py-3 font-medium text-text-muted">Асран хамгаалагч</th>
                 <th className="px-4 py-3 font-medium text-text-muted">Төлөв</th>
+                <th className="px-4 py-3 font-medium text-text-muted">Өөрчлөх</th>
               </tr>
             </thead>
             <tbody>

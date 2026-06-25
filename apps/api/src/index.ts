@@ -12,6 +12,7 @@ import { screeningRoutes } from './routes/screenings.js'
 import { followUpRoutes } from './routes/followups.js'
 import { userRoutes } from './routes/users.js'
 import { statsRoutes } from './routes/stats.js'
+import { auditRoutes } from './routes/audit.js'
 
 const app = new Hono<AppEnv>()
 
@@ -27,6 +28,7 @@ app.route('/api/screenings', screeningRoutes)
 app.route('/api/followups', followUpRoutes)
 app.route('/api/users', userRoutes)
 app.route('/api/stats', statsRoutes)
+app.route('/api/audit', auditRoutes)
 
 app.onError((err, c) => {
   console.error(err)

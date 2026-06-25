@@ -13,38 +13,41 @@ const ChildDetailPage = () => {
 
   return (
     <section className="flex flex-col gap-5">
-      <Link href="/admin" className="text-sm text-neutral-500 underline">
+      <Link href="/admin" className="text-sm text-primary hover:underline">
         ← Сургуулиуд
       </Link>
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+
+      <div className="rounded-xl border border-border bg-surface p-5 shadow-(--shadow-card)">
+        <h1 className="text-xl font-semibold tracking-tight text-text-base">
           {child ? `${child.lastName} ${child.firstName}` : '…'}
         </h1>
-        {child ? (
-          <p className="text-sm text-neutral-500">
-            Суудал {child.rosterSlot} · {child.birthYear} · {child.childKey}
+        {child && (
+          <p className="mt-1 text-sm text-text-muted">
+            Суудал {child.rosterSlot} · {child.birthYear} · <span className="font-mono">{child.childKey}</span>
           </p>
-        ) : null}
+        )}
       </div>
 
-      <div>
-        <h2 className="mb-2 text-sm font-medium text-neutral-500">Скринингийн түүх</h2>
+      <div className="rounded-xl border border-border bg-surface shadow-(--shadow-card)">
+        <div className="border-b border-border px-5 py-3">
+          <h2 className="text-sm font-semibold text-text-muted">Скринингийн түүх</h2>
+        </div>
         {screenings && screenings.length > 0 ? (
-          <ul className="flex flex-col gap-2">
+          <ul className="divide-y divide-border">
             {screenings.map((s) => (
-              <li
-                key={s.id}
-                className="flex items-center gap-3 border-b border-neutral-100 py-2 text-sm"
-              >
+              <li key={s.id} className="flex items-center gap-3 px-5 py-3 text-sm">
                 <TriageBadge level={s.triageLevel} />
-                <span>{new Date(s.capturedAt).toLocaleDateString('mn-MN')}</span>
-                <span className="text-neutral-500">{s.seasonId}</span>
-                <span className="text-neutral-500">{s.findings.length} илрэл</span>
+                <span className="text-text-base">{new Date(s.capturedAt).toLocaleDateString('mn-MN')}</span>
+                <span className="text-text-muted">{s.seasonId}</span>
+                <span className="text-text-muted">{s.findings.length} илрэл</span>
+                <Link href={`/dentist/screenings/${s.id}`} className="ml-auto text-xs text-primary hover:underline">
+                  Дэлгэрэнгүй
+                </Link>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-neutral-500">Скрининг бүртгэгдээгүй байна.</p>
+          <p className="px-5 py-4 text-sm text-text-muted">Скрининг бүртгэгдээгүй байна.</p>
         )}
       </div>
     </section>

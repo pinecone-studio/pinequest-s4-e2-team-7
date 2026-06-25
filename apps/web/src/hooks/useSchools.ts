@@ -12,6 +12,15 @@ export const useSchools = () => {
   })
 }
 
+export const useSchool = (schoolId: string) => {
+  const { token } = useSession()
+  return useQuery({
+    queryKey: ['school', schoolId],
+    queryFn: () => apiFetch<School>(`/api/schools/${schoolId}`, { token }),
+    enabled: !!token && !!schoolId,
+  })
+}
+
 export const useCreateSchool = () => {
   const { token } = useSession()
   const qc = useQueryClient()

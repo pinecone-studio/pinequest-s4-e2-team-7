@@ -22,6 +22,12 @@ classRoutes.post('/schools/:schoolId/classes', authorize('admin'), async (c) => 
   return c.json({ success: true, data: klass }, 201)
 })
 
+classRoutes.get('/classes/:classId', authenticate, async (c) => {
+  const klass = await prisma.schoolClass.findUnique({ where: { id: c.req.param('classId') } })
+  if (!klass) return c.json({ success: false, data: null }, 404)
+  return c.json({ success: true, data: klass })
+})
+
 classRoutes.post('/classes/:classId/carry-forward', authorize('admin'), async (c) => {
   const source = await prisma.schoolClass.findUnique({
     where: { id: c.req.param('classId') },
