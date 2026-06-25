@@ -68,8 +68,8 @@ const HomePage = () => {
           href={ROUTES.scan.result}
         />
       ) : (
-        <div className="warm-card p-4 text-[14px] text-slate-500">
-          Scan хийгээгүй байна — эхний шалгалтаа эхлүүлээрэй.
+        <div className="warm-card p-4 text-[14px] text-text-muted">
+          Шалгалт хийгээгүй байна — эхний шалгалтаа эхлүүлээрэй.
         </div>
       )}
 
@@ -83,10 +83,10 @@ const HomePage = () => {
         )}
 
         <div className="warm-card p-6">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Дараагийн үзлэг</p>
-          <p className="mt-3 text-[20px] font-bold text-slate-900">{appointment.doctorName}</p>
-          <p className="text-[13px] text-slate-500">{appointment.clinic}</p>
-          <p className="mt-4 rounded-2xl bg-[#F3B900]/12 px-4 py-3 text-[14px] font-semibold text-slate-900">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">Дараагийн үзлэг</p>
+          <p className="mt-3 text-[20px] font-bold text-text-base">{appointment.doctorName}</p>
+          <p className="text-[13px] text-text-muted">{appointment.clinic}</p>
+          <p className="mt-4 rounded-2xl bg-[#F3B900]/12 px-4 py-3 text-[14px] font-semibold text-text-base">
             {new Date(appointment.datetime).toLocaleString('mn-MN', {
               weekday: 'long',
               month: 'long',
@@ -95,14 +95,14 @@ const HomePage = () => {
               minute: '2-digit',
             })}
           </p>
-          <p className="mt-2 text-[12px] text-slate-500">{appointment.address}</p>
+          <p className="mt-2 text-[12px] text-text-muted">{appointment.address}</p>
           <Link href={ROUTES.doctor.root} className="mt-4 inline-block text-[13px] font-semibold text-[#B8860B]">
             Эмч захиалах →
           </Link>
         </div>
       </div>
 
-      <p className="pb-2 text-center text-[11px] leading-relaxed text-slate-400 lg:text-left">
+      <p className="pb-2 text-center text-[11px] leading-relaxed text-text-muted lg:text-left">
         Screening систем — эмчийн онош биш.
       </p>
     </div>

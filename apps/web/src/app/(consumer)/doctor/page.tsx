@@ -1,45 +1,99 @@
 'use client'
 
-import { AppShell, FlowCard } from '@/components/consumer/AppShell'
-import Button from '@/components/ui/Button'
+import { Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { AppShell } from '@/components/consumer/AppShell'
+import { DoctorMapPanel } from '@/components/consumer/DoctorMapPanel'
+import { FilterPill } from '@/components/consumer/warm/WarmUI'
+import { SPECIALISTS } from '@/lib/doctors'
 import { ROUTES } from '@/lib/routes'
 
-const DOCTORS = [
-  { id: '1', name: 'Dr. Batbold', clinic: 'Smile Dental', district: 'БЗД', exp: '12 жил', rating: 4.9, price: '35,000₮' },
-  { id: '2', name: 'Dr. Oyunaa', clinic: 'Kids Teeth UB', district: 'СБД', exp: '8 жил', rating: 4.8, price: '40,000₮' },
-  { id: '3', name: 'Dr. Tseren', clinic: 'Family Dental', district: 'ХУД', exp: '15 жил', rating: 4.7, price: '32,000₮' },
+type DoctorView = 'list' | 'map'
+
+const TABS: { id: DoctorView; label: string }[] = [
+  { id: 'list', label: 'Эмч' },
+  { id: 'map', label: 'Газрын зураг' },
 ]
 
-const DoctorListPage = () => (
-  <AppShell title="Эмч нар" subtitle="Туршлага · захиалга · үнэлгээ · салбар">
-    <div className="grid gap-8 lg:grid-cols-[1fr_280px]">
-      <div className="space-y-4">
-        {DOCTORS.map((d) => (
-          <div key={d.id} className="warm-card flex flex-wrap items-center gap-4 p-6">
-            <span className="flex size-14 items-center justify-center rounded-2xl bg-primary-subtle text-xl font-bold text-primary">
-              {d.name.charAt(4)}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-[16px] font-bold">{d.name}</p>
-              <p className="text-[13px] text-text-muted">{d.clinic} · {d.district}</p>
-              <p className="mt-1 text-[12px] text-text-muted">Туршлага: {d.exp} · ★ {d.rating}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[14px] font-semibold">{d.price}</p>
-              <Button size="sm" className="mt-2" onClick={() => alert(`Захиалга: ${d.name} (demo)`)}>
-                Тасалбар захиалах
-              </Button>
-            </div>
+const DoctorListPanel = () => {
+  const router = useRouter()
+
+  return (
+    <div className="space-y-4">
+      <p className="warm-section-label px-1">Мэргэжилтэн эмч</p>
+      {SPECIALISTS.map((d) => (
+        <button
+          key={d.id}
+          type="button"
+          onClick={() => router.push(ROUTES.doctor.chatWith(d.id))}
+          className="warm-card group flex w-full flex-wrap items-center gap-4 p-6 text-left transition-all hover:ring-2 hover:ring-[#F3B900]/35"
+        >
+          <span className="flex size-14 items-center justify-center rounded-2xl bg-primary-subtle text-xl font-bold text-primary">
+            {d.name.charAt(0)}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[16px] font-bold text-text-base">{d.name}</p>
+            <p className="text-[13px] text-text-muted">{d.clinic} · {d.district}</p>
+            <p className="mt-1 text-[12px] text-text-muted">Туршлага: {d.exp} · ★ {d.rating}</p>
           </div>
+          <div className="flex flex-col items-end gap-2">
+            <p className="text-[14px] font-semibold text-text-base">{d.price}</p>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F3B900]/15 px-3 py-1.5 text-[12px] font-semibold text-[#B8860B] transition group-hover:bg-[#F3B900] group-hover:text-slate-900">
+              💬 Чатлах
+            </span>
+          </div>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+const DoctorHubContent = () => {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const viewParam = searchParams.get('view')
+  const view: DoctorView = viewParam === 'map' ? 'map' : 'list'
+
+  const setView = (next: DoctorView) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (next === 'list') {
+      params.delete('view')
+      params.delete('q')
+      params.delete('clinic')
+    } else {
+      params.set('view', 'map')
+    }
+    const qs = params.toString()
+    router.replace(qs ? `${ROUTES.doctor.root}?${qs}` : ROUTES.doctor.root, { scroll: false })
+  }
+
+  const subtitle =
+    view === 'map' ? 'Ойрын эмнэлэг · маршрут · хайлт' : 'Эмч сонгоод шууд чатлах'
+
+  return (
+    <AppShell title="Тусламж" subtitle={subtitle}>
+      <div className="mb-8 flex flex-wrap gap-2">
+        {TABS.map(({ id, label }) => (
+          <FilterPill key={id} label={label} active={view === id} onClick={() => setView(id)} />
         ))}
       </div>
 
-      <div className="space-y-4">
-        <FlowCard href={ROUTES.doctor.map} emoji="🗺️" title="Map / Байршил" desc="OpenStreetMap, маршрут" accent="gold" />
-        <FlowCard href={ROUTES.doctor.chat} emoji="💬" title="Эмчийн чат" desc="Scan үр дүн илгээх" accent="dark" />
-      </div>
-    </div>
-  </AppShell>
+      {view === 'list' ? (
+        <DoctorListPanel />
+      ) : (
+        <DoctorMapPanel
+          initialQuery={searchParams.get('q') ?? ''}
+          initialClinicId={searchParams.get('clinic')}
+        />
+      )}
+    </AppShell>
+  )
+}
+
+const HelpHubPage = () => (
+  <Suspense fallback={<div className="py-12 text-center text-text-muted">Ачааллаж байна…</div>}>
+    <DoctorHubContent />
+  </Suspense>
 )
 
-export default DoctorListPage
+export default HelpHubPage

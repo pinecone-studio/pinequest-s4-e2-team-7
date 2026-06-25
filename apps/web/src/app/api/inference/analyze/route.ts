@@ -39,6 +39,9 @@ export async function POST(req: NextRequest) {
   }
 
   const hasPain = form.get('hasPain') === 'yes'
+  const nightPain = form.get('nightPain') === 'yes'
+  const fever = form.get('fever') === 'yes'
+  const feverSwelling = form.get('feverSwelling') === 'yes'
   const proxy = new FormData()
   proxy.append('image', image, 'capture.jpg')
 
@@ -58,7 +61,11 @@ export async function POST(req: NextRequest) {
 
   const normalized = normalizeInference(raw, 'server')
   const findings = detectionsToFindings(normalized.detections, () => crypto.randomUUID())
-  const triageResult = triage(findings, { painDisturbingSleepOrEating: hasPain })
+  const triageResult = triage(findings, {
+    painDisturbingSleepOrEating: hasPain || nightPain,
+    fever: fever || feverSwelling,
+    swelling: feverSwelling,
+  })
 
   const detections = normalized.detections
     .slice()

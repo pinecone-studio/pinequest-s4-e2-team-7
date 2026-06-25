@@ -49,7 +49,7 @@ const RegisterPage = () => {
   return (
     <AuthShell
       title="Бүртгүүлэх"
-      subtitle="Хувийн screening, brush түүхээ хадгалах"
+      subtitle="Хувийн шалгалт, угаалгын түүхээ хадгалах"
       footer={
         <p className="text-center text-[14px] text-text-muted">
           Бүртгэлтэй юу?{' '}

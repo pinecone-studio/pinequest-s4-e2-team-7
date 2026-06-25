@@ -1,4 +1,4 @@
-import { getQuestionnaire, type ScanDetection, type ScanResult } from '@/lib/consumerState'
+import { getQuestionnaire, questionnaireSymptoms, type ScanDetection, type ScanResult } from '@/lib/consumerState'
 
 type AnalyzePayload = {
   triage: ScanResult['triage']
@@ -12,7 +12,13 @@ export const analyzeScanImage = async (file: File, imageUrl: string): Promise<Sc
   const q = getQuestionnaire()
   const form = new FormData()
   form.append('image', file)
-  if (q?.hasPain) form.append('hasPain', q.hasPain)
+  if (q) {
+    form.append('hasPain', q.hasPainfulTooth === 'yes' ? 'yes' : 'no')
+    const symptoms = questionnaireSymptoms(q)
+    if (symptoms.painDisturbingSleepOrEating) form.append('nightPain', 'yes')
+    if (symptoms.fever) form.append('fever', 'yes')
+    if (symptoms.swelling) form.append('feverSwelling', 'yes')
+  }
 
   const res = await fetch('/api/inference/analyze', { method: 'POST', body: form })
   const payload = (await res.json()) as AnalyzePayload | { message?: string }

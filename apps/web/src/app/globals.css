@@ -66,6 +66,8 @@
   --color-surface: #1C1C1E;
   --color-surface-raised: #2C2C2E;
   --color-sidebar-bg: #1C1C1E;
+  --color-consumer-chrome: #141416;
+  --color-consumer-canvas: #0A0A0B;
   --color-border: #38383A;
   --color-border-muted: #2C2C2E;
   --color-text-base: #F5F5F7;
@@ -167,8 +169,8 @@ main {
 
 /* ── Consumer app (warm minimalist canvas) ── */
 .consumer-app {
-  background: #FAF8F5;
-  color: #0f172a;
+  background: var(--color-consumer-canvas);
+  color: var(--color-text-base);
 }
 
 .consumer-sidebar {
@@ -223,9 +225,9 @@ main {
 
 .consumer-card {
   border-radius: 1.5rem;
-  background: #ffffff;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-  transition: opacity 0.2s ease;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-border-muted);
 }
 
 .consumer-card:hover {
@@ -235,8 +237,8 @@ main {
 .consumer-input {
   width: 100%;
   border-radius: 9999px;
-  border: 1px solid #E8E4DA;
-  background: #ffffff;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   padding: 12px 16px;
   font-size: 14px;
   color: var(--color-text-base);
@@ -255,22 +257,22 @@ main {
 
 /* ── Warm flat UI utilities ── */
 .consumer-chrome {
-  background: #F0EBE3;
-  border-color: #E8E4DA;
+  background: var(--color-consumer-chrome);
+  border-color: var(--color-border);
 }
 
 .warm-card {
   border-radius: 1.5rem;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-muted);
+  box-shadow: var(--shadow-card);
 }
 
 .warm-card-sm {
   border-radius: 1rem;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-muted);
+  box-shadow: var(--shadow-card);
 }
 
 .warm-section-label {
@@ -278,18 +280,18 @@ main {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--color-text-muted);
 }
 
 .warm-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, #E8E4DA 12%, #E8E4DA 88%, transparent);
+  background: linear-gradient(90deg, transparent, var(--color-border) 12%, var(--color-border) 88%, transparent);
 }
 
 .warm-inset {
   border-radius: 1rem;
-  background: #f8fafc;
-  border: 1px solid #f1f5f9;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-muted);
 }
 
 .warm-pill {
@@ -305,30 +307,23 @@ main {
 
 .warm-btn-secondary {
   border-radius: 9999px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   padding: 0.625rem 1.25rem;
   font-size: 14px;
   font-weight: 600;
-  color: #475569;
+  color: var(--color-text-muted);
   transition: all 0.2s ease;
 }
 
 .warm-btn-secondary:hover {
-  background: #f8fafc;
+  background: var(--color-surface-raised);
 }
 
-.auth-page {
-  background: #FAF8F5;
-}
-
-.auth-hero {
-  background: #FAF8F5;
-  border-right: 1px solid #f1f5f9;
-}
-
+.auth-page,
+.auth-hero,
 .landing-page {
-  background: #FAF8F5;
+  background: var(--color-consumer-canvas);
 }
 
 /* Tooth model (flat) */

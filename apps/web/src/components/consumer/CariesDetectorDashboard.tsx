@@ -18,9 +18,9 @@ import { ROUTES } from '@/lib/routes'
 import { cn } from '@/lib/utils'
 
 const DETECTION_LABEL: Record<string, string> = {
-  Caries: 'Шүдний өвчин (caries)',
-  Cavity: 'Цохорт (cavity)',
-  Crack: 'Салалт (crack)',
+  Caries: 'Шүдний өвчин',
+  Cavity: 'Цохорт',
+  Crack: 'Салалт',
 }
 
 const formatLabel = (d: ScanDetection) => DETECTION_LABEL[d.label] ?? d.label
@@ -28,9 +28,9 @@ const formatLabel = (d: ScanDetection) => DETECTION_LABEL[d.label] ?? d.label
 const DEFAULT_FILTERS = ['Болд', 'Сарнай', 'Энхбаяр']
 
 const IntraoralImageView = ({ imageUrl, detections }: { imageUrl: string; detections: ScanDetection[] }) => (
-  <div className="relative overflow-hidden rounded-2xl bg-slate-100">
+  <div className="relative overflow-hidden rounded-2xl bg-surface-raised">
     {/* eslint-disable-next-line @next/next/no-img-element */}
-    <img src={imageUrl} alt="Intraoral" className="w-full object-contain" />
+    <img src={imageUrl} alt="Шүдний ойрын зураг" className="w-full object-contain" />
     {detections.map((d, i) => (
       <div
         key={i}
@@ -43,7 +43,7 @@ const IntraoralImageView = ({ imageUrl, detections }: { imageUrl: string; detect
         }}
       >
         <span className="absolute -top-6 left-0 max-w-[160px] truncate rounded-full bg-slate-900/85 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
-          {formatLabel(d).replace(' (caries)', '')} {(d.confidence * 100).toFixed(0)}%
+          {formatLabel(d)} {(d.confidence * 100).toFixed(0)}%
         </span>
       </div>
     ))}
@@ -61,25 +61,25 @@ const ResultsPanel = ({ result }: { result: ScanResult }) => {
         : 'Хэвийн — хяналт хангалттай'
   const triageSummary =
     urgent
-      ? 'AI screening-ийн дагуу ойрын хугацаанд мэргэжилтэн эмчид үзүүлэхийг зөвлөж байна.'
+      ? 'AI шинжилгээний дагуу ойрын хугацаанд мэргэжилтэн эмчид үзүүлэхийг зөвлөж байна.'
       : result.advice
 
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h2 className="text-[22px] font-bold tracking-tight text-slate-900">Үр дүн</h2>
-        <p className="mt-1 text-[13px] text-slate-500">Загвар: YOLOv8 intraoral caries detector (research/demo)</p>
+        <h2 className="text-[22px] font-bold tracking-tight text-text-base">Үр дүн</h2>
+        <p className="mt-1 text-[13px] text-text-muted">Загвар: YOLOv8 шүдний өвчний илрүүлэгч (судалгаа/демо)</p>
       </div>
 
       <TriageHeroCard level={triageLevel} label={triageLabel} summary={triageSummary} />
 
       <FlatCard className="p-6">
-        <p className="text-[12px] font-bold uppercase tracking-wide text-slate-400">Зөвлөмж</p>
-        <p className="mt-4 text-[15px] leading-relaxed text-slate-700">{result.advice}</p>
+        <p className="text-[12px] font-bold uppercase tracking-wide text-text-muted">Зөвлөмж</p>
+        <p className="mt-4 text-[15px] leading-relaxed text-text-base">{result.advice}</p>
       </FlatCard>
 
       <div>
-        <p className="mb-3 text-[12px] font-bold uppercase tracking-wide text-slate-400">
+        <p className="mb-3 text-[12px] font-bold uppercase tracking-wide text-text-muted">
           Илрүүлсэн зүйлс ({result.detections.length})
         </p>
         <div className="space-y-2">
@@ -227,7 +227,7 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
     <div className="space-y-8">
       {/* Filter pills — child / history selector */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-2 text-[13px] font-medium text-slate-500">Хүүхэд:</span>
+        <span className="mr-2 text-[13px] font-medium text-text-muted">Хүүхэд:</span>
         {filterOptions.map((name) => (
           <FilterPill key={name} label={name} active={activeFilter === name} onClick={() => setActiveFilter(name)} />
         ))}
@@ -253,14 +253,14 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="mt-6 flex min-h-[320px] w-full flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-slate-200 bg-[#FAF8F5] p-10 text-center transition-all duration-200 hover:border-[#F3B900]/50 hover:bg-[#F3B900]/5"
+                className="mt-6 flex min-h-[320px] w-full flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-border bg-surface-raised p-10 text-center transition-all duration-200 hover:border-[#F3B900]/50 hover:bg-[#F3B900]/5"
               >
-                <span className="flex size-14 items-center justify-center rounded-2xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
-                  <Upload className="size-7 text-slate-400" strokeWidth={1.5} />
+                <span className="flex size-14 items-center justify-center rounded-2xl bg-surface shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+                  <Upload className="size-7 text-text-muted" strokeWidth={1.5} />
                 </span>
                 <div>
-                  <p className="text-[16px] font-semibold text-slate-900">Intraoral зураг оруулна уу</p>
-                  <p className="mt-2 max-w-sm text-[13px] text-slate-500">
+                  <p className="text-[16px] font-semibold text-text-base">Шүдний ойрын зураг оруулна уу</p>
+                  <p className="mt-2 max-w-sm text-[13px] text-text-muted">
                     Файл чөлөөлөх эсвэл камер ашиглан шүдний ойрын зураг аваарай
                   </p>
                 </div>
@@ -312,9 +312,9 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
               <span className="flex size-16 items-center justify-center rounded-full bg-[#F3B900]/15">
                 <Sparkles className="size-8 text-[#F3B900]" strokeWidth={1.5} />
               </span>
-              <p className="mt-5 text-[17px] font-bold text-slate-900">Үр дүн энд харагдана</p>
-              <p className="mt-2 max-w-xs text-[14px] leading-relaxed text-slate-500">
-                Зураг оруулсны дараа «AI шинжилгээ хийх» дарж triage, зөвлөмж, илрүүлсэн зүйлсийг хараарай.
+              <p className="mt-5 text-[17px] font-bold text-text-base">Үр дүн энд харагдана</p>
+              <p className="mt-2 max-w-xs text-[14px] leading-relaxed text-text-muted">
+                Зураг оруулсны дараа «AI шинжилгээ хийх» дарж ангилал, зөвлөмж, илрүүлсэн зүйлсийг хараарай.
               </p>
             </FlatCard>
           )}

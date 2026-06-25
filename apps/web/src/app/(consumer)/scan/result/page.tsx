@@ -9,14 +9,14 @@ const ScanResultPage = () => (
     <div className="mb-10 flex items-start gap-4">
       <Link
         href="/scan/camera"
-        className="mt-1 flex size-10 items-center justify-center rounded-full bg-white text-slate-600 shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-all duration-200 hover:opacity-90"
+        className="mt-1 flex size-10 items-center justify-center rounded-full bg-surface text-text-muted shadow-[0_4px_20px_rgba(0,0,0,0.04)] ring-1 ring-border transition-all duration-200 hover:opacity-90"
         aria-label="Буцах"
       >
         <ArrowLeft className="size-4" strokeWidth={2} />
       </Link>
       <div>
-        <p className="text-[13px] font-semibold uppercase tracking-wider text-[#F3B900]">Scan үр дүн</p>
-        <h2 className="mt-1 text-[32px] font-bold tracking-tight text-slate-900">AI Analysis</h2>
+        <p className="text-[13px] font-semibold uppercase tracking-wider text-[#F3B900]">Шалгалтын үр дүн</p>
+        <h2 className="mt-1 text-[32px] font-bold tracking-tight text-text-base">Шинжилгээний дүн</h2>
       </div>
     </div>
     <CariesDetectorDashboard initialResult />

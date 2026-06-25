@@ -7,14 +7,16 @@ export const ROUTES = {
   scan: {
     root: '/scan',
     questionnaire: '/scan/questionnaire',
+  questionnaireRetake: '/scan/questionnaire?retake=1',
     camera: '/scan/camera',
     result: '/scan/result',
   },
 
   doctor: {
     root: '/doctor',
-    map: '/doctor/map',
+    map: '/doctor?view=map',
     chat: '/doctor/chat',
+    chatWith: (id: string) => `/doctor/chat?doctor=${encodeURIComponent(id)}`,
   },
 
   brush: {
@@ -43,28 +45,28 @@ export const HOME_FEATURES: Array<{
   {
     id: 'scan',
     href: ROUTES.scan.root,
-    label: 'Scan',
-    desc: 'Шүдний зураг аваад AI screening',
+    label: 'Шалгалт',
+    desc: 'Шүдний зураг аваад AI шинжилгээ',
     emoji: '📷',
   },
   {
     id: 'doctor',
     href: ROUTES.doctor.root,
-    label: 'Doctor',
-    desc: 'Эмч хайх, чат, байршил',
+    label: 'Тусламж',
+    desc: 'Эмч, чат, ойрын эмнэлэг',
     emoji: '🩺',
   },
   {
     id: 'brush',
     href: ROUTES.brush.root,
-    label: 'Brush',
-    desc: 'Угаалгын заавар, smart monitor',
+    label: 'Угаалга',
+    desc: 'Угаалгын заавар, ухаалаг хяналт',
     emoji: '🪥',
   },
   {
     id: 'profile',
     href: ROUTES.profile.root,
-    label: 'Profile',
+    label: 'Профайл',
     desc: 'Түүх, тохиргоо, тайлан',
     emoji: '👤',
   },

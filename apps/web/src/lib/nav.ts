@@ -15,31 +15,31 @@ export const MAIN_NAV: Array<{
   {
     id: 'scan',
     href: ROUTES.scan.camera,
-    label: 'Scan',
-    desc: 'AI detector',
+    label: 'Шалгалт',
+    desc: 'AI шинжилгээ',
     Icon: ScanLine,
     match: (p) => p.startsWith('/scan'),
   },
   {
     id: 'doctor',
     href: ROUTES.doctor.root,
-    label: 'Doctor',
-    desc: 'Эмч, чат',
+    label: 'Тусламж',
+    desc: 'Эмч, чат, эмнэлэг',
     Icon: Stethoscope,
     match: (p) => p.startsWith('/doctor'),
   },
   {
     id: 'brush',
     href: ROUTES.brush.root,
-    label: 'Brush',
-    desc: 'Smart monitor',
+    label: 'Угаалга',
+    desc: 'Ухаалаг хяналт',
     Icon: Sparkles,
     match: (p) => p.startsWith('/brush'),
   },
   {
     id: 'profile',
     href: ROUTES.profile.root,
-    label: 'Profile',
+    label: 'Профайл',
     desc: 'Түүх',
     Icon: UserRound,
     match: (p) => p.startsWith('/profile'),
@@ -48,7 +48,7 @@ export const MAIN_NAV: Array<{
 
 export const HOME_NAV = {
   href: ROUTES.home,
-  label: 'Home',
+  label: 'Нүүр',
   Icon: Home,
   match: (p: string) => p === '/home',
 }

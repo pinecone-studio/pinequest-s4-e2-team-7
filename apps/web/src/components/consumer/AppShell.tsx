@@ -15,7 +15,7 @@ export const PageHeader = ({ title, subtitle, backHref, breadcrumbs, eyebrow }: 
   return (
     <div className="mb-10">
       {breadcrumbs && breadcrumbs.length > 0 ? (
-        <nav className="mb-4 flex flex-wrap items-center gap-1 text-[12px] text-slate-500">
+        <nav className="mb-4 flex flex-wrap items-center gap-1 text-[12px] text-text-muted">
           {breadcrumbs.map((crumb, i) => (
             <span key={i} className="flex items-center gap-1">
               {i > 0 ? <ChevronRightIcon className="size-3" /> : null}
@@ -24,7 +24,7 @@ export const PageHeader = ({ title, subtitle, backHref, breadcrumbs, eyebrow }: 
                   {crumb.label}
                 </Link>
               ) : (
-                <span className="text-slate-900">{crumb.label}</span>
+                <span className="text-text-base">{crumb.label}</span>
               )}
             </span>
           ))}
@@ -35,7 +35,7 @@ export const PageHeader = ({ title, subtitle, backHref, breadcrumbs, eyebrow }: 
         {backHref ? (
           <Link
             href={backHref}
-            className="mt-1 flex size-10 shrink-0 items-center justify-center rounded-full border border-black/[0.04] bg-white text-slate-600 shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-200 hover:bg-[#FAF8F5]"
+            className="mt-1 flex size-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-text-muted shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-200 hover:bg-surface-raised"
             aria-label="Буцах"
           >
             <ArrowLeftIcon className="size-4" />
@@ -43,8 +43,8 @@ export const PageHeader = ({ title, subtitle, backHref, breadcrumbs, eyebrow }: 
         ) : null}
         <div>
           {eyebrow ? <p className="warm-section-label mb-2">{eyebrow}</p> : null}
-          <h2 className="text-[28px] font-bold tracking-tight text-slate-900">{title}</h2>
-          {subtitle ? <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-slate-500">{subtitle}</p> : null}
+          <h2 className="text-[28px] font-bold tracking-tight text-text-base">{title}</h2>
+          {subtitle ? <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-text-muted">{subtitle}</p> : null}
         </div>
       </div>
     </div>
@@ -88,9 +88,9 @@ export const FlowCard = ({
       ? 'bg-slate-900 text-white hover:opacity-95'
       : accent === 'gold'
         ? 'bg-[#F3B900] text-slate-900 hover:bg-[#E5AD00]'
-        : 'bg-white text-slate-900 hover:bg-[#FAF8F5]'
+        : 'bg-surface text-text-base hover:bg-surface-raised'
 
-  const descCls = accent === 'default' ? 'text-slate-500' : 'text-slate-800/70'
+  const descCls = accent === 'default' ? 'text-text-muted' : 'opacity-80'
 
   return (
     <Link
@@ -115,12 +115,12 @@ export const StatusPill = ({
 }) => {
   const cls =
     tone === 'green'
-      ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
+      ? 'bg-triage-green-bg text-triage-green ring-1 ring-triage-green/20'
       : tone === 'yellow'
-        ? 'bg-amber-50 text-amber-800 ring-1 ring-amber-100'
+        ? 'bg-triage-yellow-bg text-triage-yellow ring-1 ring-triage-yellow/20'
         : tone === 'red'
-          ? 'bg-red-50 text-red-600 ring-1 ring-red-100'
-          : 'bg-slate-100 text-slate-500 ring-1 ring-slate-200/60'
+          ? 'bg-triage-red-bg text-triage-red ring-1 ring-triage-red/20'
+          : 'bg-surface-raised text-text-muted ring-1 ring-border'
 
   return (
     <span className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold ${cls}`}>
@@ -142,10 +142,10 @@ export const StatCard = ({
 }) => (
   <div className="warm-card p-6">
     <p className="warm-section-label">{label}</p>
-    <p className="mt-2 text-[28px] font-bold tracking-tight text-slate-900">{value}</p>
-    {hint ? <p className="mt-1 text-[13px] text-slate-500">{hint}</p> : null}
+    <p className="mt-2 text-[28px] font-bold tracking-tight text-text-base">{value}</p>
+    {hint ? <p className="mt-1 text-[13px] text-text-muted">{hint}</p> : null}
     {progress !== undefined ? (
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#F0EBE3]">
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-consumer-chrome">
         <div
           className="h-full rounded-full bg-[#F3B900] transition-all"
           style={{ width: `${Math.min(100, progress)}%` }}

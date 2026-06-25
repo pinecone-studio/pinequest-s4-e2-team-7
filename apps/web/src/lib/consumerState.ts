@@ -5,13 +5,19 @@ const SCAN_HISTORY_KEY = 'screener.scanHistory.v1'
 const BRUSH_LOGS_KEY = 'screener.brushLogs.v1'
 const APPOINTMENT_KEY = 'screener.appointment.v1'
 
+export type PainWhen = 'cold' | 'hot' | 'spontaneous' | 'night' | 'pressure'
+export type PainSince = 'yesterday' | '2days' | '4days'
+
 export type QuestionnaireAnswers = {
   childName: string
   age: string
   lastDentalVisit: string
-  hasPain: 'yes' | 'no'
-  sensitivity: 'none' | 'cold' | 'hot' | 'both'
-  comorbidities: string
+  /** Өвддөг шүд байгаа эсэх */
+  hasPainfulTooth: 'yes' | 'no'
+  /** hasPainfulTooth === 'yes' үед л бөглөнө */
+  painWhen?: PainWhen
+  painSince?: PainSince
+  feverSwelling?: 'yes' | 'no'
   filledAt: string
 }
 
@@ -77,7 +83,31 @@ export const isQuestionnaireComplete = (): boolean => {
   return Boolean(localStorage.getItem(QUESTIONNAIRE_KEY))
 }
 
-export const getQuestionnaire = (): QuestionnaireAnswers | null => read(QUESTIONNAIRE_KEY)
+export const getQuestionnaire = (): QuestionnaireAnswers | null => {
+  const raw = read<QuestionnaireAnswers & { hasPain?: 'yes' | 'no' }>(QUESTIONNAIRE_KEY)
+  if (!raw) return null
+  if ('hasPainfulTooth' in raw && raw.hasPainfulTooth) return raw as QuestionnaireAnswers
+  return {
+    childName: raw.childName,
+    age: raw.age,
+    lastDentalVisit: raw.lastDentalVisit,
+    hasPainfulTooth: raw.hasPain ?? 'no',
+    filledAt: raw.filledAt,
+  }
+}
+
+/** Questionnaire → triage symptom flags for AI analyze. */
+export const questionnaireSymptoms = (q: QuestionnaireAnswers | null) => {
+  if (!q || q.hasPainfulTooth !== 'yes') {
+    return { painDisturbingSleepOrEating: false, fever: false, swelling: false }
+  }
+  const feverSwelling = q.feverSwelling === 'yes'
+  return {
+    painDisturbingSleepOrEating: q.painWhen === 'night' || q.painWhen === 'spontaneous',
+    fever: feverSwelling,
+    swelling: feverSwelling,
+  }
+}
 
 export const saveQuestionnaire = (answers: Omit<QuestionnaireAnswers, 'filledAt'>): void => {
   write(QUESTIONNAIRE_KEY, { ...answers, filledAt: new Date().toISOString() })

@@ -19,8 +19,8 @@ export const FlatCard = ({
 }) => (
   <div
     className={cn(
-      'rounded-3xl border border-black/[0.04] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.02)]',
-      glass && 'border-white/60 bg-white/75 backdrop-blur-xl',
+      'rounded-3xl border border-border-muted bg-surface shadow-[var(--shadow-card)]',
+      glass && 'border-border/50 bg-surface/90 backdrop-blur-xl dark:bg-surface/75',
       className,
     )}
   >
@@ -41,8 +41,8 @@ export const SectionHeader = ({
 }) => (
   <div className={cn('space-y-1', className)}>
     {eyebrow ? <p className="warm-section-label">{eyebrow}</p> : null}
-    <h3 className="text-[22px] font-bold tracking-tight text-slate-900">{title}</h3>
-    {subtitle ? <p className="max-w-2xl text-[14px] leading-relaxed text-slate-500">{subtitle}</p> : null}
+    <h3 className="text-[22px] font-bold tracking-tight text-text-base">{title}</h3>
+    {subtitle ? <p className="max-w-2xl text-[14px] leading-relaxed text-text-muted">{subtitle}</p> : null}
   </div>
 )
 
@@ -55,8 +55,8 @@ export const FeatureRow = ({
   label: string
   className?: string
 }) => (
-  <li className={cn('flex items-center gap-3 py-3.5 text-[14px] text-slate-600', className)}>
-    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#F3B900]/10 text-[#B8860B]">
+  <li className={cn('flex items-center gap-3 py-3.5 text-[14px] text-text-muted', className)}>
+    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#F3B900]/10 text-[#B8860B] dark:text-primary">
       {icon}
     </span>
     {label}
@@ -74,8 +74,8 @@ export const SettingRow = ({
 }) => (
   <div className="flex items-center justify-between gap-4 px-1 py-4">
     <div className="min-w-0">
-      <p className="text-[14px] font-medium text-slate-900">{title}</p>
-      {description ? <p className="mt-0.5 text-[13px] text-slate-500">{description}</p> : null}
+      <p className="text-[14px] font-medium text-text-base">{title}</p>
+      {description ? <p className="mt-0.5 text-[13px] text-text-muted">{description}</p> : null}
     </div>
     <div className="shrink-0">{control}</div>
   </div>
@@ -94,8 +94,8 @@ export const PillButton = ({
     primary:
       'bg-[#F3B900] text-slate-900 font-semibold shadow-[0_2px_8px_rgba(243,185,0,0.25)] hover:bg-[#E5AD00] active:scale-[0.98]',
     secondary:
-      'border border-[#E8E4DA] bg-white text-slate-700 font-semibold hover:border-slate-300 hover:bg-[#FAF8F5]',
-    ghost: 'text-slate-500 font-medium hover:bg-white/80 hover:text-slate-800',
+      'border border-border bg-surface-raised text-text-base font-semibold hover:bg-surface hover:border-border',
+    ghost: 'text-text-muted font-medium hover:bg-surface-raised hover:text-text-base',
   }
 
   return (
@@ -130,7 +130,7 @@ export const FilterPill = ({
       'rounded-full px-5 py-2 text-[13px] font-semibold transition-all duration-200',
       active
         ? 'bg-[#F3B900] text-slate-900 shadow-[0_2px_8px_rgba(243,185,0,0.2)]'
-        : 'bg-white text-slate-500 ring-1 ring-[#E8E4DA] hover:text-slate-700',
+        : 'bg-surface-raised text-text-muted ring-1 ring-border hover:text-text-base',
     )}
   >
     {label}
@@ -149,7 +149,7 @@ export const AnchorPill = ({
   <a
     href={href}
     className={cn(
-      'inline-flex items-center rounded-full bg-white px-4 py-2 text-[13px] font-medium text-slate-600 ring-1 ring-[#E8E4DA] transition-all duration-200 hover:text-slate-900 hover:ring-slate-300',
+      'inline-flex items-center rounded-full bg-surface-raised px-4 py-2 text-[13px] font-medium text-text-muted ring-1 ring-border transition-all duration-200 hover:text-text-base hover:ring-border',
       className,
     )}
   >
@@ -158,8 +158,8 @@ export const AnchorPill = ({
 )
 
 export const DetectedRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex items-center justify-between rounded-2xl border border-black/[0.04] bg-white px-5 py-4 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-    <span className="text-[14px] font-medium text-slate-800">{label}</span>
-    <span className="font-mono text-[14px] font-semibold text-slate-600">{value}</span>
+  <div className="flex items-center justify-between rounded-2xl border border-border-muted bg-surface-raised px-5 py-4">
+    <span className="text-[14px] font-medium text-text-base">{label}</span>
+    <span className="font-mono text-[14px] font-semibold text-text-muted">{value}</span>
   </div>
 )

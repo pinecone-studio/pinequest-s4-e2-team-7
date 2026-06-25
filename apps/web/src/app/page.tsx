@@ -15,15 +15,15 @@ import { homeForRole } from '@/lib/auth'
 import { ROUTES } from '@/lib/routes'
 
 const STEPS = [
-  { n: '01', title: 'Асуумж + Scan', desc: 'Богино асуумж бөглөж, шүдний зураг аваад AI screening хийнэ.' },
-  { n: '02', title: 'Үр дүн + Triage', desc: 'YOLOv8 bounding box, яаралтай эсэх зэрэглэл, зөвлөмж.' },
-  { n: '03', title: 'Эмч + Brush', desc: 'Эмчтэй холбогдож, smart сойзоор зөв угаалга хянана.' },
+  { n: '01', title: 'Асуумж + шалгалт', desc: 'Богино асуумж бөглөж, шүдний зураг аваад AI шинжилгээ хийнэ.' },
+  { n: '02', title: 'Үр дүн + ангилал', desc: 'Илрүүлсэн зүйлс, яаралтай эсэх зэрэглэл, зөвлөмж.' },
+  { n: '03', title: 'Тусламж + угаалга', desc: 'Эмчтэй холбогдож, ухаалаг сойзоор зөв угаалга хянана.' },
 ]
 
 const DOCTOR_TIPS = [
-  { name: 'Dr. Batbold', tip: 'Өдөрт 2 удаа, 2 минут угаалга — хамгийн үр дүнтэй профилактик.' },
-  { name: 'Dr. Oyunaa', tip: '6 сар тутам эмчид үзүүлэх нь кариесыг эрт илрүүлнэ.' },
-  { name: 'Dr. Tseren', tip: 'Smart сойзны өнцөг, даралтыг хүүхэдтэй хамт хянана уу.' },
+  { name: 'Б. Батболд', tip: 'Өдөрт 2 удаа, 2 минут угаалга — хамгийн үр дүнтэй профилактик.' },
+  { name: 'О. Оюунаа', tip: '6 сар тутам эмчид үзүүлэх нь кариесыг эрт илрүүлнэ.' },
+  { name: 'Ц. Цэрэн', tip: 'Ухаалаг сойзны өнцөг, даралтыг хүүхэдтэй хамт хянана уу.' },
 ]
 
 const LandingPage = () => {
@@ -50,12 +50,12 @@ const LandingPage = () => {
       {/* Hero */}
       <section className="mx-auto grid max-w-7xl gap-12 px-6 py-16 lg:grid-cols-2 lg:items-center lg:px-10">
         <div>
-          <span className="warm-pill text-[12px] font-semibold">AI + Smart Brush</span>
+          <span className="warm-pill text-[12px] font-semibold">AI + ухаалаг сойз</span>
           <h1 className="mt-6 text-[44px] font-bold leading-[1.08] tracking-tight text-slate-900 lg:text-[52px]">
             Хүүхдийн шүдний эрүүл мэндийг гэртээ хяна
           </h1>
           <p className="mt-5 max-w-lg text-[16px] leading-relaxed text-slate-500">
-            AI оношлогоо, ухаалаг сойзны нэгдэл — screening систем (эмчийн онош биш). Эмчтэй холбогдож,
+            AI оношлогоо, ухаалаг сойзны нэгдэл — шалгалтын систем (эмчийн онош биш). Эмчтэй холбогдож,
             зөв угаалгын зуршил бүрдүүл.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
@@ -78,15 +78,15 @@ const LandingPage = () => {
             <div className="warm-inset flex flex-col justify-between p-5">
               <CameraIcon className="size-8 text-primary" />
               <div>
-                <p className="text-[13px] font-bold">AI Scan</p>
-                <p className="text-[11px] text-text-muted">YOLOv8 triage</p>
+                <p className="text-[13px] font-bold">AI шалгалт</p>
+                <p className="text-[11px] text-text-muted">Шүдний шинжилгээ</p>
               </div>
             </div>
             <div className="warm-inset flex flex-col justify-between p-5">
               <SparklesIcon className="size-8 text-primary" />
               <div>
-                <p className="text-[13px] font-bold">Smart Brush</p>
-                <p className="text-[11px] text-text-muted">Realtime monitor</p>
+                <p className="text-[13px] font-bold">Ухаалаг угаалга</p>
+                <p className="text-[11px] text-text-muted">Бодит цагийн хяналт</p>
               </div>
             </div>
             <div className="col-span-2 warm-inset p-6">
@@ -105,7 +105,7 @@ const LandingPage = () => {
       {/* How it works */}
       <section id="how" className="mx-auto max-w-7xl px-6 py-16 lg:px-10">
         <h2 className="text-[32px] font-bold tracking-tight">Хэрхэн ажилладаг</h2>
-        <p className="mt-2 max-w-xl text-text-muted">3 алхам — scan-аас эмчийн зөвлөгөө хүртэл</p>
+        <p className="mt-2 max-w-xl text-text-muted">3 алхам — шалгалтаас эмчийн зөвлөгөө хүртэл</p>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {STEPS.map((s) => (
             <div key={s.n} className="warm-card p-8">
@@ -142,7 +142,7 @@ const LandingPage = () => {
         <div className="warm-card flex flex-col items-center justify-between gap-6 bg-slate-900 p-10 text-white md:flex-row">
           <div>
             <h2 className="text-[28px] font-bold">Өнөөдөр эхлээрэй</h2>
-            <p className="mt-2 text-white/75">Нэвтэрч scan, brush, эмчийн зөвлөгөөг ашиглана уу.</p>
+            <p className="mt-2 text-white/75">Нэвтэрч шалгалт, угаалга, эмчийн зөвлөгөөг ашиглана уу.</p>
           </div>
           <div className="flex gap-3">
             <Link href="/register" className="rounded-full bg-[#F3B900] px-6 py-3 font-bold text-slate-900 transition-all duration-200 hover:opacity-90">
@@ -154,7 +154,7 @@ const LandingPage = () => {
           </div>
         </div>
         <p className="mt-8 text-center text-[11px] text-text-muted">
-          Screening-and-triage систем — яаралтай тохиолдолд шууд эмчид хандана уу.
+          Шалгалт болон ангиллын систем — яаралтай тохиолдолд шууд эмчид хандана уу.
         </p>
       </section>
     </div>

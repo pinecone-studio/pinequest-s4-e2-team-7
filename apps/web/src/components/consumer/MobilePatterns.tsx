@@ -9,8 +9,8 @@ export const GreetingHeader = ({ name }: { name: string }) => {
   return (
     <div className="flex items-start justify-between gap-4">
       <div>
-        <h2 className="text-[24px] font-bold tracking-tight text-slate-900">Сайн уu, {name} 👋</h2>
-        <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#E8E4DA] bg-white px-3 py-1 text-[12px] font-medium text-slate-500">
+        <h2 className="text-[24px] font-bold tracking-tight text-text-base">Сайн уу, {name} 👋</h2>
+        <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-[12px] font-medium text-text-muted">
           <span className="size-1.5 rounded-full bg-emerald-500" />
           Онлайн
         </span>
@@ -72,11 +72,11 @@ export const LastScreeningCard = ({
   >
     <span className={cn('size-3 shrink-0 rounded-full', TRIAGE_DOT[triage])} />
     <div className="min-w-0 flex-1">
-      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Сүүлийн шалгалт</p>
-      <p className="mt-0.5 line-clamp-2 text-[14px] font-medium text-slate-900">{summary}</p>
-      <p className="mt-1 text-[12px] text-slate-500">{date}</p>
+      <p className="text-[11px] font-medium uppercase tracking-wide text-text-muted">Сүүлийн шалгалт</p>
+      <p className="mt-0.5 line-clamp-2 text-[14px] font-medium text-text-base">{summary}</p>
+      <p className="mt-1 text-[12px] text-text-muted">{date}</p>
     </div>
-    <span className="text-slate-400">›</span>
+    <span className="text-text-muted">›</span>
   </Link>
 )
 
@@ -90,10 +90,10 @@ export const QuickActionGrid = ({
       <Link
         key={href}
         href={href}
-        className="warm-card flex aspect-square flex-col justify-between p-4 transition-all hover:bg-[#FAF8F5]"
+        className="warm-card flex aspect-square flex-col justify-between p-4 transition-all hover:bg-surface-raised"
       >
         <span className="flex size-10 items-center justify-center rounded-xl bg-[#F3B900]/12 text-lg">{icon}</span>
-        <span className="whitespace-pre-line text-[13px] font-semibold leading-snug text-slate-900">{label}</span>
+        <span className="whitespace-pre-line text-[13px] font-semibold leading-snug text-text-base">{label}</span>
       </Link>
     ))}
   </div>
@@ -110,10 +110,10 @@ export const TriageHeroCard = ({
 }) => {
   const styles =
     level === 'green'
-      ? 'bg-emerald-50 text-emerald-800'
+      ? 'bg-triage-green-bg text-triage-green'
       : level === 'yellow'
-        ? 'bg-amber-50 text-amber-900'
-        : 'bg-red-50 text-red-800'
+        ? 'bg-triage-yellow-bg text-triage-yellow'
+        : 'bg-triage-red-bg text-triage-red'
   return (
     <div className={cn('rounded-[20px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]', styles)}>
       <p className="text-[20px] font-extrabold">{label}</p>
@@ -124,11 +124,11 @@ export const TriageHeroCard = ({
 
 export const QuestionProgress = ({ step, total }: { step: number; total: number }) => (
   <div className="mb-6">
-    <div className="mb-2 flex justify-between text-[12px] font-medium text-slate-500">
+    <div className="mb-2 flex justify-between text-[12px] font-medium text-text-muted">
       <span>Асуулт {step}/{total}</span>
       <span>{Math.round((step / total) * 100)}%</span>
     </div>
-    <div className="h-2 overflow-hidden rounded-full bg-[#F0EBE3]">
+    <div className="h-2 overflow-hidden rounded-full bg-consumer-chrome">
       <div className="h-full rounded-full bg-[#F3B900] transition-all" style={{ width: `${(step / total) * 100}%` }} />
     </div>
   </div>
@@ -154,7 +154,7 @@ export const RadioCard = ({
     )}
   >
     <input type="radio" name={name} value={value} checked={checked} onChange={onChange} className="size-4 accent-[#F3B900]" />
-    <span className="text-[14px] font-medium text-slate-900">{label}</span>
+    <span className="text-[14px] font-medium text-text-base">{label}</span>
   </label>
 )
 
@@ -186,12 +186,12 @@ export const ClinicListCard = ({
     )}
   >
     <button type="button" onClick={onSelect} className="min-w-0 flex-1 text-left">
-      <p className="font-semibold text-slate-900">{name}</p>
-      <p className="mt-0.5 text-[12px] text-slate-500">
-        ★ {rating.toFixed(1)} · {distanceKm.toFixed(1)} km
+      <p className="font-semibold text-text-base">{name}</p>
+      <p className="mt-0.5 text-[12px] text-text-muted">
+        ★ {rating.toFixed(1)} · {distanceKm.toFixed(1)} км
       </p>
-      <p className="mt-1 line-clamp-1 text-[12px] text-slate-500">{addr}</p>
-      <p className="text-[11px] text-slate-400">🕐 {hours}</p>
+      <p className="mt-1 line-clamp-1 text-[12px] text-text-muted">{addr}</p>
+      <p className="text-[11px] text-text-muted">🕐 {hours}</p>
     </button>
     <div className="flex shrink-0 gap-2">
       {phone ? (

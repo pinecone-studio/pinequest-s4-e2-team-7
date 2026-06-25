@@ -2,10 +2,15 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { QuestionProgress, RadioCard } from '@/components/consumer/MobilePatterns'
 import Button from '@/components/ui/Button'
-import { saveQuestionnaire } from '@/lib/consumerState'
+import {
+  getQuestionnaire,
+  saveQuestionnaire,
+  type PainSince,
+  type PainWhen,
+} from '@/lib/consumerState'
 import { ROUTES } from '@/lib/routes'
 
 const VISIT_OPTIONS = [
@@ -15,68 +20,132 @@ const VISIT_OPTIONS = [
   { value: 'never', label: 'Хэзээ ч үзүүлээгүй' },
 ] as const
 
-const SENSITIVITY_OPTIONS = [
-  { value: 'none', label: 'Хэвийн' },
-  { value: 'cold', label: 'Хүйтэн дээр' },
-  { value: 'hot', label: 'Халуун дээр' },
-  { value: 'both', label: 'Хоёуланд' },
-] as const
+const PAIN_WHEN_OPTIONS: { value: PainWhen; label: string }[] = [
+  { value: 'cold', label: 'Хүйтэн зүйл идэхэд өвддөг' },
+  { value: 'hot', label: 'Халуун зүйл идэхэд өвддөг' },
+  { value: 'spontaneous', label: 'Өөрөө аяндаа өвддөг' },
+  { value: 'night', label: 'Шөнө өвддөг' },
+  { value: 'pressure', label: 'Дарахад өвддөг' },
+]
 
-const TOTAL_STEPS = 4
+const PAIN_SINCE_OPTIONS: { value: PainSince; label: string }[] = [
+  { value: 'yesterday', label: 'Өчигдрөөс' },
+  { value: '2days', label: '2 хоног' },
+  { value: '4days', label: '4 хоног' },
+]
+
+type StepId = 'child' | 'visit' | 'painGate' | 'painWhen' | 'painSince' | 'feverSwelling'
+
+const buildSteps = (hasPainfulTooth: 'yes' | 'no'): StepId[] => {
+  const steps: StepId[] = ['child', 'visit', 'painGate']
+  if (hasPainfulTooth === 'yes') steps.push('painWhen', 'painSince', 'feverSwelling')
+  return steps
+}
 
 const ScanQuestionnairePage = () => {
   const router = useRouter()
-  const [step, setStep] = useState(1)
+  const [stepIndex, setStepIndex] = useState(0)
   const [childName, setChildName] = useState('')
   const [age, setAge] = useState('')
   const [lastDentalVisit, setLastDentalVisit] = useState('')
-  const [hasPain, setHasPain] = useState<'yes' | 'no'>('no')
-  const [sensitivity, setSensitivity] = useState<'none' | 'cold' | 'hot' | 'both'>('none')
-  const [comorbidities, setComorbidities] = useState('')
+  const [hasPainfulTooth, setHasPainfulTooth] = useState<'yes' | 'no'>('no')
+  const [painWhen, setPainWhen] = useState<PainWhen | ''>('')
+  const [painSince, setPainSince] = useState<PainSince | ''>('')
+  const [feverSwelling, setFeverSwelling] = useState<'yes' | 'no' | ''>('')
+
+  useEffect(() => {
+    const saved = getQuestionnaire()
+    if (!saved) return
+    setChildName(saved.childName)
+    setAge(saved.age)
+    setLastDentalVisit(saved.lastDentalVisit)
+    setHasPainfulTooth(saved.hasPainfulTooth)
+    if (saved.painWhen) setPainWhen(saved.painWhen)
+    if (saved.painSince) setPainSince(saved.painSince)
+    if (saved.feverSwelling) setFeverSwelling(saved.feverSwelling)
+  }, [])
+
+  const steps = useMemo(() => buildSteps(hasPainfulTooth), [hasPainfulTooth])
+  const currentStep = steps[Math.min(stepIndex, steps.length - 1)] ?? 'child'
+  const totalSteps = steps.length
+
+  useEffect(() => {
+    if (stepIndex >= steps.length) setStepIndex(steps.length - 1)
+  }, [stepIndex, steps.length])
 
   const finish = () => {
-    saveQuestionnaire({ childName, age, lastDentalVisit, hasPain, sensitivity, comorbidities })
+    saveQuestionnaire({
+      childName,
+      age,
+      lastDentalVisit,
+      hasPainfulTooth,
+      ...(hasPainfulTooth === 'yes'
+        ? {
+            painWhen: painWhen as PainWhen,
+            painSince: painSince as PainSince,
+            feverSwelling: feverSwelling as 'yes' | 'no',
+          }
+        : {}),
+    })
     router.push(ROUTES.scan.camera)
   }
 
   const next = () => {
-    if (step < TOTAL_STEPS) setStep((s) => s + 1)
+    if (currentStep === 'painGate' && hasPainfulTooth === 'no') {
+      finish()
+      return
+    }
+    if (stepIndex < steps.length - 1) setStepIndex((i) => i + 1)
     else finish()
   }
 
+  const back = () => {
+    if (stepIndex > 0) setStepIndex((i) => i - 1)
+  }
+
   const canNext =
-    step === 1
-      ? childName.trim() && age.trim()
-      : step === 2
+    currentStep === 'child'
+      ? Boolean(childName.trim() && age.trim())
+      : currentStep === 'visit'
         ? Boolean(lastDentalVisit)
-        : true
+        : currentStep === 'painGate'
+          ? true
+          : currentStep === 'painWhen'
+            ? Boolean(painWhen)
+            : currentStep === 'painSince'
+              ? Boolean(painSince)
+              : currentStep === 'feverSwelling'
+                ? Boolean(feverSwelling)
+                : true
+
+  const isLastStep = currentStep === 'painGate' ? hasPainfulTooth === 'no' : stepIndex === steps.length - 1
 
   return (
     <div className="mx-auto w-full max-w-lg space-y-6">
       <div className="flex items-center gap-3">
         <Link
-          href={ROUTES.scan.root}
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm ring-1 ring-[#E8E4DA] transition hover:bg-[#FAF8F5]"
+          href={ROUTES.home}
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface text-text-muted shadow-sm ring-1 ring-border transition hover:bg-surface-raised"
           aria-label="Буцах"
         >
           ←
         </Link>
-        <h1 className="text-[20px] font-bold text-slate-900">Асуумж</h1>
+        <h1 className="text-[20px] font-bold text-text-base">Асуумж</h1>
       </div>
 
-      <QuestionProgress step={step} total={TOTAL_STEPS} />
+      <QuestionProgress step={stepIndex + 1} total={totalSteps} />
 
-      {step === 1 ? (
+      {currentStep === 'child' ? (
         <div className="space-y-4">
           <div className="warm-card p-5">
-            <p className="text-[18px] font-semibold leading-snug text-slate-900">Хүүхдийн мэдээлэл</p>
+            <p className="text-[18px] font-semibold leading-snug text-text-base">Хүүхдийн мэдээлэл</p>
           </div>
           <label className="block space-y-2">
-            <span className="text-[13px] font-medium text-slate-600">Хүүхдийн нэр</span>
+            <span className="text-[13px] font-medium text-text-muted">Хүүхдийн нэр</span>
             <input required value={childName} onChange={(e) => setChildName(e.target.value)} className="consumer-input" />
           </label>
           <label className="block space-y-2">
-            <span className="text-[13px] font-medium text-slate-600">Нас</span>
+            <span className="text-[13px] font-medium text-text-muted">Нас</span>
             <input
               required
               type="number"
@@ -90,10 +159,10 @@ const ScanQuestionnairePage = () => {
         </div>
       ) : null}
 
-      {step === 2 ? (
+      {currentStep === 'visit' ? (
         <div className="space-y-4">
           <div className="warm-card p-5">
-            <p className="text-[18px] font-semibold leading-snug text-slate-900">Сүүлд эмчид үзүүлсэн хугацаа?</p>
+            <p className="text-[18px] font-semibold leading-snug text-text-base">Сүүлд эмчид үзүүлсэн хугацаа?</p>
           </div>
           <div className="space-y-2">
             {VISIT_OPTIONS.map(({ value, label }) => (
@@ -110,48 +179,96 @@ const ScanQuestionnairePage = () => {
         </div>
       ) : null}
 
-      {step === 3 ? (
+      {currentStep === 'painGate' ? (
         <div className="space-y-4">
           <div className="warm-card p-5">
-            <p className="text-[18px] font-semibold leading-snug text-slate-900">Өвдөлт мэдрэгдэж байна уu?</p>
+            <p className="text-[18px] font-semibold leading-snug text-text-base">Өвддөг шүд байгаа юу?</p>
+            <p className="mt-2 text-[13px] text-text-muted">
+              «Үгүй» гэвэл өвдөлтийн асуултуудыг алгасаад үргэлжлүүлнэ.
+            </p>
           </div>
-          <RadioCard name="pain" value="no" label="Үгүй" checked={hasPain === 'no'} onChange={() => setHasPain('no')} />
-          <RadioCard name="pain" value="yes" label="Тийм" checked={hasPain === 'yes'} onChange={() => setHasPain('yes')} />
+          <RadioCard
+            name="painfulTooth"
+            value="no"
+            label="Үгүй"
+            checked={hasPainfulTooth === 'no'}
+            onChange={() => setHasPainfulTooth('no')}
+          />
+          <RadioCard
+            name="painfulTooth"
+            value="yes"
+            label="Тийм"
+            checked={hasPainfulTooth === 'yes'}
+            onChange={() => setHasPainfulTooth('yes')}
+          />
         </div>
       ) : null}
 
-      {step === 4 ? (
+      {currentStep === 'painWhen' ? (
         <div className="space-y-4">
           <div className="warm-card p-5">
-            <p className="text-[18px] font-semibold leading-snug text-slate-900">Шүдний мэдрэг чанар</p>
+            <p className="text-[18px] font-semibold leading-snug text-text-base">Ямар үед өвддөг вэ?</p>
           </div>
           <div className="space-y-2">
-            {SENSITIVITY_OPTIONS.map(({ value, label }) => (
+            {PAIN_WHEN_OPTIONS.map(({ value, label }) => (
               <RadioCard
                 key={value}
-                name="sensitivity"
+                name="painWhen"
                 value={value}
                 label={label}
-                checked={sensitivity === value}
-                onChange={() => setSensitivity(value)}
+                checked={painWhen === value}
+                onChange={() => setPainWhen(value)}
               />
             ))}
           </div>
-          <label className="block space-y-2 pt-2">
-            <span className="text-[13px] font-medium text-slate-600">Хавсарсан өвчин (хэрэв байвал)</span>
-            <textarea
-              value={comorbidities}
-              onChange={(e) => setComorbidities(e.target.value)}
-              className="consumer-input min-h-[88px] resize-none"
-              placeholder="Жишээ: чихрийн шижин…"
-            />
-          </label>
+        </div>
+      ) : null}
+
+      {currentStep === 'painSince' ? (
+        <div className="space-y-4">
+          <div className="warm-card p-5">
+            <p className="text-[18px] font-semibold leading-snug text-text-base">Хэзээнээс өвдөж эхлэсэн бэ?</p>
+          </div>
+          <div className="space-y-2">
+            {PAIN_SINCE_OPTIONS.map(({ value, label }) => (
+              <RadioCard
+                key={value}
+                name="painSince"
+                value={value}
+                label={label}
+                checked={painSince === value}
+                onChange={() => setPainSince(value)}
+              />
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {currentStep === 'feverSwelling' ? (
+        <div className="space-y-4">
+          <div className="warm-card p-5">
+            <p className="text-[18px] font-semibold leading-snug text-text-base">Халуурч нүүр хавдсан уу?</p>
+          </div>
+          <RadioCard
+            name="feverSwelling"
+            value="no"
+            label="Үгүй"
+            checked={feverSwelling === 'no'}
+            onChange={() => setFeverSwelling('no')}
+          />
+          <RadioCard
+            name="feverSwelling"
+            value="yes"
+            label="Тийм"
+            checked={feverSwelling === 'yes'}
+            onChange={() => setFeverSwelling('yes')}
+          />
         </div>
       ) : null}
 
       <div className="flex gap-3 pt-2">
-        {step > 1 ? (
-          <Button type="button" variant="secondary" className="flex-1 rounded-full" onClick={() => setStep((s) => s - 1)}>
+        {stepIndex > 0 ? (
+          <Button type="button" variant="secondary" className="flex-1 rounded-full" onClick={back}>
             Буцах
           </Button>
         ) : null}
@@ -161,7 +278,7 @@ const ScanQuestionnairePage = () => {
           disabled={!canNext}
           onClick={next}
         >
-          {step === TOTAL_STEPS ? 'Хадгалж камер руу үргэлжлүүлэх' : 'Дараах'}
+          {isLastStep ? 'Хадгалж камер руу үргэлжлүүлэх' : 'Дараах'}
         </Button>
       </div>
     </div>

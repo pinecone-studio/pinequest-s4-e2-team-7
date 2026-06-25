@@ -33,11 +33,11 @@ export const AuthShell = ({
         <ul className="mt-8 space-y-3 text-[14px] text-text-muted">
           <li className="flex items-center gap-2">
             <span className="size-2 rounded-full bg-primary" />
-            YOLOv8 AI screening
+            YOLOv8 AI шинжилгээ
           </li>
           <li className="flex items-center gap-2">
             <span className="size-2 rounded-full bg-primary" />
-            Real-time smart brush monitor
+            Бодит цагийн угаалгын хяналт
           </li>
           <li className="flex items-center gap-2">
             <span className="size-2 rounded-full bg-primary" />
@@ -46,7 +46,7 @@ export const AuthShell = ({
         </ul>
       </div>
 
-      <p className="text-[12px] text-text-muted">© Screener — screening систем, эмчийн онош биш</p>
+      <p className="text-[12px] text-text-muted">© Screener — шалгалтын систем, эмчийн онош биш</p>
     </aside>
 
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-12">

@@ -1,7 +1,9 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { AppShell, StatusPill } from '@/components/consumer/AppShell'
+import { ThemeToggle } from '@/components/consumer/ThemeToggle'
 import { MonthlyHealthChart } from '@/components/consumer/MiniChart'
 import {
   AnchorPill,
@@ -20,6 +22,7 @@ import {
   type QuestionnaireAnswers,
   type ScanResult,
 } from '@/lib/consumerState'
+import { ROUTES } from '@/lib/routes'
 
 const PROFILE_SECTIONS = [
   { id: 'export', label: 'Тайлан' },
@@ -52,9 +55,9 @@ const ExportSection = () => {
   return (
     <section id="export" className="scroll-mt-24">
       <SectionHeader
-        eyebrow="01 · Export"
-        title="File Generate"
-        subtitle="Screening болон brushing түүхийг PDF эсвэл JSON хэлбэрээр татаж хадгална."
+        eyebrow="01 · Тайлан"
+        title="Тайлан гаргах"
+        subtitle="Шалгалт болон угаалгын түүхийг PDF эсвэл JSON хэлбэрээр татаж хадгална."
       />
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_280px]">
@@ -62,8 +65,8 @@ const ExportSection = () => {
           <div className="flex size-12 items-center justify-center rounded-2xl bg-[#F3B900]/15 text-[#B8860B]">
             <FileDown className="size-6" strokeWidth={2} />
           </div>
-          <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-slate-500">
-            PDF тайланд triage үр дүн, зөвлөмж, brush статистик, асуумжийн хариулт багтана. JSON нь
+          <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-text-muted">
+            PDF тайланд ангилал, зөвлөмж, угаалгын статистик, асуумжийн хариулт багтана. JSON нь
             систем хоорондын интеграцид тохиромжтой.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -78,9 +81,9 @@ const ExportSection = () => {
 
         <div className="warm-card divide-y divide-[#E8E4DA]/60 p-2">
           <ul className="px-4">
-            <FeatureRow icon={<span className="text-[12px] font-bold">20</span>} label="Сүүлийн scan түүх" />
+            <FeatureRow icon={<span className="text-[12px] font-bold">20</span>} label="Сүүлийн шалгалтын түүх" />
             <FeatureRow icon={<span className="text-[12px] font-bold">Q</span>} label="Асуумжийн хариулт" />
-            <FeatureRow icon={<span className="text-[12px] font-bold">B</span>} label="Brush session статистик" />
+            <FeatureRow icon={<span className="text-[12px] font-bold">B</span>} label="Угаалгын бүртгэл" />
           </ul>
         </div>
       </div>
@@ -117,9 +120,9 @@ const HistorySection = () => {
   return (
     <section id="history" className="scroll-mt-24">
       <SectionHeader
-        eyebrow="02 · History"
+        eyebrow="02 · Түүх"
         title="Түүх"
-        subtitle="Scan, brush болон сар бүрийн эрүүл мэндийн динамик."
+        subtitle="Шалгалт, угаалга болон сар бүрийн эрүүл мэндийн динамик."
       />
 
       <div className="mt-8 space-y-6">
@@ -129,8 +132,8 @@ const HistorySection = () => {
           <div className="warm-card overflow-hidden">
             <div className="border-b border-[#E8E4DA]/60 px-6 py-4">
               <div className="flex items-center gap-2">
-                <History className="size-4 text-slate-400" strokeWidth={2} />
-                <h4 className="text-[15px] font-semibold text-slate-900">Scan түүх</h4>
+                <History className="size-4 text-text-muted" strokeWidth={2} />
+                <h4 className="text-[15px] font-semibold text-text-base">Шалгалтын түүх</h4>
               </div>
             </div>
             <div className="p-4">
@@ -139,9 +142,9 @@ const HistorySection = () => {
                   {scans.slice(0, 5).map((s) => (
                     <li
                       key={s.id}
-                      className="flex items-center justify-between rounded-2xl bg-[#FAF8F5] px-4 py-3"
+                      className="flex items-center justify-between rounded-2xl bg-surface-raised px-4 py-3"
                     >
-                      <span className="text-[13px] text-slate-600">
+                      <span className="text-[13px] text-text-muted">
                         {new Date(s.createdAt).toLocaleDateString('mn-MN')}
                       </span>
                       <StatusPill label={triageLabel(s.triage, s.urgent)} tone={triageTone(s.triage)} />
@@ -149,30 +152,30 @@ const HistorySection = () => {
                   ))}
                 </ul>
               ) : (
-                <p className="px-2 py-6 text-center text-[14px] text-slate-500">Scan хийгээгүй байна</p>
+                <p className="px-2 py-6 text-center text-[14px] text-text-muted">Шалгалт хийгээгүй байна</p>
               )}
             </div>
           </div>
 
           <div className="warm-card overflow-hidden">
             <div className="border-b border-[#E8E4DA]/60 px-6 py-4">
-              <h4 className="text-[15px] font-semibold text-slate-900">Асуумж + Brush</h4>
+              <h4 className="text-[15px] font-semibold text-text-base">Асуумж + Угаалга</h4>
             </div>
             <div className="p-6">
               {q ? (
-                <p className="text-[14px] font-medium text-slate-900">
+                <p className="text-[14px] font-medium text-text-base">
                   {q.childName}
-                  <span className="font-normal text-slate-500"> · {q.age} нас</span>
+                  <span className="font-normal text-text-muted"> · {q.age} нас</span>
                 </p>
               ) : (
-                <p className="text-[14px] text-slate-500">Асуумж бөглөөгүй</p>
+                <p className="text-[14px] text-text-muted">Асуумж бөглөөгүй</p>
               )}
               {brush ? (
-                <pre className="mt-4 overflow-x-auto rounded-2xl bg-[#FAF8F5] p-4 text-[11px] leading-relaxed text-slate-600">
+                <pre className="mt-4 overflow-x-auto rounded-2xl bg-surface-raised p-4 text-[11px] leading-relaxed text-text-muted">
                   {JSON.stringify(brush.zones, null, 2)}
                 </pre>
               ) : (
-                <p className="mt-4 text-[13px] text-slate-500">Brush session байхгүй</p>
+                <p className="mt-4 text-[13px] text-text-muted">Угаалгын бүртгэл байхгүй</p>
               )}
             </div>
           </div>
@@ -182,27 +185,34 @@ const HistorySection = () => {
   )
 }
 
-const SettingsSection = () => (
-  <section id="settings" className="scroll-mt-24">
-    <SectionHeader eyebrow="03 · Settings" title="Тохиргоо" subtitle="Мэдэгдэл, хэл, нууц үг болон апп тохиргоо." />
+const SettingsSection = () => {
+  const router = useRouter()
 
-    <div className="warm-card mt-8 divide-y divide-[#E8E4DA]/60 px-6">
+  return (
+  <section id="settings" className="scroll-mt-24">
+    <SectionHeader eyebrow="03 · Тохиргоо" title="Тохиргоо" subtitle="Мэдэгдэл, хэл, нууц үг болон апп тохиргоо." />
+
+    <div className="warm-card mt-8 divide-y divide-border-muted px-6">
+      <SettingRow
+        title="Гэрэл / харанхуй горим"
+        description="Аппын өнгөний схем"
+        control={<ThemeToggle />}
+      />
       <SettingRow
         title="Эмчийн цаг сануулах"
         description="Мэдэгдэл илгээнэ"
         control={<input type="checkbox" defaultChecked className="size-4 accent-[#F3B900]" />}
       />
       <SettingRow
-        title="Brush сануулагч"
+        title="Угаалгын сануулагч"
         description="Өглөө, орой"
         control={<input type="checkbox" defaultChecked className="size-4 accent-[#F3B900]" />}
       />
       <div className="py-4">
         <label className="block space-y-2">
-          <span className="text-[14px] font-medium text-slate-900">Хэл</span>
+          <span className="text-[14px] font-medium text-text-base">Хэл</span>
           <select className="consumer-input max-w-xs">
             <option>Монгол</option>
-            <option>English</option>
           </select>
         </label>
       </div>
@@ -218,20 +228,21 @@ const SettingsSection = () => (
       </PillButton>
       <PillButton
         variant="ghost"
-        className="flex-1 ring-1 ring-[#E8E4DA]"
+        className="flex-1 ring-1 ring-border"
         onClick={() => {
           clearQuestionnaire()
-          alert('Scan асуумж дахин бөглөх боломжтой боллоо')
+          router.push(ROUTES.scan.questionnaire)
         }}
       >
-        Scan асуумж дахин бөглөх
+        Шалгалтын асуумж дахин бөглөх
       </PillButton>
     </div>
   </section>
-)
+  )
+}
 
 const ProfilePage = () => (
-  <AppShell eyebrow="Account" title="Profile" subtitle="Тайлан татах, түүх харах, апп тохиргоо — нэг scroll дээр.">
+  <AppShell eyebrow="Бүртгэл" title="Профайл" subtitle="Тайлан татах, түүх харах, апп тохиргоо — нэг scroll дээр.">
     <nav className="mb-12 flex flex-wrap gap-2">
       {PROFILE_SECTIONS.map(({ id, label }) => (
         <AnchorPill key={id} href={`#${id}`} label={label} />

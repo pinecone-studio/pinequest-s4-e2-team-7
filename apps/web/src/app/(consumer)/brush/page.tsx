@@ -26,7 +26,7 @@ type BrushTab = 'instructions' | 'monitor'
 
 const TABS: { id: BrushTab; label: string }[] = [
   { id: 'instructions', label: 'Заавар' },
-  { id: 'monitor', label: 'Smart Monitor' },
+  { id: 'monitor', label: 'Ухаалаг хяналт' },
 ]
 
 const STEPS = [
@@ -60,7 +60,7 @@ const InstructionsPanel = () => (
       </div>
       <div className="border-t border-[#E8E4DA]/60 px-5 py-4">
         <p className="text-[15px] font-semibold text-slate-900">Видео заавар</p>
-        <p className="mt-1 text-[13px] text-slate-500">Bass &amp; Supervise техник — 2 минут</p>
+        <p className="mt-1 text-[13px] text-text-muted">Bass угаалгын техник — 2 минут</p>
         <a
           href={`https://youtu.be/${BRUSH_VIDEO_ID}`}
           target="_blank"
@@ -192,9 +192,9 @@ const MonitorPanel = () => {
         </div>
 
         <div className="warm-card p-6">
-          <p className="text-[14px] font-semibold text-slate-900">ML coverage</p>
-          <p className="mt-2 text-[32px] font-bold text-slate-900">{mlState.overallCoverage}%</p>
-          <p className="mt-1 text-[12px] text-slate-500">32 шүд · гадна/дотор/жевхэн гадаргуу</p>
+          <p className="text-[14px] font-semibold text-text-base">Хамралт</p>
+          <p className="mt-2 text-[32px] font-bold text-text-base">{mlState.overallCoverage}%</p>
+          <p className="mt-1 text-[12px] text-text-muted">32 шүд · гадна/дотор/жевхэн гадаргуу</p>
         </div>
 
         <div className="warm-card p-6">
@@ -240,9 +240,9 @@ const BrushPageContent = () => {
 
   return (
     <AppShell
-      eyebrow="Smart brush"
-      title="Brush"
-      subtitle={tab === 'instructions' ? 'Видео · 3D анимац · 45° өнцөг' : 'ML coverage · realtime · ESP32 smart brush'}
+      eyebrow="Угаалга"
+      title="Шүд угаалга"
+      subtitle={tab === 'instructions' ? 'Видео · 3D анимац · 45° өнцөг' : 'Хамралтын хяналт · бодит цаг'}
     >
       <div className="mb-8 flex flex-wrap gap-2">
         {TABS.map(({ id, label }) => (
