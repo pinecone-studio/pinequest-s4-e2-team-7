@@ -35,7 +35,7 @@ export const analyzeScanImage = async (file: File, imageUrl: string): Promise<Sc
 
 export const scanErrorText = (message: string): string => {
   if (message.includes('inference_unreachable')) {
-    return 'AI сервер ажиллахгүй байна — өөр терминал дээр `pnpm dev:model` ажиллуулна уу.'
+    return 'AI сервер ажиллахгүй байна — `pnpm dev` дахин асаагаад хэдэн секунд хүлээнэ үү (model ачаалж байж болно).'
   }
   if (message === 'inference_failed') return 'AI шинжилгээ амжилтгүй — дахин оролдоно уу.'
   return 'AI шинжилгээнд алдаа гарлаа — дахин оролдоно уу.'

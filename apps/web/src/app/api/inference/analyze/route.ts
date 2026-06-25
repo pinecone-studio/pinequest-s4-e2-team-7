@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     raw = (await res.json()) as RawInference
   } catch {
     return NextResponse.json(
-      { message: 'inference_unreachable — run `pnpm dev:model` in another terminal' },
+      { message: 'inference_unreachable — inference server did not respond; restart `pnpm dev`' },
       { status: 503 },
     )
   }
