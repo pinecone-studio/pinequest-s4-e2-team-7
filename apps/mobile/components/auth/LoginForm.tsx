@@ -1,51 +1,30 @@
 import { useState } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
-import { useRouter } from 'expo-router'
-import { apiFetch } from '@/lib/api'
-import { saveToken, saveUser, type AuthUser } from '@/lib/auth'
-import { toMongolian } from '@/lib/errorMessages'
+import { useAuth } from '@/lib/useAuth'
 import LoginIdentifierField from './LoginIdentifierField'
 import PinField from './PinField'
 import PrimaryButton from './PrimaryButton'
 
-type AuthData = { token: string; user: AuthUser }
-
 const LoginForm = () => {
-  const router = useRouter()
-  const [phone, setPhone] = useState('')
-  const [pin, setPin] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const { submit, busy, error } = useAuth()
+  const [identifier, setIdentifier] = useState('')
+  const [password, setPassword] = useState('')
 
-  const onLogin = async () => {
-    if (!phone || !pin) return
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await apiFetch<AuthData>('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email: phone, password: pin }),
-      })
-      await saveToken(data.token)
-      await saveUser(data.user)
-      router.replace('/(tabs)')
-    } catch (err) {
-      setError(toMongolian(err))
-    } finally {
-      setLoading(false)
-    }
+  const onLogin = () => {
+    if (!identifier.trim() || !password) return
+    submit('/api/auth/login', { email: identifier.trim(), password })
   }
 
   return (
     <View style={s.root}>
-      <LoginIdentifierField value={phone} onChange={setPhone} />
-      <PinField value={pin} onChange={setPin} />
+      <LoginIdentifierField value={identifier} onChange={setIdentifier} />
+      <PinField value={password} onChange={setPassword} />
       {error ? <Text style={s.error}>{error}</Text> : null}
       <PrimaryButton
         label="Нэвтрэх"
         onPress={onLogin}
-        loading={loading}
-        disabled={!phone || !pin}
+        loading={busy}
+        disabled={!identifier.trim() || !password}
       />
     </View>
   )

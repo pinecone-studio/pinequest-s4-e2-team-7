@@ -171,3 +171,7 @@ curl localhost:4000/api/schools -H "authorization: Bearer $TOKEN"
 - **Expo: `Unable to resolve module …`** — stale Metro cache; restart with
   `npx expo start -c`.
 - **`pnpm` not found** — run `corepack enable pnpm`, or prefix commands with `corepack pnpm …`.
+
+
+
+

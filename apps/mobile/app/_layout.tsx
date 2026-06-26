@@ -19,9 +19,13 @@ export default function RootLayout() {
   const segments = useSegments()
 
   const [fontsLoaded] = useFonts({
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     Inter_400Regular: require('../assets/fonts/Inter_400Regular.ttf'),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     Inter_500Medium:  require('../assets/fonts/Inter_500Medium.ttf'),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     Inter_600SemiBold: require('../assets/fonts/Inter_600SemiBold.ttf'),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     Inter_700Bold:    require('../assets/fonts/Inter_700Bold.ttf'),
   })
 
@@ -45,9 +49,9 @@ export default function RootLayout() {
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="scan" options={{ headerShown: false }} />
+        <Stack.Screen name="hospital" options={{ headerShown: false }} />
         <Stack.Screen name="stats" options={{ title: 'Статистик', headerBackTitle: 'Буцах' }} />
-        <Stack.Screen name="class/new" options={{ title: 'Анги нэмэх', headerBackTitle: 'Буцах' }} />
-        <Stack.Screen name="class/[id]" options={{ title: '', headerBackTitle: 'Буцах' }} />
+        <Stack.Screen name="class" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
