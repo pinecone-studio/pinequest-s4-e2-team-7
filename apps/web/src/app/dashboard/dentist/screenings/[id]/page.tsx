@@ -2,15 +2,16 @@
 
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { ReviewForm } from '@/components/ReviewForm'
-import { TriageBadge } from '@/components/TriageBadge'
+import { ReviewForm } from '@/components/dentist/ReviewForm'
+import { TriageBadge } from '@/components/ui/TriageBadge'
 import { useScreening } from '@/hooks/useScreening'
+import { PageSpinner } from '@/components/ui/Spinner'
 
 const ScreeningChartPage = () => {
   const id = useParams().id as string
   const { data: s } = useScreening(id)
 
-  if (!s) return <p className="text-sm text-text-muted">Ачааллаж байна…</p>
+  if (!s) return <PageSpinner />
 
   return (
     <section className="flex flex-col gap-5">

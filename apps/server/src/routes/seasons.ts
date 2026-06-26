@@ -11,7 +11,7 @@ export const seasonRoutes = new Hono<AppEnv>()
 seasonRoutes.get('/', authenticate, async (c) => {
   const db = c.get('db')
   const scope = await resolveScope(db, c.get('jwtPayload'))
-  const scSc = scopeWhere(scope, { classId: screenings.classId, schoolId: screenings.schoolId })
+  const scSc = scopeWhere(scope, { classId: screenings.classId, schoolId: screenings.schoolId, childKey: screenings.childKey })
   // SchoolClass matches on its own id for class scope (no classId column).
   const classCond = scope.all
     ? undefined

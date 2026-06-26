@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store'
 const TOKEN_KEY = 'auth_token'
 const USER_KEY = 'auth_user'
 
-export type AuthUser = { id: string; name: string; role: string }
+export type AuthUser = { id: string; name: string; role: string; schoolId?: string | null }
 
 export const getToken = () => SecureStore.getItemAsync(TOKEN_KEY)
 export const saveToken = (token: string) => SecureStore.setItemAsync(TOKEN_KEY, token)

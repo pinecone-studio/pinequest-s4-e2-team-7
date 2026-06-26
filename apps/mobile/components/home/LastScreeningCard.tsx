@@ -2,12 +2,6 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/lib/ThemeContext'
 
-const TRIAGE_COLORS: Record<string, string> = {
-  green:  '#22C55E',
-  yellow: '#F2B705',
-  red:    '#EF4444',
-}
-
 type Props = {
   date: string
   triageLevel: 'green' | 'yellow' | 'red'
@@ -17,7 +11,10 @@ type Props = {
 
 const LastScreeningCard = ({ date, triageLevel, summary, onPress }: Props) => {
   const { colors } = useTheme()
-  const dotColor = TRIAGE_COLORS[triageLevel] ?? TRIAGE_COLORS.green
+  const dotColor =
+    triageLevel === 'red' ? colors.badgeRed
+    : triageLevel === 'yellow' ? colors.badgeYellow
+    : colors.badgeGreen
 
   return (
     <TouchableOpacity

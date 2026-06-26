@@ -1,3 +1,4 @@
+import type { ChildScreeningSummary } from '@pinequest/types'
 import { getToken } from './auth'
 
 const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'https://screener-api.ariunzul.workers.dev'
@@ -21,6 +22,125 @@ export const apiFetch = async <T>(path: string, opts?: RequestInit): Promise<T> 
   if (!res.ok) throw new Error(json.message ?? String(res.status))
   return json.data
 }
+
+export type TriageLevel = 'green' | 'yellow' | 'red'
+
+export type TeacherClass = {
+  id: string
+  schoolId: string
+  name: string
+  seasonId: string
+  gradeLevel: number | null
+  scheduledAt: string | null
+  reminderPhone: string | null
+  isActive: boolean
+  createdAt: string
+  enrolled: number
+  screened: number
+}
+
+export type RosterStatusRow = {
+  id: string
+  childKey: string
+  rosterSlot: number
+  firstName: string
+  lastName: string
+  birthYear: number
+  guardianEmail: string | null
+  guardianPhone: string | null
+  latestLevel: TriageLevel | null
+  screenedAt: string | null
+}
+
+export type RosterStudentInput = {
+  rosterSlot: number
+  firstName: string
+  lastName: string
+  birthYear: number
+  gender?: 'M' | 'F'
+  guardianPhone?: string
+  guardianEmail?: string
+}
+
+export type CreateClassPayload = {
+  name: string
+  seasonId: string
+  gradeLevel?: number
+  scheduledAt?: string
+  reminderPhone?: string
+  students: RosterStudentInput[]
+}
+
+export type ProfilePatch = { name?: string; phone?: string }
+export type ProfileResult = { id: string; name: string; role: string; phone: string | null; schoolId: string | null }
+export type MeResult = { id: string; email: string; name: string; role: string; phone: string | null; schoolId: string | null; isActive: boolean }
+
+export const getMe = () => apiFetch<MeResult>('/api/auth/me')
+
+export type ChildSummaryPayload = {
+  child: { id: string; firstName: string; lastName: string; guardianPhone: string | null; guardianEmail: string | null }
+  summary: ChildScreeningSummary | null
+  screeningCount: number
+}
+
+export const getChildSummary = (childId: string) =>
+  apiFetch<ChildSummaryPayload>(`/api/children/${childId}/summary`)
+
+export type Stats = {
+  totalScreened: number
+  triage: { green: number; yellow: number; red: number }
+  coverage: { screened: number; total: number }
+  pendingReview: number
+  flaggedFollowUps: number
+  resolvedFollowUps: number
+}
+export type TimeseriesBucket = { ts: string; screened: number; flagged: number }
+export type Timeseries = { range: 'D' | 'W' | 'M' | 'Y'; buckets: TimeseriesBucket[] }
+
+const qs = (params: Record<string, string | undefined>) => {
+  const p = Object.entries(params).filter(([, v]) => v).map(([k, v]) => `${k}=${encodeURIComponent(v as string)}`)
+  return p.length ? `?${p.join('&')}` : ''
+}
+
+export const getStats = (seasonId?: string) => apiFetch<Stats>(`/api/stats${qs({ seasonId })}`)
+export const getTimeseries = (range: 'D' | 'W' | 'M' | 'Y', seasonId?: string) =>
+  apiFetch<Timeseries>(`/api/stats/timeseries${qs({ range, seasonId })}`)
+export const getSeasons = () => apiFetch<string[]>('/api/seasons')
+
+export type ClassMeta = {
+  id: string
+  schoolId: string
+  name: string
+  seasonId: string
+  gradeLevel: number | null
+  scheduledAt: string | null
+  reminderPhone: string | null
+}
+
+export const getMyClasses = () => apiFetch<TeacherClass[]>('/api/teacher/classes')
+
+export const getClass = (id: string) => apiFetch<ClassMeta>(`/api/classes/${id}`)
+
+export const createClass = (payload: CreateClassPayload) =>
+  apiFetch<TeacherClass>('/api/teacher/classes', { method: 'POST', body: JSON.stringify(payload) })
+
+export const getRosterStatus = (classId: string) =>
+  apiFetch<RosterStatusRow[]>(`/api/teacher/classes/${classId}/roster-status`)
+
+export const updateSchedule = (classId: string, scheduledAt: string | null, reminderPhone?: string | null) =>
+  apiFetch<TeacherClass>(`/api/classes/${classId}/schedule`, {
+    method: 'PATCH',
+    body: JSON.stringify({ scheduledAt, reminderPhone }),
+  })
+
+export const updateMe = (patch: ProfilePatch) =>
+  apiFetch<ProfileResult>('/api/auth/me', { method: 'PATCH', body: JSON.stringify(patch) })
+
+export type HelpRequest = { id: string; status: 'open' | 'connected' | 'closed' }
+
+/** Ask a registered volunteer dentist to help a flagged (red/yellow) child. */
+export const requestVolunteerHelp = (childKey: string, level: 'red' | 'yellow', note?: string) =>
+  apiFetch<HelpRequest>('/api/help/requests', { method: 'POST', body: JSON.stringify({ childKey, level, note }) })
 
 export type AnalyzeMeta = {
   childKey: string

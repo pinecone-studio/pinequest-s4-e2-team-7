@@ -1,9 +1,12 @@
 'use client'
 
+import { ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline'
 import { useReviewQueue } from '@/hooks/useScreening'
-import HeroStrip from '@/components/dashboard/HeroStrip'
-import UrgentActionCard from '@/components/dashboard/UrgentActionCard'
-import ReviewQueueCard from '@/components/dashboard/ReviewQueueCard'
+import HeroStrip from '@/components/shared/HeroStrip'
+import UrgentActionCard from '@/components/shared/UrgentActionCard'
+import ReviewQueueCard from '@/components/dentist/ReviewQueueCard'
+import EmptyState from '@/components/ui/EmptyState'
+import { PageSpinner } from '@/components/ui/Spinner'
 
 const DentistQueuePage = () => {
   const { data, isLoading } = useReviewQueue()
@@ -20,7 +23,7 @@ const DentistQueuePage = () => {
       {oldestRed && (
         <UrgentActionCard
           tone="red"
-          title="Яаралтай улаан скрининг хянагдаагүй байна"
+          title="Яаралтай улаан үзүүлэлт хянагдаагүй байна"
           body={`Хамгийн эртний: ${new Date(oldestRed.capturedAt).toLocaleDateString('mn-MN')} · ${oldestRed.childKey.slice(0, 16)}`}
           ctaLabel="Хянах"
           ctaHref={`/dashboard/dentist/screenings/${oldestRed.id}`}
@@ -30,13 +33,15 @@ const DentistQueuePage = () => {
       <h2 className="text-lg font-semibold tracking-tight text-text-base">Хянах дараалал</h2>
 
       {isLoading ? (
-        <p className="text-sm text-text-muted">Ачааллаж байна…</p>
+        <PageSpinner />
       ) : pending.length > 0 ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {pending.map((s) => <ReviewQueueCard key={s.id} row={s} />)}
         </div>
       ) : (
-        <p className="text-sm text-text-muted">Хянах скрининг алга.</p>
+        <div className="rounded-2xl border border-border bg-surface shadow-(--shadow-card)">
+          <EmptyState Icon={ClipboardDocumentCheckIcon} title="Хянах үзүүлэлт алга" hint="Шинэ үзүүлэлт ирэхэд баталгаажуулах жагсаалт энд гарна." />
+        </div>
       )}
     </section>
   )

@@ -6,6 +6,9 @@ import { healthRoutes } from './routes/health.js'
 import { authRoutes } from './routes/auth.js'
 import { schoolRoutes } from './routes/schools.js'
 import { classRoutes } from './routes/classes.js'
+import { teacherRoutes } from './routes/teacher.js'
+import { boardRoutes } from './routes/board.js'
+import { helpRoutes } from './routes/help.js'
 import { childRoutes } from './routes/children.js'
 import { analyzeRoutes } from './routes/analyze.js'
 import { screeningRoutes } from './routes/screenings.js'
@@ -15,6 +18,7 @@ import { statsRoutes } from './routes/stats.js'
 import { seasonRoutes } from './routes/seasons.js'
 import { auditRoutes } from './routes/audit.js'
 import { contentRoutes } from './routes/content.js'
+import { scheduleRoutes } from './routes/schedule.js'
 import { devRoutes } from './routes/dev.js'
 
 const app = new Hono<AppEnv>()
@@ -28,6 +32,9 @@ app.route('/', healthRoutes)
 app.route('/api/auth', authRoutes)
 app.route('/api/schools', schoolRoutes)
 app.route('/api', classRoutes)
+app.route('/api/teacher', teacherRoutes)
+app.route('/api/board', boardRoutes)
+app.route('/api/help', helpRoutes)
 app.route('/api', childRoutes)
 app.route('/api/screenings', analyzeRoutes) // /analyze literal before /:id param
 app.route('/api/screenings', screeningRoutes)
@@ -37,6 +44,7 @@ app.route('/api/stats', statsRoutes)
 app.route('/api/seasons', seasonRoutes)
 app.route('/api/audit', auditRoutes)
 app.route('/api/content', contentRoutes)
+app.route('/api/schedule', scheduleRoutes)
 app.route('/api/dev', devRoutes)
 
 app.onError((err, c) => {

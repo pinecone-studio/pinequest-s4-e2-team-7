@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
 import { AuthShell, GoogleAuthButton } from '@/components/consumer/AuthShell'
 import Button from '@/components/ui/Button'
-import { apiFetch, authErrorText } from '@/lib/api'
+import { apiFetch } from '@/lib/api'
 import { homeForRole, setToken } from '@/lib/auth'
 import { useSession } from '@/components/providers'
 
@@ -29,15 +29,10 @@ const RegisterPage = () => {
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setBusy(true)
-    setError(null)
+    setBusy(true); setError(null)
     try {
-      const data = await apiFetch<AuthData>('/api/auth/register', {
-        method: 'POST',
-        body: { name, email, password, phone },
-      })
-      setToken(data.token)
-      refresh()
+      const data = await apiFetch<AuthData>('/api/auth/register', { method: 'POST', body: { name, email, password, phone } })
+      setToken(data.token); refresh()
       router.replace(homeForRole(data.user.role))
     } catch (err) {
       setError(errorText(err instanceof Error ? err.message : ''))
@@ -53,9 +48,7 @@ const RegisterPage = () => {
       footer={
         <p className="text-center text-[14px] text-text-muted">
           Бүртгэлтэй юу?{' '}
-          <Link href="/login" className="font-semibold text-primary hover:underline">
-            Нэвтрэх
-          </Link>
+          <Link href="/login" className="font-semibold text-primary hover:underline">Нэвтрэх</Link>
         </p>
       }
     >
@@ -69,12 +62,10 @@ const RegisterPage = () => {
           {busy ? 'Түр хүлээнэ үү…' : 'Бүртгүүлэх'}
         </Button>
       </form>
-
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
         <p className="relative mx-auto w-fit bg-surface px-3 text-[11px] text-text-muted">эсвэл</p>
       </div>
-
       <GoogleAuthButton label="Google-ээр бүртгүүлэх" />
     </AuthShell>
   )

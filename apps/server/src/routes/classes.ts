@@ -3,6 +3,7 @@ import { and, asc, count, desc, eq, inArray } from 'drizzle-orm'
 import { childKey } from '@pinequest/core'
 import { schoolClasses, children, screenings } from '@pinequest/db/d1'
 import { authenticate, authorize } from '../middleware/auth.js'
+import { hasClassScope } from '../lib/scopeFilter.js'
 import { inChunks } from '../lib/chunk.js'
 import type { AppEnv } from '../types.js'
 
@@ -44,12 +45,19 @@ classRoutes.get('/classes/:classId', authenticate, async (c) => {
   return c.json({ success: true, data: klass })
 })
 
-classRoutes.patch('/classes/:classId/schedule', authorize('screener', 'admin'), async (c) => {
+classRoutes.patch('/classes/:classId/schedule', authorize('teacher', 'screener', 'admin'), async (c) => {
+  const db = c.get('db')
+  const classId = c.req.param('classId')
+  const payload = c.get('jwtPayload')
+  // Teachers may only reschedule a class they own.
+  if (payload.role === 'teacher' && !(await hasClassScope(db, payload, classId))) {
+    return c.json({ success: false, data: null, message: 'forbidden' }, 403)
+  }
   const { scheduledAt, reminderPhone } = await c.req.json<{ scheduledAt?: string | null; reminderPhone?: string | null }>()
-  const [updated] = await c.get('db').update(schoolClasses).set({
+  const [updated] = await db.update(schoolClasses).set({
     scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
     reminderPhone: reminderPhone ?? null,
-  }).where(eq(schoolClasses.id, c.req.param('classId'))).returning()
+  }).where(eq(schoolClasses.id, classId)).returning()
   return c.json({ success: true, data: updated })
 })
 
