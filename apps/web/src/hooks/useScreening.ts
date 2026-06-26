@@ -4,6 +4,18 @@ import { apiFetch } from '@/lib/api'
 import { useSession } from '@/components/providers'
 
 type Finding = { id: string; fdi: number | null; className: string; confidence: number }
+type ScreeningImage = { id: string; ref: string; order: number }
+export type Questionnaire = {
+  isAdult: boolean
+  swelling: boolean | null
+  painDisturbingSleepOrEating: boolean | null
+  fever: boolean | null
+  gumPimpleOrFistula: boolean | null
+  trauma: boolean | null
+  bleedingGums: boolean | null
+  smoker: boolean | null
+  lastCheckupAdult: string | null
+} | null
 
 export type ScreeningDetail = {
   id: string
@@ -14,6 +26,8 @@ export type ScreeningDetail = {
   capturedAt: string
   modelName: string
   findings: Finding[]
+  images: ScreeningImage[]
+  questionnaire: Questionnaire
   review: { confirmedLevel: string; note: string | null } | null
 }
 
@@ -51,6 +65,10 @@ export const useSubmitReview = (id: string) => {
   return useMutation({
     mutationFn: (body: { confirmedLevel: string; note?: string }) =>
       apiFetch(`/api/screenings/${id}/review`, { token, method: 'PUT', body }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['screening', id] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['screening', id] })
+      qc.invalidateQueries({ queryKey: ['review-queue'] }) // reviewed item leaves the queue
+      qc.invalidateQueries({ queryKey: ['screenings'] })
+    },
   })
 }

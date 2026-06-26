@@ -20,6 +20,22 @@ export const rosterImportRowSchema = z.object({
 })
 export type RosterImportRowInput = z.infer<typeof rosterImportRowSchema>
 
+/** A roster row entered by a teacher — same as import, plus an optional guardian email. */
+export const teacherRosterRowSchema = rosterImportRowSchema.extend({
+  guardianEmail: z.string().email().optional(),
+})
+
+/** Teacher creates a class + its roster in one shot (the create-class form payload). */
+export const teacherClassCreateSchema = z.object({
+  name: z.string().min(1),
+  seasonId: z.string().min(1),
+  gradeLevel: z.number().int().positive().optional(),
+  scheduledAt: z.string().optional(),
+  reminderPhone: z.string().min(6).optional(),
+  students: z.array(teacherRosterRowSchema).max(100),
+})
+export type TeacherClassCreateInput = z.infer<typeof teacherClassCreateSchema>
+
 export const followUpStatusSchema = z.enum([
   'flagged',
   'contacted',

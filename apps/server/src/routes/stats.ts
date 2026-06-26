@@ -42,13 +42,30 @@ const bucketize = (rows: { capturedAt: Date; triageLevel: string }[], r: Range) 
   return buckets
 }
 
+// 12 fixed calendar-month buckets (Jan–Dec) for a given year — used by the
+// season-scoped "Үзүүлэлт" chart. Y = kids screened per month.
+const calendarBuckets = (rows: { capturedAt: Date; triageLevel: string }[], year: number) => {
+  const buckets = Array.from({ length: 12 }, (_, m) => ({ ts: new Date(Date.UTC(year, m, 1)).toISOString(), screened: 0, flagged: 0 }))
+  for (const row of rows) {
+    const m = new Date(row.capturedAt).getUTCMonth()
+    buckets[m].screened += 1
+    if (row.triageLevel === 'yellow' || row.triageLevel === 'red') buckets[m].flagged += 1
+  }
+  return buckets
+}
+
 statsRoutes.get('/timeseries', authenticate, async (c) => {
   const db = c.get('db')
   const { range, seasonId, schoolId: querySchoolId } = c.req.query()
-  const r: Range = (['D', 'W', 'M', 'Y'] as const).includes(range as Range) ? (range as Range) : 'M'
-  const scSc = scopeWhere(await resolveScope(db, c.get('jwtPayload')), { classId: screenings.classId, schoolId: screenings.schoolId })
+  const scSc = scopeWhere(await resolveScope(db, c.get('jwtPayload')), { classId: screenings.classId, schoolId: screenings.schoolId, childKey: screenings.childKey })
   const rows = await db.select({ capturedAt: screenings.capturedAt, triageLevel: screenings.triageLevel }).from(screenings)
     .where(and(scSc, seasonId ? eq(screenings.seasonId, seasonId) : undefined, querySchoolId ? eq(screenings.schoolId, querySchoolId) : undefined))
+  // CAL = 12 calendar months of the season's year (X axis), kids/month (Y axis).
+  if (range === 'CAL') {
+    const year = seasonId && /^\d{4}/.test(seasonId) ? parseInt(seasonId.slice(0, 4), 10) : new Date().getUTCFullYear()
+    return c.json({ success: true, data: { range: 'CAL', buckets: calendarBuckets(rows, year) } })
+  }
+  const r: Range = (['D', 'W', 'M', 'Y'] as const).includes(range as Range) ? (range as Range) : 'M'
   return c.json({ success: true, data: { range: r, buckets: bucketize(rows, r) } })
 })
 
@@ -56,8 +73,8 @@ statsRoutes.get('/', authenticate, async (c) => {
   const db = c.get('db')
   const { seasonId, schoolId: querySchoolId } = c.req.query()
   const scope = await resolveScope(db, c.get('jwtPayload'))
-  const scSc = scopeWhere(scope, { classId: screenings.classId, schoolId: screenings.schoolId })
-  const chSc = scopeWhere(scope, { classId: children.classId, schoolId: children.schoolId })
+  const scSc = scopeWhere(scope, { classId: screenings.classId, schoolId: screenings.schoolId, childKey: screenings.childKey })
+  const chSc = scopeWhere(scope, { classId: children.classId, schoolId: children.schoolId, childKey: children.childKey })
   const seasonCond = seasonId ? eq(screenings.seasonId, seasonId) : undefined
   const querySchool = querySchoolId ? eq(screenings.schoolId, querySchoolId) : undefined
   const fuSchool = scope.all

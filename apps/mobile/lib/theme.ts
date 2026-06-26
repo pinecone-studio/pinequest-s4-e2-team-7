@@ -1,64 +1,71 @@
 export type ColorTokens = {
   primary: string
+  primaryText: string
   sidebar: string
   bg: string
   surface: string
+  surfaceRaised: string
   textBase: string
   textSecondary: string
   textMuted: string
   textDisabled: string
   border: string
-  // triage — clinical signal, neutral palette (not alarm-bright)
+  btnFill: string
   triageGreenBg: string
   triageGreenText: string
   triageYellowBg: string
   triageYellowText: string
   triageRedBg: string
   triageRedText: string
-  // solid badge dots in lists
   badgeGreen: string
   badgeYellow: string
   badgeRed: string
 }
 
 export const lightColors: ColorTokens = {
-  primary: '#48A9B2',
-  sidebar: '#48A9B2',
-  bg: '#F2F2F7',        // Apple primary background
+  primary: '#F2B705',        // Honey Gold — matches web brand primary
+  primaryText: '#1A1407',    // dark text on gold button
+  sidebar: '#2A2418',        // web brand-sidebar
+  bg: '#F3F1EA',             // warm cream canvas — matches web bg
   surface: '#FFFFFF',
-  textBase: '#1D1D1F',  // Apple primary label
+  surfaceRaised: '#F7F5EE',  // inputs / raised cards
+  textBase: '#1D1D1F',
   textSecondary: '#3C3C43',
-  textMuted: '#6E6E73', // Apple tertiary label
+  textMuted: '#6E6E73',
   textDisabled: '#ADADB2',
-  border: '#D1D1D6',    // Apple separator
-  triageGreenBg: '#EEF8F3',
-  triageGreenText: '#2A7D4F',
-  triageYellowBg: '#FAF6E4',
-  triageYellowText: '#8A6500',
-  triageRedBg: '#FAF0F0',
-  triageRedText: '#B83838',
-  badgeGreen: '#2A7D4F',
-  badgeYellow: '#8A6500',
-  badgeRed: '#B83838',
+  border: '#E8E4DA',         // warm-tinted separator
+  btnFill: '#E4DFD7',        // neutral secondary button fill
+  triageGreenBg: '#EEF9F3',
+  triageGreenText: '#3B8C5E',
+  triageYellowBg: '#FEF3E7',
+  triageYellowText: '#A8580A',
+  triageRedBg: '#FBF1F0',
+  triageRedText: '#A84545',
+  badgeGreen: '#52A075',
+  badgeYellow: '#C97A25',
+  badgeRed: '#C07272',
 }
 
 export const darkColors: ColorTokens = {
-  primary: '#57BDC1',
-  sidebar: '#57BDC1',
-  bg: '#000000',        // Apple true black
-  surface: '#1C1C1E',   // Apple dark secondary background
-  textBase: '#F5F5F7',  // Apple light primary label
+  primary: '#FFC93C',        // brighter gold for dark mode — matches web dark primary
+  primaryText: '#1A1407',
+  sidebar: '#1C1C1E',
+  bg: '#000000',
+  surface: '#1C1C1E',
+  surfaceRaised: '#2C2C2E',
+  textBase: '#F5F5F7',
   textSecondary: '#ADADB8',
-  textMuted: '#8E8E93', // Apple light tertiary label
+  textMuted: '#8E8E93',
   textDisabled: '#48484A',
-  border: '#38383A',    // Apple dark separator
+  border: '#38383A',
+  btnFill: '#3A3A3C',        // neutral secondary button fill (dark)
   triageGreenBg: '#0C2818',
-  triageGreenText: '#5DC98B',
-  triageYellowBg: '#251A00',
-  triageYellowText: '#E2AF3C',
-  triageRedBg: '#270D0D',
-  triageRedText: '#E07070',
-  badgeGreen: '#5DC98B',
-  badgeYellow: '#E2AF3C',
-  badgeRed: '#E07070',
+  triageGreenText: '#62D094',
+  triageYellowBg: '#261500',
+  triageYellowText: '#E8924A',
+  triageRedBg: '#250C0C',
+  triageRedText: '#D97878',
+  badgeGreen: '#62D094',
+  badgeYellow: '#E8924A',
+  badgeRed: '#D97878',
 }

@@ -3,11 +3,11 @@ import { Providers } from '@/components/providers'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Screener — Админ самбар',
+  title: 'Toothlings — Админ самбар',
   description: 'Шүдний цоорол илрүүлэх скрининг — ростер ба хяналтын самбар',
 }
 
-const initThemeScript = `(function(){try{if(localStorage.getItem('screener.theme')==='dark')document.documentElement.classList.add('dark')}catch(_){}})()`
+const initThemeScript = `(function(){try{if(localStorage.getItem('toothlings.theme')==='dark')document.documentElement.classList.add('dark')}catch(_){}})()`
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => (
   <html lang="mn" suppressHydrationWarning>

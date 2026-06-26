@@ -2,9 +2,8 @@
 
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { ArrowLeftIcon } from '@heroicons/react/24/outline'
-import { TriageBadge } from '@/components/TriageBadge'
-import ChildSummaryCard from '@/components/ChildSummaryCard'
+import { TriageBadge } from '@/components/ui/TriageBadge'
+import ChildSummaryCard from '@/components/admin/child/ChildSummaryCard'
 import { useChild, useChildSummary } from '@/hooks/useChildren'
 import { useScreenings } from '@/hooks/useScreenings'
 
@@ -19,11 +18,11 @@ const ChildDetailPage = () => {
   return (
     <section className="flex flex-col gap-5">
       <Link href="/dashboard/admin" className="btn inline-flex w-fit items-center gap-1 text-sm text-primary transition-all duration-150 hover:underline">
-        <ArrowLeftIcon className="size-4" /> Буцах
+        Буцах
       </Link>
 
       {/* Identity header */}
-      <div className="rounded-2xl border border-border bg-surface p-5 shadow-(--shadow-card)">
+      <div className="blob border border-border bg-surface p-5 shadow-(--shadow-card)">
         <h1 className="text-xl font-semibold tracking-tight text-text-base">{fullName}</h1>
         {child && (
           <p className="mt-1 text-sm text-text-muted">
@@ -44,16 +43,16 @@ const ChildDetailPage = () => {
           summary={payload.summary}
         />
       ) : (
-        <div className="rounded-2xl border border-border bg-surface p-5 text-sm text-text-muted shadow-(--shadow-card)">
-          Энэ хүүхдэд скрининг бүртгэгдээгүй байна.
+        <div className="blob border border-border bg-surface p-5 text-sm text-text-muted shadow-(--shadow-card)">
+          Энэ хүүхдэд үзүүлэлт бүртгэгдээгүй байна.
         </div>
       )}
 
       {/* History */}
-      <div className="rounded-2xl border border-border bg-surface shadow-(--shadow-card)">
+      <div className="blob border border-border bg-surface shadow-(--shadow-card)">
         <div className="border-b border-border px-5 py-3">
           <h2 className="text-sm font-semibold text-text-muted">
-            Скринингийн түүх{payload ? ` (${payload.screeningCount})` : ''}
+            Үзүүлэлтийн түүх{payload ? ` (${payload.screeningCount})` : ''}
           </h2>
         </div>
         {screenings && screenings.length > 0 ? (
@@ -71,7 +70,7 @@ const ChildDetailPage = () => {
             ))}
           </ul>
         ) : (
-          <p className="px-5 py-4 text-sm text-text-muted">Скрининг бүртгэгдээгүй байна.</p>
+          <p className="px-5 py-4 text-sm text-text-muted">Үзүүлэлт бүртгэгдээгүй байна.</p>
         )}
       </div>
     </section>

@@ -1,25 +1,19 @@
 'use client'
 
-import Link from 'next/link'
-import { ArrowRightIcon } from '@heroicons/react/24/outline'
+import { ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline'
 import { useReviewQueue } from '@/hooks/useScreening'
-import HeroStrip from '@/components/dashboard/HeroStrip'
-import UrgentActionCard from '@/components/dashboard/UrgentActionCard'
-
-const TINT: Record<string, string> = {
-  red: 'border-triage-red/30 bg-triage-red-bg',
-  yellow: 'border-triage-yellow/30 bg-triage-yellow-bg',
-  green: 'border-triage-green/30 bg-triage-green-bg',
-}
-const DOT: Record<string, string> = { red: 'bg-triage-red', yellow: 'bg-triage-yellow', green: 'bg-triage-green' }
-const TXT: Record<string, string> = { red: 'text-triage-red', yellow: 'text-triage-yellow', green: 'text-triage-green' }
-const LABEL: Record<string, string> = { red: 'Яаралтай', yellow: 'Хяналт', green: 'Аюулгүй' }
+import HeroStrip from '@/components/shared/HeroStrip'
+import UrgentActionCard from '@/components/shared/UrgentActionCard'
+import ReviewQueueCard from '@/components/dentist/ReviewQueueCard'
+import EmptyState from '@/components/ui/EmptyState'
+import { PageSpinner } from '@/components/ui/Spinner'
 
 const DentistQueuePage = () => {
   const { data, isLoading } = useReviewQueue()
+  const pending = (data ?? []).filter((s) => !s.review) // unreviewed only — confirmed items leave the queue
 
-  const oldestRed = data
-    ?.filter((s) => s.triageLevel === 'red')
+  const oldestRed = pending
+    .filter((s) => s.triageLevel === 'red')
     .sort((a, b) => new Date(a.capturedAt).getTime() - new Date(b.capturedAt).getTime())[0]
 
   return (
@@ -29,8 +23,8 @@ const DentistQueuePage = () => {
       {oldestRed && (
         <UrgentActionCard
           tone="red"
-          title="Яаралтай улаан скрининг хянагдаагүй байна"
-          body={`Хамгийн эртний: ${new Date(oldestRed.capturedAt).toLocaleDateString('mn-MN')} · ${oldestRed.childKey}`}
+          title="Яаралтай улаан үзүүлэлт хянагдаагүй байна"
+          body={`Хамгийн эртний: ${new Date(oldestRed.capturedAt).toLocaleDateString('mn-MN')} · ${oldestRed.childKey.slice(0, 16)}`}
           ctaLabel="Хянах"
           ctaHref={`/dashboard/dentist/screenings/${oldestRed.id}`}
         />
@@ -39,36 +33,15 @@ const DentistQueuePage = () => {
       <h2 className="text-lg font-semibold tracking-tight text-text-base">Хянах дараалал</h2>
 
       {isLoading ? (
-        <p className="text-sm text-text-muted">Ачааллаж байна…</p>
-      ) : data && data.length > 0 ? (
+        <PageSpinner />
+      ) : pending.length > 0 ? (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {data.map((s) => {
-            const lvl = s.triageLevel
-            return (
-              <Link
-                key={s.id}
-                href={`/dashboard/dentist/screenings/${s.id}`}
-                className={`btn flex flex-col gap-3 rounded-2xl border p-4 shadow-(--shadow-card) transition-all duration-150 hover:shadow-(--shadow-card-lg) ${TINT[lvl] ?? 'border-border bg-surface'}`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-2">
-                    <span className={`size-2.5 rounded-full ${DOT[lvl]}`} />
-                    <span className={`text-[13px] font-semibold ${TXT[lvl]}`}>{LABEL[lvl] ?? lvl}</span>
-                  </span>
-                  <span className="text-[11px] text-text-muted">
-                    {new Date(s.capturedAt).toLocaleDateString('mn-MN')}
-                  </span>
-                </div>
-                <span className="font-mono text-[12px] text-text-muted">{s.childKey.slice(0, 16)}…</span>
-                <span className="mt-1 inline-flex items-center gap-1 text-[12px] font-medium text-primary">
-                  Хянах <ArrowRightIcon className="size-3.5" />
-                </span>
-              </Link>
-            )
-          })}
+          {pending.map((s) => <ReviewQueueCard key={s.id} row={s} />)}
         </div>
       ) : (
-        <p className="text-sm text-text-muted">Хянах скрининг алга.</p>
+        <div className="rounded-2xl border border-border bg-surface shadow-(--shadow-card)">
+          <EmptyState Icon={ClipboardDocumentCheckIcon} title="Хянах үзүүлэлт алга" hint="Шинэ үзүүлэлт ирэхэд баталгаажуулах жагсаалт энд гарна." />
+        </div>
       )}
     </section>
   )

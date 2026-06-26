@@ -3,14 +3,15 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
-import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import type { SchoolClassRow } from '@pinequest/types'
 import { useCarryForward, useClasses, useCreateClass } from '@/hooks/useClasses'
 import { useSchool } from '@/hooks/useSchools'
 import { useStats } from '@/hooks/useStats'
-import CoverageBar from '@/components/CoverageBar'
-import ClassListRow from '@/components/ClassListRow'
-import CarryForwardModal from '@/components/CarryForwardModal'
+import Button from '@/components/ui/Button'
+import CoverageBar from '@/components/admin/schools/CoverageBar'
+import ClassListRow from '@/components/admin/schools/ClassListRow'
+import CarryForwardModal from '@/components/admin/schools/CarryForwardModal'
+import { PageSpinner } from '@/components/ui/Spinner'
 
 const inp = 'rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary'
 
@@ -42,7 +43,7 @@ const SchoolClassesPage = () => {
   return (
     <section className="flex flex-col gap-5">
       <Link href="/dashboard/admin" className="btn inline-flex w-fit items-center gap-1 text-sm text-primary transition-all duration-150 hover:underline">
-        <ArrowLeftIcon className="size-4" /> Сургуулиуд
+        Сургуулиуд
       </Link>
       <h1 className="text-2xl font-semibold tracking-tight text-text-base">
         {school?.name ?? '…'}
@@ -51,13 +52,13 @@ const SchoolClassesPage = () => {
 
       {stats && (
         <div className="grid grid-cols-3 gap-3">
-          {TRIAGE.map(({ k, label, cls }) => (
-            <div key={k} className={`rounded-xl border p-3 text-center ${cls}`}>
-              <p className="text-2xl font-bold">{stats.triage[k]}</p>
-              <p className="text-xs text-text-muted">{label}</p>
+          {TRIAGE.map(({ k, label, cls }, i) => (
+            <div key={k} style={{ animationDelay: `${i * 70}ms` }} className={`blob pop-in grow border p-4 text-center hover:shadow-(--shadow-card-lg) ${cls}`}>
+              <p className="stat-rise text-2xl font-bold tabular-nums">{stats.triage[k]}</p>
+              <p className="text-xs opacity-80">{label}</p>
             </div>
           ))}
-          <div className="col-span-3 rounded-xl border border-border bg-surface p-3">
+          <div className="blob col-span-3 border border-border bg-surface p-4 shadow-(--shadow-card)">
             <p className="mb-2 text-xs font-medium text-text-muted">Хамрагдалт</p>
             <CoverageBar screened={stats.coverage.screened} total={stats.coverage.total} />
           </div>
@@ -67,13 +68,11 @@ const SchoolClassesPage = () => {
       <form onSubmit={onAdd} className="flex flex-wrap gap-2">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ангийн нэр (ж: 3А)" className={inp} />
         <input value={seasonId} onChange={(e) => setSeasonId(e.target.value)} placeholder="Улирал" className={inp} />
-        <button className="btn rounded-xl bg-primary px-4 py-2 text-sm font-medium text-text-on-primary transition-all duration-150 hover:bg-primary-hover">
-          Нэмэх
-        </button>
+        <Button type="submit" disabled={createClass.isPending}>Нэмэх</Button>
       </form>
 
       {isLoading ? (
-        <p className="text-sm text-text-muted">Ачааллаж байна…</p>
+        <PageSpinner />
       ) : (
         <ul className="flex flex-col gap-2">
           {classes?.map((c) => (

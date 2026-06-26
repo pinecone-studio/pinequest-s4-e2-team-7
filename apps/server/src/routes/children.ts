@@ -6,6 +6,8 @@ import { children, schoolClasses } from '@pinequest/db/d1'
 import type { DuplicateWarning } from '@pinequest/types'
 import { authenticate, authorize } from '../middleware/auth.js'
 import { loadChildSummary } from '../lib/childSummary.js'
+import { hasChildAccess } from '../lib/scopeFilter.js'
+import { inChunks } from '../lib/chunk.js'
 import type { AppEnv } from '../types.js'
 
 export const childRoutes = new Hono<AppEnv>()
@@ -53,7 +55,7 @@ childRoutes.post('/classes/:classId/children/bulk', authorize('admin'), async (c
     slots.add(row.rosterSlot); keys.add(key)
     toCreate.push({ classId: klass.id, schoolId: klass.schoolId, childKey: key, firstName: row.firstName, lastName: row.lastName, birthYear: row.birthYear, rosterSlot: row.rosterSlot, gender: row.gender ?? null, guardianPhone: row.guardianPhone ?? null })
   }
-  if (toCreate.length) await db.insert(children).values(toCreate)
+  await inChunks(toCreate, (b) => db.insert(children).values(b))
   return c.json({ success: true, data: { created: toCreate.length, duplicates } }, 201)
 })
 
@@ -69,12 +71,29 @@ childRoutes.get('/children/:id/summary', authenticate, async (c) => {
   return c.json({ success: true, data })
 })
 
-childRoutes.put('/children/:id', authorize('admin'), async (c) => {
+childRoutes.put('/children/:id', authorize('teacher', 'school_doctor', 'admin'), async (c) => {
+  const db = c.get('db')
+  const id = c.req.param('id')
+  const current = await db.query.children.findFirst({ where: eq(children.id, id) })
+  if (!current) return c.json({ success: false, data: null }, 404)
+  if (!(await hasChildAccess(db, c.get('jwtPayload'), current))) return c.json({ success: false, data: null, message: 'forbidden' }, 403)
+
   const { firstName, lastName, gender, guardianPhone, guardianEmail, consentObtained, isActive } =
     await c.req.json<{ firstName?: string; lastName?: string; gender?: 'M' | 'F'; guardianPhone?: string; guardianEmail?: string; consentObtained?: boolean; isActive?: boolean }>()
-  const [child] = await c.get('db').update(children).set({
+  const [child] = await db.update(children).set({
     firstName, lastName, gender, guardianPhone, guardianEmail, consentObtained,
     consentAt: consentObtained ? new Date() : undefined, isActive,
-  }).where(eq(children.id, c.req.param('id'))).returning()
+  }).where(eq(children.id, id)).returning()
+  return c.json({ success: true, data: child })
+})
+
+// Soft-delete (immutable spine — we deactivate, never hard-delete). Scoped.
+childRoutes.delete('/children/:id', authorize('teacher', 'school_doctor', 'admin'), async (c) => {
+  const db = c.get('db')
+  const id = c.req.param('id')
+  const current = await db.query.children.findFirst({ where: eq(children.id, id) })
+  if (!current) return c.json({ success: false, data: null }, 404)
+  if (!(await hasChildAccess(db, c.get('jwtPayload'), current))) return c.json({ success: false, data: null, message: 'forbidden' }, 403)
+  const [child] = await db.update(children).set({ isActive: false }).where(eq(children.id, id)).returning()
   return c.json({ success: true, data: child })
 })

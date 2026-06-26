@@ -8,14 +8,14 @@ type Props = {
   interactive?: boolean // hover lift (clickable cards)
 }
 
-// The board's base surface: clean white, soft radius + subtle shadow on the
-// warm cream canvas. One source of truth for card chrome.
+// The board's base surface: clean white, playful squircle radius + subtle
+// shadow on the warm cream canvas. One source of truth for card chrome.
 const Card = ({ children, className, pad = true, interactive }: Props) => (
   <div
     className={cn(
-      'rounded-2xl border border-border bg-surface shadow-(--shadow-card)',
+      'blob border border-border bg-surface shadow-(--shadow-card)',
       pad && 'p-5',
-      interactive && 'transition-shadow duration-200 hover:shadow-(--shadow-card-lg)',
+      interactive && 'grow hover:shadow-(--shadow-card-lg)',
       className,
     )}
   >

@@ -4,42 +4,31 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   ArrowRightIcon,
-  Squares2X2Icon,
-  ClipboardDocumentCheckIcon,
-  ClipboardDocumentListIcon,
+  CameraIcon,
+  ChatBubbleLeftRightIcon,
+  SparklesIcon,
+  ShieldCheckIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline'
 import { useSession } from '@/components/providers'
 import { homeForRole } from '@/lib/auth'
 import { Landing } from '@/components/landingpage/Landing'
 
-const BOARDS = [
-  {
-    href: '/dashboard/admin',
-    label: 'Админ самбар',
-    desc: 'Бүх сургууль, дүн, хяналт',
-    Icon: Squares2X2Icon,
-  },
-  {
-    href: '/dashboard/dentist',
-    label: 'Эмчийн хяналт',
-    desc: 'Скрининг шалгах дараалал',
-    Icon: ClipboardDocumentCheckIcon,
-  },
-  {
-    href: '/dashboard/follow-up',
-    label: 'Дагалт',
-    desc: 'Дагах шаардлагатай жагсаалт',
-    Icon: ClipboardDocumentListIcon,
-  },
+const STEPS = [
+  { n: '01', title: 'Асуумж + шалгалт', desc: 'Богино асуумж бөглөж, шүдний зураг аваад AI шинжилгээ хийнэ.' },
+  { n: '02', title: 'Үр дүн + ангилал', desc: 'Илрүүлсэн зүйлс, яаралтай эсэх зэрэглэл, зөвлөмж.' },
+  { n: '03', title: 'Тусламж + угаалга', desc: 'Эмчтэй холбогдож, ухаалаг сойзоор зөв угаалга хянана.' },
+]
+
+const DOCTOR_TIPS = [
+  { name: 'Б. Батболд', tip: 'Өдөрт 2 удаа, 2 минут угаалга — хамгийн үр дүнтэй профилактик.' },
+  { name: 'О. Оюунаа', tip: '6 сар тутам эмчид үзүүлэх нь кариесыг эрт илрүүлнэ.' },
+  { name: 'Ц. Цэрэн', tip: 'Ухаалаг сойзны өнцөг, даралтыг хүүхэдтэй хамт хянана уу.' },
 ]
 
 const LandingPage = () => {
   const router = useRouter()
   const { token, role } = useSession()
-
-  // Begin → into the dashboard: logged in lands on their board (admin → /dashboard/admin),
-  // otherwise route through login first.
-  const onBegin = () => router.push(token ? homeForRole(role) : '/login')
 
   return (
     <Landing />
