@@ -1,15 +1,20 @@
-import { TouchableOpacity, View, StyleSheet } from 'react-native'
+import { TouchableOpacity, View, StyleSheet, StyleProp, ViewStyle } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/lib/ThemeContext'
 
-type Props = { onPress: () => void }
+type Props = {
+  onPress: () => void
+  style?: StyleProp<ViewStyle>
+  [key: string]: unknown
+}
 
-const CameraTabButton = ({ onPress }: Props) => {
+const CameraTabButton = ({ onPress, style, ...rest }: Props) => {
   const { colors } = useTheme()
 
   return (
     <TouchableOpacity
-      style={s.wrap}
+      {...rest}
+      style={[style, s.wrap]}
       onPress={onPress}
       activeOpacity={0.85}
     >
@@ -23,11 +28,15 @@ const CameraTabButton = ({ onPress }: Props) => {
 const s = StyleSheet.create({
   wrap: {
     top: -22,
-    alignItems: 'center', justifyContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   circle: {
-    width: 62, height: 62, borderRadius: 31,
-    alignItems: 'center', justifyContent: 'center',
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#F2B705',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,

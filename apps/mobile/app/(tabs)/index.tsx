@@ -6,7 +6,7 @@ import { useTheme } from '@/lib/ThemeContext'
 import { getUser, type AuthUser } from '@/lib/auth'
 import { useOutboxSync } from '@/lib/useOutboxSync'
 import GreetingHeader from '@/components/home/GreetingHeader'
-import RoleSelector from '@/components/home/RoleSelector'
+
 import ScanHeroCard from '@/components/home/ScanHeroCard'
 import LastScreeningCard from '@/components/home/LastScreeningCard'
 import QuickActionGrid from '@/components/home/QuickActionGrid'
@@ -44,7 +44,6 @@ const HomeScreen = () => {
     <SafeAreaView style={[s.safe, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         <GreetingHeader name={user?.name ?? '...'} online={online} />
-        <RoleSelector role={user?.role ?? 'screener'} />
         <ScanHeroCard onScan={handleScan} />
         <LastScreeningCard
           date="2026-06-20"

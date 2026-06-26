@@ -37,26 +37,26 @@ const TabLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="classes"
+        name="guide"
         options={{
-          title: 'Ангиуд',
-          tabBarIcon: ({ color }) => <TabIcon name="school-outline" color={color} />,
+          title: 'Заавар',
+          tabBarIcon: ({ color }) => <TabIcon name="book-outline" color={color} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
           title: '',
-          tabBarButton: () => (
-            <CameraTabButton onPress={() => router.push('/scan')} />
+          tabBarButton: (props) => (
+            <CameraTabButton {...props} onPress={() => router.push('/scan')} />
           ),
         }}
       />
       <Tabs.Screen
-        name="calendar"
+        name="hospital"
         options={{
-          title: 'Хуанли',
-          tabBarIcon: ({ color }) => <TabIcon name="calendar-outline" color={color} />,
+          title: 'Тусламж',
+          tabBarIcon: ({ color }) => <TabIcon name="medkit-outline" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -66,6 +66,8 @@ const TabLayout = () => {
           tabBarIcon: ({ color }) => <TabIcon name="person-outline" color={color} />,
         }}
       />
+      <Tabs.Screen name="classes" options={{ href: null }} />
+      <Tabs.Screen name="calendar" options={{ href: null }} />
     </Tabs>
   )
 }

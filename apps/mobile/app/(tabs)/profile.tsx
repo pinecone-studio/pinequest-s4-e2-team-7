@@ -1,15 +1,15 @@
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet } from 'react-native'
+import { ScrollView, View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { getUser, saveUser, clearToken, clearUser } from '@/lib/auth'
+import { getUser, saveUser } from '@/lib/auth'
 import { getMe, updateMe, type MeResult } from '@/lib/api'
 import { useTheme } from '@/lib/ThemeContext'
 import { toMongolian } from '@/lib/errorMessages'
 import TextField from '@/components/auth/TextField'
 import PrimaryButton from '@/components/auth/PrimaryButton'
 import OutlineButton from '@/components/auth/OutlineButton'
+import SettingsSection from '@/components/profile/SettingsSection'
 
 const ROLE_LABEL: Record<string, string> = {
   screener: 'Хэрэглэгч', teacher: 'Багш', parent: 'Эцэг эх',
@@ -18,7 +18,6 @@ const ROLE_LABEL: Record<string, string> = {
 
 const ProfileScreen = () => {
   const { colors } = useTheme()
-  const router = useRouter()
   const [me, setMe] = useState<MeResult | null>(null)
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState('')
@@ -45,8 +44,6 @@ const ProfileScreen = () => {
       setEditing(false)
     } catch (err) { setError(toMongolian(err)) } finally { setSaving(false) }
   }
-
-  const logout = async () => { await clearToken(); await clearUser(); router.replace('/login') }
 
   if (!me) {
     return <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}><ActivityIndicator color={colors.primary} style={s.loader} /></SafeAreaView>
@@ -80,10 +77,7 @@ const ProfileScreen = () => {
           </View>
         )}
 
-        <TouchableOpacity style={[s.logoutBtn, { borderColor: colors.triageRedText }]} onPress={logout} activeOpacity={0.7}>
-          <Ionicons name="log-out-outline" size={18} color={colors.triageRedText} />
-          <Text style={[s.logoutText, { color: colors.triageRedText }]}>Гарах</Text>
-        </TouchableOpacity>
+        <SettingsSection />
       </ScrollView>
     </SafeAreaView>
   )
@@ -112,8 +106,6 @@ const s = StyleSheet.create({
   editBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderRadius: 12, paddingVertical: 12 },
   editText: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
   error: { fontSize: 13, color: '#ef4444' },
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderWidth: 1, borderRadius: 12, padding: 14 },
-  logoutText: { fontFamily: 'Inter_600SemiBold', fontSize: 15 },
 })
 
 export default ProfileScreen
