@@ -1,6 +1,6 @@
 import type { UserRole } from '@pinequest/types'
 
-const TOKEN_KEY = 'screener_token'
+const TOKEN_KEY = 'toothlings_token'
 
 export const setToken = (token: string): void => {
   document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=43200; samesite=lax`
@@ -25,7 +25,8 @@ type JwtPayload = { sub: string; role: UserRole; schoolId?: string; exp?: number
 
 /** Landing route for a role after login/registration. */
 export const homeForRole = (role: UserRole | string | null): string => {
-  if (role === 'admin') return '/dashboard/admin'
+  if (role === 'admin' || role === 'school_doctor' || role === 'teacher') return '/dashboard/admin'
+  if (role === 'parent') return '/dashboard/admin/child'
   if (role === 'dentist') return '/dashboard/dentist'
   if (role === 'follow_up') return '/dashboard/follow-up'
   return '/home'

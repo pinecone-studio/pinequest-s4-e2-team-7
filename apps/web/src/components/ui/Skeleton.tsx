@@ -65,4 +65,23 @@ export const SkeletonTable = () => (
   </div>
 )
 
+export const SkeletonKanban = ({ cols = 4 }: { cols?: number }) => (
+  <div className="rounded-3xl border border-border bg-surface p-5 shadow-(--shadow-card)">
+    <div className="flex gap-4 overflow-x-auto pb-1">
+      {Array.from({ length: cols }).map((_, i) => (
+        <div key={i} className="flex w-[272px] shrink-0 flex-col gap-3 rounded-2xl bg-bg/60 p-3">
+          <div className="flex items-center gap-2 px-1 pb-1">
+            <Skeleton className="size-2 rounded-full" />
+            <Skeleton className="h-3 flex-1 rounded" />
+            <Skeleton className="h-4 w-6 rounded-full" />
+          </div>
+          {Array.from({ length: 2 + (i % 2) }).map((_, j) => (
+            <SkeletonCard key={j} rows={2} />
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+)
+
 export default Skeleton

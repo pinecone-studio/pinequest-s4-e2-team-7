@@ -1,6 +1,6 @@
-import { eq, desc, count } from 'drizzle-orm'
+import { eq, desc, count, asc } from 'drizzle-orm'
 import { buildChildSummary } from '@pinequest/core'
-import { children, screenings, type DB } from '@pinequest/db/d1'
+import { children, screenings, screeningImages, type DB } from '@pinequest/db/d1'
 import type {
   ChildScreeningSummary,
   FindingClass,
@@ -8,6 +8,15 @@ import type {
   ToothFinding,
   TriageLevel,
 } from '@pinequest/types'
+
+export type QuestionnaireAnswers = {
+  swelling: boolean
+  painDisturbingSleepOrEating: boolean
+  fever: boolean
+  gumPimpleOrFistula: boolean
+  trauma: boolean
+  bleedingGums: boolean | null
+}
 
 /** Roster-side child fields the board may show (PII stays server-scoped). */
 export type ChildSummaryPayload = {
@@ -22,6 +31,9 @@ export type ChildSummaryPayload = {
   }
   summary: ChildScreeningSummary | null
   screeningCount: number
+  imageRefs: string[]
+  questionnaire: QuestionnaireAnswers | null
+  hospital: null
 }
 
 const toFinding = (f: {
@@ -55,7 +67,7 @@ export const loadChildSummary = async (db: DB, id: string): Promise<ChildSummary
     db.query.screenings.findFirst({
       where: eq(screenings.childKey, child.childKey),
       orderBy: desc(screenings.capturedAt),
-      with: { findings: true, questionnaire: true, review: true },
+      with: { findings: true, questionnaire: true, review: true, images: { orderBy: asc(screeningImages.order) } },
     }),
     db.select({ c: count() }).from(screenings).where(eq(screenings.childKey, child.childKey)),
   ])
@@ -86,5 +98,17 @@ export const loadChildSummary = async (db: DB, id: string): Promise<ChildSummary
     },
     summary,
     screeningCount: cnt[0]?.c ?? 0,
+    imageRefs: latest?.images?.map((i) => i.ref) ?? [],
+    questionnaire: latest?.questionnaire
+      ? {
+          swelling: latest.questionnaire.swelling ?? false,
+          painDisturbingSleepOrEating: latest.questionnaire.painDisturbingSleepOrEating ?? false,
+          fever: latest.questionnaire.fever ?? false,
+          gumPimpleOrFistula: latest.questionnaire.gumPimpleOrFistula ?? false,
+          trauma: latest.questionnaire.trauma ?? false,
+          bleedingGums: latest.questionnaire.bleedingGums ?? null,
+        }
+      : null,
+    hospital: null,
   }
 }

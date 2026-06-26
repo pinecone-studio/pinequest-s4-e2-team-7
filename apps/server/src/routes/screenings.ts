@@ -22,7 +22,7 @@ screeningRoutes.get('/', authenticate, async (c) => {
   const { childKey, classId, schoolId, seasonId, screenedById } = c.req.query()
   const scope = await resolveScope(db, c.get('jwtPayload'))
   const conds = [
-    scopeWhere(scope, { classId: screenings.classId, schoolId: screenings.schoolId }),
+    scopeWhere(scope, { classId: screenings.classId, schoolId: screenings.schoolId, childKey: screenings.childKey }),
     childKey ? eq(screenings.childKey, childKey) : undefined,
     classId ? eq(screenings.classId, classId) : undefined,
     schoolId ? eq(screenings.schoolId, schoolId) : undefined,

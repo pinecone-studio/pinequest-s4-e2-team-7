@@ -12,14 +12,18 @@ export type RoleKey = typeof ROLES[number]['key']
 type Props = {
   selected?: RoleKey | null
   onSelect?: (key: RoleKey) => void
+  /** Roles shown but not yet selectable (rendered greyed with a "soon" hint). */
+  disabled?: RoleKey[]
 }
 
-const RoleChips = ({ selected, onSelect }: Props) => {
+const RoleChips = ({ selected, onSelect, disabled }: Props) => {
   const { colors } = useTheme()
   return (
     <View style={s.row}>
       {ROLES.map(({ key, emoji, label }) => {
-        const active = selected === key
+        const isDisabled = disabled?.includes(key) ?? false
+        const active = selected === key && !isDisabled
+        const pressable = !!onSelect && !isDisabled
         return (
           <TouchableOpacity
             key={key}
@@ -28,10 +32,11 @@ const RoleChips = ({ selected, onSelect }: Props) => {
               {
                 borderColor: active ? colors.primary : colors.border,
                 backgroundColor: active ? colors.primary + '22' : 'transparent',
+                opacity: isDisabled ? 0.45 : 1,
               },
             ]}
-            onPress={() => onSelect?.(key)}
-            activeOpacity={onSelect ? 0.7 : 1}
+            onPress={() => pressable && onSelect?.(key)}
+            activeOpacity={pressable ? 0.7 : 1}
           >
             <Text style={s.emoji}>{emoji}</Text>
             <Text style={[s.chipLabel, { color: active ? colors.primary : colors.textMuted }]}>

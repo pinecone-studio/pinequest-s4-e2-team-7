@@ -1,9 +1,12 @@
 'use client'
 
-import { FollowUpRow } from '@/components/FollowUpRow'
+import { CheckCircleIcon } from '@heroicons/react/24/outline'
+import { FollowUpRow } from '@/components/follow-up/FollowUpRow'
 import { useFollowUps } from '@/hooks/useFollowUps'
-import HeroStrip from '@/components/dashboard/HeroStrip'
-import UrgentActionCard from '@/components/dashboard/UrgentActionCard'
+import HeroStrip from '@/components/shared/HeroStrip'
+import UrgentActionCard from '@/components/shared/UrgentActionCard'
+import EmptyState from '@/components/ui/EmptyState'
+import { PageSpinner } from '@/components/ui/Spinner'
 
 const FollowUpWorklistPage = () => {
   const { data, isLoading } = useFollowUps()
@@ -27,7 +30,7 @@ const FollowUpWorklistPage = () => {
       <h2 className="text-lg font-semibold tracking-tight text-text-base">Дагах жагсаалт</h2>
 
       {isLoading ? (
-        <p className="text-sm text-text-muted">Ачааллаж байна…</p>
+        <PageSpinner />
       ) : data && data.length > 0 ? (
         <div className="overflow-hidden rounded-lg border border-border bg-surface">
           <table className="w-full text-left text-sm">
@@ -47,7 +50,9 @@ const FollowUpWorklistPage = () => {
           </table>
         </div>
       ) : (
-        <p className="text-sm text-text-muted">Дагах шаардлагатай бичлэг алга.</p>
+        <div className="rounded-2xl border border-border bg-surface shadow-(--shadow-card)">
+          <EmptyState Icon={CheckCircleIcon} title="Дагах жагсаалт хоосон" hint="Хянагдсан үзүүлэлт ирэхэд дагах шаардлагатай хүүхдүүд энд харагдана." />
+        </div>
       )}
     </section>
   )

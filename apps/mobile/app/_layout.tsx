@@ -45,6 +45,9 @@ export default function RootLayout() {
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="scan" options={{ headerShown: false }} />
+        <Stack.Screen name="stats" options={{ title: 'Статистик', headerBackTitle: 'Буцах' }} />
+        <Stack.Screen name="class/new" options={{ title: 'Анги нэмэх', headerBackTitle: 'Буцах' }} />
+        <Stack.Screen name="class/[id]" options={{ title: '', headerBackTitle: 'Буцах' }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

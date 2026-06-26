@@ -26,7 +26,8 @@
 
   /* text (Apple label hierarchy) */
   --color-text-base: #1D1D1F;
-  --color-text-muted: #6E6E73;
+  --color-text-secondary: #3C3C43;   /* mid-hierarchy: subheadings, secondary labels */
+  --color-text-muted: #5E6066;       /* raised from #6E6E73 → clears 4.5:1 on cream */
   --color-text-on-primary: #1A1407;
   --color-text-on-sidebar: #1D1D1F;
 
@@ -45,19 +46,44 @@
   --color-chart-2: #C9B98A; /* muted gold-gray */
   --color-chart-3: #C2CAD2; /* neutral gray */
 
-  /* triage — neutral clinical signal. "Check" pushed to ORANGE so it never
-     collides with the Honey Gold brand (brand = identity, orange = check). */
-  --color-triage-green: #2A7D4F;
-  --color-triage-green-bg: #EEF8F3;
-  --color-triage-yellow: #B5560B;
-  --color-triage-yellow-bg: #FDEFE4;
-  --color-triage-red: #B83838;
-  --color-triage-red-bg: #FAF0F0;
+  /* triage — warm-earth clinical signal. Priority, not panic.
+     Green = sage calm. Orange = gentle attention (avoids honey-gold collision).
+     Red = dusty clay — "time to visit a dentist", not "emergency". */
+  --color-triage-green: #3B8C5E;
+  --color-triage-green-bg: #EEF9F3;
+  --color-triage-yellow: #A8580A;
+  --color-triage-yellow-bg: #FEF3E7;
+  --color-triage-red: #A84545;
+  --color-triage-red-bg: #FBF1F0;
+
+  /* follow-up lifecycle status colors */
+  --color-fu-flagged:      #78716c;
+  --color-fu-flagged-bg:   #f5f5f4;
+  --color-fu-contacted:    #0284c7;
+  --color-fu-contacted-bg: #e0f2fe;
+  --color-fu-doctor:       #7c3aed;
+  --color-fu-doctor-bg:    #ede9fe;
+  --color-fu-done:         #059669;
+  --color-fu-done-bg:      #d1fae5;
+
+  /* neutral button fill — warm stone for secondary / cancel actions.
+     Clearly distinct from both white surface (#FFF) and cream canvas (#F3F1EA). */
+  --color-btn-fill: #E4DFD7;
+  --color-btn-fill-hover: #D9D4CB;
 
   /* Apple-style card elevation (light = subtle shadow) */
   --shadow-card: 0 1px 4px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
   --shadow-card-lg: 0 4px 16px rgba(0,0,0,0.09), 0 2px 6px rgba(0,0,0,0.05);
   --shadow-float: 0 8px 32px rgba(0,0,0,0.11), 0 2px 8px rgba(0,0,0,0.05);
+
+  /* playful tone-card glow — colored ambient shadow on hover (light) */
+  --shadow-glow-gold: 0 12px 30px -8px rgba(242,183,5,0.45), 0 4px 10px rgba(0,0,0,0.06);
+  --shadow-glow-lime: 0 12px 30px -8px rgba(151,191,13,0.40), 0 4px 10px rgba(0,0,0,0.06);
+  --shadow-glow-dark: 0 14px 34px -10px rgba(42,36,24,0.55), 0 4px 10px rgba(0,0,0,0.08);
+
+  /* playful radii scale — squircle card language */
+  --radius-blob: 28px;
+  --radius-blob-lg: 34px;
 }
 
 .dark {
@@ -77,13 +103,13 @@
   --color-primary-hover: #FFD45E;
   --color-primary-subtle: #2A2310;
 
-  /* triage dark — soft, not eye-searing. "Check" = orange, distinct from gold. */
-  --color-triage-green: #5DC98B;
+  /* triage dark — warm-earth, same system. Slightly brighter for dark canvas readability. */
+  --color-triage-green: #62D094;
   --color-triage-green-bg: #0C2818;
-  --color-triage-yellow: #FF9D4D;
-  --color-triage-yellow-bg: #2A1B0E;
-  --color-triage-red: #E07070;
-  --color-triage-red-bg: #270D0D;
+  --color-triage-yellow: #E8924A;
+  --color-triage-yellow-bg: #261500;
+  --color-triage-red: #D97878;
+  --color-triage-red-bg: #250C0C;
 
   /* accent dark */
   --color-accent: #B5E020;
@@ -94,10 +120,28 @@
   --color-chart-2: #8A7C52; /* muted gold-gray */
   --color-chart-3: #5A5A5E; /* neutral gray */
 
+  --color-fu-flagged:      #a8a29e;
+  --color-fu-flagged-bg:   #292524;
+  --color-fu-contacted:    #38bdf8;
+  --color-fu-contacted-bg: #0c2a38;
+  --color-fu-doctor:       #a78bfa;
+  --color-fu-doctor-bg:    #2e1a5c;
+  --color-fu-done:         #34d399;
+  --color-fu-done-bg:      #052e1c;
+
+  /* neutral button fill — dark mode (elevation via color) */
+  --color-btn-fill: #3A3A3C;
+  --color-btn-fill-hover: #4A4A4E;
+
   /* dark mode = elevation via color, not shadow */
   --shadow-card: none;
   --shadow-card-lg: none;
   --shadow-float: none;
+
+  /* keep the colored glow in dark — it reads as a soft halo, not a drop shadow */
+  --shadow-glow-gold: 0 12px 34px -10px rgba(255,201,60,0.30);
+  --shadow-glow-lime: 0 12px 34px -10px rgba(181,224,32,0.26);
+  --shadow-glow-dark: 0 0 0 1px rgba(255,255,255,0.06);
 }
 
 body {
@@ -114,12 +158,14 @@ body {
   display: none;
 }
 
-/* ── Page content fade-in ── */
+/* ── Page content fade-in — applied via .page-in-wrap, NOT globally on main ──
+   A global main selector created a z-index stacking context above the sidebar
+   during the 180ms animation window, blocking nav clicks on page load. */
 @keyframes page-in {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-main {
+.page-in-wrap > * {
   animation: page-in 0.18s ease-out both;
 }
 
@@ -136,6 +182,7 @@ main {
 
 /* ── Micro-interaction: press scale ── */
 .btn {
+  cursor: pointer;
   transition: all 0.15s ease;
 }
 .btn:active {
@@ -146,6 +193,37 @@ main {
   outline-offset: 2px;
 }
 
+/* ── Pointer cursor for everything clickable ──
+   Tailwind v4 preflight drops the button pointer; restore it project-wide. */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+a[href],
+label[for],
+select:not(:disabled),
+summary,
+[onclick] {
+  cursor: pointer;
+}
+button:disabled,
+[role="button"][aria-disabled="true"],
+.btn:disabled {
+  cursor: not-allowed;
+}
+
+/* ── Interaction utility classes ── */
+.interactive { transition: color 0.15s ease, background-color 0.15s ease; }
+.lift        { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.lift:hover  { transform: translateY(-1px); box-shadow: var(--shadow-card-lg); }
+.row-hover   { transition: background-color 0.12s ease; }
+.row-hover:hover { background-color: var(--color-surface-raised); }
+
+/* ── List entrance stagger ── */
+@keyframes list-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+.list-in { animation: list-in 0.2s ease-out both; }
+
 /* ── Notification dot pulse ── */
 @keyframes notif-ping {
   0%   { transform: scale(1); opacity: 1; }
@@ -154,6 +232,13 @@ main {
 .notif-ping {
   animation: notif-ping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
+
+/* ── Toast: slide up from bottom-right ── */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.toast-in { animation: toast-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
 /* ── Modal: backdrop fade + dialog spring-in ── */
 @keyframes backdrop-in {
@@ -367,4 +452,62 @@ main {
   inset: 30% 35%;
   border-radius: 50%;
   background: #f8fafc;
+}
+
+/* ── Playful card language ─────────────────────────────────────────────
+   Squircle tone cards (gold / lime / dark / surface) that lift + glow on
+   hover, with floating circular action buttons. Maps the reference deal-card
+   look onto our honey-gold palette. */
+.blob       { border-radius: var(--radius-blob); }
+.blob-lg    { border-radius: var(--radius-blob-lg); }
+
+/* pop-in: spring entrance for cards/tiles (stagger via inline animation-delay) */
+@keyframes pop-in {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.96); }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.pop-in { animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+/* float: gentle idle bob for hero icons/illustrations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+.float { animation: float 3.4s ease-in-out infinite; }
+
+/* shimmer: animated sheen sweeping across progress bars / rings */
+@keyframes shimmer {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+.shimmer::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,0.55) 50%, transparent 80%);
+  animation: shimmer 2.4s ease-in-out infinite;
+}
+
+/* hover-grow: the universal card/tile micro-interaction (lift + scale + glow) */
+.grow { transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease; }
+.grow:hover { transform: translateY(-3px) scale(1.012); }
+
+/* spin-on-hover for circular action buttons */
+.icon-spin { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.group:hover .icon-spin, .icon-spin:hover { transform: rotate(12deg) scale(1.12); }
+
+/* press: stronger tactile squash for the playful buttons */
+.tap { transition: transform 0.12s ease; }
+.tap:active { transform: scale(0.93); }
+
+/* count-up reveal for big stat numbers */
+@keyframes stat-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.stat-rise { animation: stat-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pop-in, .float, .shimmer::after, .stat-rise, .list-in, .page-in-wrap > * { animation: none; }
+  .grow:hover { transform: none; }
 }

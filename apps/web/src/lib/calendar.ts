@@ -27,7 +27,7 @@ export const buildICS = (ev: VisitEvent): string => {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Screener//Visit//MN',
+    'PRODID:-//Toothlings//Visit//MN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',

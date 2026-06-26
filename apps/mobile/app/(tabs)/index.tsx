@@ -7,22 +7,15 @@ import { getUser, type AuthUser } from '@/lib/auth'
 import { useOutboxSync } from '@/lib/useOutboxSync'
 import GreetingHeader from '@/components/home/GreetingHeader'
 import RoleSelector from '@/components/home/RoleSelector'
-import ChildrenTabRow from '@/components/home/ChildrenTabRow'
 import ScanHeroCard from '@/components/home/ScanHeroCard'
 import LastScreeningCard from '@/components/home/LastScreeningCard'
 import QuickActionGrid from '@/components/home/QuickActionGrid'
 
-const MOCK_CHILDREN = [
-  { id: '1', name: 'Болд' },
-  { id: '2', name: 'Сарнай' },
-  { id: '3', name: 'Энхбаяр' },
-]
-
 const QUICK_ACTIONS = [
-  { id: 'history', icon: 'list-outline' as const,    label: 'Шалгалтын\nтүүх' },
-  { id: 'guide',   icon: 'book-outline' as const,    label: 'Заавар' },
-  { id: 'map',     icon: 'location-outline' as const, label: 'Ойрын\nэмнэлэг' },
-  { id: 'share',   icon: 'share-outline' as const,   label: 'Хуваалцах' },
+  { id: 'classes',  icon: 'school-outline' as const,      label: 'Миний\nангиуд' },
+  { id: 'stats',    icon: 'stats-chart-outline' as const, label: 'Статистик' },
+  { id: 'calendar', icon: 'calendar-outline' as const,    label: 'Хуанли' },
+  { id: 'history',  icon: 'list-outline' as const,        label: 'Түүх' },
 ]
 
 const HomeScreen = () => {
@@ -30,8 +23,7 @@ const HomeScreen = () => {
   const router = useRouter()
   const { sync } = useOutboxSync()
   const [user, setUser] = useState<AuthUser | null>(null)
-  const [activeChild, setActiveChild] = useState(MOCK_CHILDREN[0].id)
-  const [online, setOnline] = useState(true)
+  const [online] = useState(true)
 
   useEffect(() => { getUser().then(setUser) }, [])
   useFocusEffect(useCallback(() => { void sync() }, [sync]))
@@ -41,9 +33,10 @@ const HomeScreen = () => {
   const actions = QUICK_ACTIONS.map((a) => ({
     ...a,
     onPress: () => {
-      if (a.id === 'history') router.push('/(tabs)/history')
-      else if (a.id === 'guide') router.push('/(tabs)/guide')
-      else if (a.id === 'map') router.push('/(tabs)/hospital')
+      if (a.id === 'classes') router.push('/(tabs)/classes' as never)
+      else if (a.id === 'stats') router.push('/stats' as never)
+      else if (a.id === 'calendar') router.push('/(tabs)/calendar' as never)
+      else if (a.id === 'history') router.push('/(tabs)/history' as never)
     },
   }))
 
@@ -52,17 +45,12 @@ const HomeScreen = () => {
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         <GreetingHeader name={user?.name ?? '...'} online={online} />
         <RoleSelector role={user?.role ?? 'screener'} />
-        <ChildrenTabRow
-          children={MOCK_CHILDREN}
-          activeId={activeChild}
-          onSelect={setActiveChild}
-        />
         <ScanHeroCard onScan={handleScan} />
         <LastScreeningCard
           date="2026-06-20"
           triageLevel="green"
           summary="Аюулын шинж тэмдэг олдсонгүй — шүдний эмчид хянуулахыг зөвлөж байна"
-          onPress={() => router.push('/(tabs)/history')}
+          onPress={() => router.push('/(tabs)/history' as never)}
         />
         <QuickActionGrid actions={actions} />
       </ScrollView>

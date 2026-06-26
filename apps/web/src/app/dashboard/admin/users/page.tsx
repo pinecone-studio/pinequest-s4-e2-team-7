@@ -1,112 +1,98 @@
 'use client'
 
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type { UserRole } from '@pinequest/types'
-import { useUsers, useCreateUser, usePatchUser } from '@/hooks/useUsers'
-import { useSchools } from '@/hooks/useSchools'
-import { useClasses } from '@/hooks/useClasses'
-import UserClassCell from '@/components/dashboard/UserClassCell'
+import { useSession } from '@/components/providers'
+import { homeForRole } from '@/lib/auth'
+import { useUsers, usePatchUser } from '@/hooks/useUsers'
+import Dropdown, { type DropdownOption } from '@/components/ui/Dropdown'
+import UserClassCell from '@/components/admin/users/UserClassCell'
+import UserCreateForm from '@/components/admin/users/UserCreateForm'
+import ConfirmModal from '@/components/ui/ConfirmModal'
+import { SkeletonTable } from '@/components/ui/Skeleton'
+import {
+  AcademicCapIcon, BuildingOffice2Icon, UserGroupIcon,
+  ViewfinderCircleIcon, SparklesIcon, ShieldCheckIcon,
+} from '@heroicons/react/24/outline'
 
-const ROLES: UserRole[] = ['screener', 'dentist', 'follow_up', 'admin']
 const ROLE_LABEL: Record<UserRole, string> = {
-  screener: 'Скрининг хийгч',
-  dentist: 'Шүдний эмч',
-  follow_up: 'Дагах ажилтан',
-  admin: 'Админ',
+  screener: 'Хэрэглэгч', teacher: 'Багш', parent: 'Эцэг эх', school_doctor: 'Сургуулийн эмч',
+  dentist: 'Шүдний эмч', follow_up: 'Сайн дурын шүдний эмч', admin: 'Админ',
 }
-
-const inp = 'rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary'
+const ROLE_OPTS: DropdownOption<UserRole>[] = [
+  { value: 'teacher',       label: 'Багш',           Icon: AcademicCapIcon },
+  { value: 'school_doctor', label: 'Сургуулийн эмч', Icon: BuildingOffice2Icon },
+  { value: 'parent',        label: 'Эцэг эх',        Icon: UserGroupIcon },
+  { value: 'screener',      label: 'Хэрэглэгч',      Icon: ViewfinderCircleIcon },
+  { value: 'dentist',       label: 'Шүдний эмч',     Icon: SparklesIcon },
+  { value: 'admin',         label: 'Админ',          Icon: ShieldCheckIcon },
+]
 
 const AdminUsersPage = () => {
+  const { role: myRole } = useSession()
+  const router = useRouter()
+  const canManage = myRole === 'admin'
+  const allowed = myRole === 'admin' || myRole === 'school_doctor'
   const { data: users, isLoading } = useUsers()
-  const { data: schools } = useSchools()
-  const createUser = useCreateUser()
   const patchUser = usePatchUser()
+  const [adminGrant, setAdminGrant] = useState<{ id: string; name: string } | null>(null)
 
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [phone, setPhone] = useState('')
-  const [role, setRole] = useState<UserRole>('screener')
-  const [schoolId, setSchoolId] = useState('')
-  const [classId, setClassId] = useState('')
-  const { data: createClasses } = useClasses(schoolId)
+  useEffect(() => {
+    if (myRole && !allowed) router.replace(homeForRole(myRole))
+  }, [myRole, allowed, router])
 
-  const onAdd = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (!name || !email || !password) return
-    createUser.mutate(
-      { name, email, password, role, phone: phone || undefined, schoolId: schoolId || undefined, classId: classId || undefined },
-      { onSuccess: () => { setName(''); setEmail(''); setPassword(''); setPhone(''); setSchoolId(''); setClassId('') } },
-    )
+  if (!myRole || !allowed) return null
+
+  const handleRoleChange = (userId: string, userName: string, newRole: UserRole) => {
+    if (newRole === 'admin') { setAdminGrant({ id: userId, name: userName }); return }
+    patchUser.mutate({ id: userId, role: newRole })
   }
 
   return (
     <section className="flex flex-col gap-5">
       <h1 className="text-2xl font-semibold tracking-tight text-text-base">Хэрэглэгчид</h1>
 
-      <div className="rounded-xl border border-border bg-surface p-4 shadow-[var(--shadow-card)]">
-        <h2 className="mb-3 text-sm font-semibold text-text-muted">Шинэ хэрэглэгч нэмэх</h2>
-        <form onSubmit={onAdd} className="grid grid-cols-2 gap-2">
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Нэр" className={inp} />
-          <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="И-мэйл" type="email" className={inp} autoComplete="off" />
-          <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Нууц үг (≥6)" type="password" className={inp} autoComplete="new-password" />
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Утас" type="tel" className={inp} autoComplete="off" />
-          <select value={role} onChange={(e) => setRole(e.target.value as UserRole)} className={inp}>
-            {ROLES.map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
-          </select>
-          <select value={schoolId} onChange={(e) => { setSchoolId(e.target.value); setClassId('') }} className={inp}>
-            <option value="">— Бүх сургууль —</option>
-            {schools?.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-          </select>
-          {role === 'screener' && schoolId && (
-            <select value={classId} onChange={(e) => setClassId(e.target.value)} className={`${inp} col-span-2`}>
-              <option value="">— Бүлэг (багшийг бүлэгт хуваарилах) —</option>
-              {createClasses?.map((c) => <option key={c.id} value={c.id}>{c.name} · {c.seasonId}</option>)}
-            </select>
-          )}
-          <button className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-hover transition-colors">
-            Нэмэх
-          </button>
-        </form>
-      </div>
+      {canManage && <UserCreateForm />}
 
       {isLoading ? (
-        <p className="text-sm text-text-muted">Ачааллаж байна…</p>
+        <SkeletonTable />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-[var(--shadow-card)]">
+        <div className="blob border border-border bg-surface shadow-(--shadow-card)">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border">
-                <th className="px-4 py-3 font-medium text-text-muted">Нэр</th>
-                <th className="px-4 py-3 font-medium text-text-muted">И-мэйл</th>
-                <th className="px-4 py-3 font-medium text-text-muted">Үүрэг</th>
-                <th className="px-4 py-3 font-medium text-text-muted">Бүлэг</th>
-                <th className="px-4 py-3 font-medium text-text-muted">Идэвхтэй</th>
+                {['Нэр', 'И-мэйл', 'Үүрэг', 'Бүлэг', 'Идэвхтэй'].map((h) => (
+                  <th key={h} scope="col" className="px-4 py-3 font-medium text-text-muted">{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {users?.map((u) => (
-                <tr key={u.id} className="border-b border-border last:border-0">
+                <tr key={u.id} className="row-hover border-b border-border last:border-0">
                   <td className="px-4 py-3 text-text-base">{u.name}</td>
                   <td className="px-4 py-3 font-mono text-xs text-text-muted">{u.email}</td>
                   <td className="px-4 py-3">
-                    <select
-                      value={u.role}
-                      onChange={(e) => patchUser.mutate({ id: u.id, role: e.target.value as UserRole })}
-                      className="rounded-md border border-border bg-surface px-2 py-1 text-xs text-text-base"
-                    >
-                      {ROLES.map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
-                    </select>
+                    {canManage ? (
+                      <Dropdown value={u.role} options={ROLE_OPTS} onChange={(v) => handleRoleChange(u.id, u.name, v)} ariaLabel="Үүрэг өөрчлөх" size="sm" className="w-40" />
+                    ) : (
+                      <span className="text-xs text-text-base">{ROLE_LABEL[u.role]}</span>
+                    )}
                   </td>
                   <td className="px-4 py-3"><UserClassCell user={u} /></td>
                   <td className="px-4 py-3">
-                    <button
-                      onClick={() => patchUser.mutate({ id: u.id, isActive: !u.isActive })}
-                      className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${u.isActive ? 'bg-triage-green-bg text-triage-green' : 'bg-surface-raised text-text-muted'}`}
-                    >
-                      {u.isActive ? 'Тийм' : 'Үгүй'}
-                    </button>
+                    {canManage ? (
+                      <button
+                        onClick={() => patchUser.mutate({ id: u.id, isActive: !u.isActive })}
+                        className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${u.isActive ? 'bg-triage-green-bg text-triage-green' : 'bg-surface-raised text-text-muted'}`}
+                      >
+                        {u.isActive ? 'Тийм' : 'Үгүй'}
+                      </button>
+                    ) : (
+                      <span className={`rounded-full px-3 py-1 text-xs font-medium ${u.isActive ? 'bg-triage-green-bg text-triage-green' : 'bg-surface-raised text-text-muted'}`}>
+                        {u.isActive ? 'Тийм' : 'Үгүй'}
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -114,6 +100,19 @@ const AdminUsersPage = () => {
           </table>
         </div>
       )}
+
+      <ConfirmModal
+        open={adminGrant !== null}
+        onClose={() => setAdminGrant(null)}
+        onConfirm={() => {
+          if (adminGrant) patchUser.mutate({ id: adminGrant.id, role: 'admin' }, { onSettled: () => setAdminGrant(null) })
+        }}
+        isPending={patchUser.isPending}
+        title="Админ эрх олгох"
+        message={adminGrant ? `${adminGrant.name}-д бүрэн админ эрх олгох уу? Энэ хэрэглэгч системийн бүх тохиргоог удирдах боломжтой болно.` : ''}
+        confirmLabel="Эрх олгох"
+        variant="danger"
+      />
     </section>
   )
 }

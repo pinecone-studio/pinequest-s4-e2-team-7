@@ -8,10 +8,10 @@ export type FindingClass = 'caries' | 'cavity' | 'crack'
 export type FollowUpStatus =
   | 'flagged'
   | 'contacted'
-  | 'referred'
-  | 'treatment_completed'
-  | 'verified_resolved'
-  | 'lost_to_follow_up'
+  | 'doctor_connected'
+  | 'treatment_done'
+  | 'treatment_refused'
+  | 'unclear'
 
 /** Screening period, e.g. "2026-spring". One leg of the identity triple. */
 export type SeasonId = string

@@ -24,10 +24,7 @@ const LoginPage = () => {
     setBusy(true)
     setError(null)
     try {
-      const data = await apiFetch<AuthData>('/api/auth/login', {
-        method: 'POST',
-        body: { email, password },
-      })
+      const data = await apiFetch<AuthData>('/api/auth/login', { method: 'POST', body: { email, password } })
       setToken(data.token)
       refresh()
       router.replace(homeForRole(data.user.role))
@@ -45,9 +42,7 @@ const LoginPage = () => {
       footer={
         <p className="text-center text-[14px] text-text-muted">
           Бүртгэлгүй юу?{' '}
-          <Link href="/register" className="font-semibold text-primary hover:underline">
-            Бүртгүүлэх
-          </Link>
+          <Link href="/register" className="font-semibold text-primary hover:underline">Бүртгүүлэх</Link>
         </p>
       }
     >
@@ -60,22 +55,15 @@ const LoginPage = () => {
           <span className="text-[13px] font-medium">Нууц үг</span>
           <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="consumer-input" placeholder="••••••••" />
         </label>
-        <div className="flex justify-end">
-          <button type="button" onClick={() => alert('Нууц үг сэргээх — Firebase Auth production-д')} className="text-[12px] font-medium text-primary hover:underline">
-            Нууц үг мартсан?
-          </button>
-        </div>
         {error ? <p className="text-[13px] text-triage-red">{error}</p> : null}
         <Button type="submit" size="lg" className="w-full" disabled={busy}>
           {busy ? 'Түр хүлээнэ үү…' : 'Нэвтрэх'}
         </Button>
       </form>
-
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
         <p className="relative mx-auto w-fit bg-surface px-3 text-[11px] text-text-muted">эсвэл</p>
       </div>
-
       <GoogleAuthButton />
     </AuthShell>
   )

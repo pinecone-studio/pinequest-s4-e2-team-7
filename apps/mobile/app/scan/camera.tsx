@@ -56,13 +56,11 @@ export default function CameraScreen() {
       setPhotos(newPhotos)
 
       if (!newPhotos.upper || !newPhotos.lower) {
-        // Switch to the other mode for the second shot
         setMode(m => m === 'upper' ? 'lower' : 'upper')
         setCapturing(false)
         return
       }
 
-      // Both photos captured — analyze
       setCapturing(false)
       setAnalyzing(true)
       const result = await analyzeImages(newPhotos.upper, newPhotos.lower, {

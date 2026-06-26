@@ -37,10 +37,10 @@ const TabLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="guide"
+        name="classes"
         options={{
-          title: 'Заавар',
-          tabBarIcon: ({ color }) => <TabIcon name="book-outline" color={color} />,
+          title: 'Ангиуд',
+          tabBarIcon: ({ color }) => <TabIcon name="school-outline" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -53,10 +53,10 @@ const TabLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="hospital"
+        name="calendar"
         options={{
-          title: 'Эмнэлэг',
-          tabBarIcon: ({ color }) => <TabIcon name="medkit-outline" color={color} />,
+          title: 'Хуанли',
+          tabBarIcon: ({ color }) => <TabIcon name="calendar-outline" color={color} />,
         }}
       />
       <Tabs.Screen

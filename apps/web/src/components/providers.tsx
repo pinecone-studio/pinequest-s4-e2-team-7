@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { UserRole } from '@pinequest/types'
 import { clearToken, decodeToken, getToken } from '@/lib/auth'
+import { ToastProvider } from '@/components/ui/Toast'
 
 type Session = {
   token: string | null
@@ -24,8 +25,8 @@ export const useSession = (): Session => {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30_000,        // cache for 30s; stable refs (schools/seasons) cache longer per-hook
-      retry: 1,                 // fail fast → components fall through to empty/error state
+      staleTime: 30_000,
+      retry: 1,
       refetchOnWindowFocus: false,
     },
   },
@@ -58,7 +59,9 @@ export const Providers = ({ children }: { children: ReactNode }) => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
+      <SessionContext.Provider value={value}>
+        <ToastProvider>{children}</ToastProvider>
+      </SessionContext.Provider>
     </QueryClientProvider>
   )
 }

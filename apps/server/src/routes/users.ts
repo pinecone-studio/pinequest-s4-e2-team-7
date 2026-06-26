@@ -9,7 +9,7 @@ import type { AppEnv } from '../types.js'
 
 export const userRoutes = new Hono<AppEnv>()
 
-const ROLES: UserRole[] = ['screener', 'dentist', 'follow_up', 'admin']
+const ROLES: UserRole[] = ['screener', 'teacher', 'parent', 'school_doctor', 'dentist', 'follow_up', 'admin']
 const userCols = { id: users.id, name: users.name, email: users.email, role: users.role, phone: users.phone, schoolId: users.schoolId, isActive: users.isActive }
 
 // Replace a user's single class grant (admin assigns teacher → class).
@@ -19,9 +19,12 @@ const setClassScope = async (db: DB, userId: string, classId: string | null | un
   if (classId) await db.insert(userScopes).values({ userId, scopeKind: 'class', scopeId: classId, grantedBy })
 }
 
-userRoutes.get('/', authorize('admin'), async (c) => {
+userRoutes.get('/', authorize('admin', 'school_doctor'), async (c) => {
   const db = c.get('db')
-  const list = await db.select({ ...userCols, createdAt: users.createdAt }).from(users).orderBy(desc(users.createdAt))
+  const payload = c.get('jwtPayload')
+  // School doctors see only their own school's staff; admin sees everyone.
+  const where = payload.role === 'school_doctor' && payload.schoolId ? eq(users.schoolId, payload.schoolId) : undefined
+  const list = await db.select({ ...userCols, createdAt: users.createdAt }).from(users).where(where).orderBy(desc(users.createdAt))
   const scopes = list.length
     ? await db.select({ userId: userScopes.userId, scopeId: userScopes.scopeId }).from(userScopes)
         .where(and(eq(userScopes.scopeKind, 'class'), inArray(userScopes.userId, list.map((u) => u.id))))
@@ -48,7 +51,7 @@ userRoutes.post('/', authorize('admin'), async (c) => {
 })
 
 const patchSchema = z.object({
-  role: z.enum(['screener', 'dentist', 'follow_up', 'admin']).optional(),
+  role: z.enum(['screener', 'teacher', 'parent', 'school_doctor', 'dentist', 'follow_up', 'admin']).optional(),
   isActive: z.boolean().optional(),
   schoolId: z.string().nullable().optional(),
   classId: z.string().nullable().optional(),
