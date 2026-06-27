@@ -3,6 +3,8 @@ import type { ChildScreeningSummary } from '@pinequest/types'
 import { apiFetch } from '@/lib/api'
 import { useSession } from '@/components/providers'
 
+export type PainOnset = 'yesterday' | '2_3_days' | '5_plus_days'
+
 export type QuestionnaireAnswers = {
   swelling: boolean
   painDisturbingSleepOrEating: boolean
@@ -10,6 +12,13 @@ export type QuestionnaireAnswers = {
   gumPimpleOrFistula: boolean
   trauma: boolean
   bleedingGums: boolean | null
+  painPresent: boolean
+  painCold: boolean
+  painHot: boolean
+  painBiting: boolean
+  painSpontaneous: boolean
+  painNight: boolean
+  painOnset: PainOnset | null
 }
 
 export type HospitalGuide = {

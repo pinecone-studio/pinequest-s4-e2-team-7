@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { Bell, ChevronDown, LogOut, Settings } from '@/lib/icons'
+import { ArrowsRightLeft, Bell, ChevronDown, LogOut, Settings } from '@/lib/icons'
+import AuthModal from '@/components/auth/AuthModal'
 import { ConsumerSearchBox } from '@/components/consumer/ConsumerSearchBox'
 import { SidebarToggleIcon } from '@/components/consumer/SidebarToggleIcon'
 import { ThemeToggle } from '@/components/consumer/ThemeToggle'
@@ -22,6 +23,7 @@ export const ConsumerShell = ({ children }: { children: React.ReactNode }) => {
   const { logout } = useSession()
   const { data: me } = useMe()
   const [collapsed, setCollapsed] = useState(true)
+  const [authOpen, setAuthOpen] = useState(false)
 
   const initial = me?.name?.charAt(0)?.toUpperCase() ?? 'U'
   const displayName = me?.name ?? 'Хэрэглэгч'
@@ -82,7 +84,7 @@ export const ConsumerShell = ({ children }: { children: React.ReactNode }) => {
             S
           </Link>
           {!collapsed ? (
-            <span className="text-[15px] font-bold tracking-wide text-text-base">SCREENER</span>
+            <span className="text-[15px] font-bold tracking-wide text-text-base">TOOTHLINGS</span>
           ) : null}
         </div>
 
@@ -109,6 +111,20 @@ export const ConsumerShell = ({ children }: { children: React.ReactNode }) => {
             </span>
             {!collapsed ? <span>Гарах</span> : null}
           </button>
+          <button
+              type="button"
+              onClick={() => setAuthOpen(true)}
+              title="Админ самбар руу нэвтрэх"
+              className={cn(
+                'flex w-full items-center text-primary transition-colors hover:bg-primary/10',
+                collapsed ? 'mx-auto size-10 justify-center rounded-xl' : 'gap-3 rounded-full px-4 py-2.5 text-[13px] font-semibold',
+              )}
+            >
+              <span className="flex shrink-0 [&>svg]:size-4.5">
+                <ArrowsRightLeft strokeWidth={2} />
+              </span>
+              {!collapsed ? <span>Админ самбар</span> : null}
+            </button>
         </div>
       </aside>
 
@@ -158,6 +174,8 @@ export const ConsumerShell = ({ children }: { children: React.ReactNode }) => {
 
         <main className="consumer-main flex-1 px-4 py-6 pb-16 lg:px-6 xl:px-8">{children}</main>
       </div>
+
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} initialMode="login" />
     </div>
   )
 }

@@ -45,8 +45,9 @@ const ChildSummaryCard = ({ childName, guardianEmail, summary: s }: Props) => {
         </button>
       </div>
 
-      {/* Hedged headline */}
-      <p className="mb-4 text-[13px] leading-relaxed text-text-base">{s.headline}</p>
+      {/* Hedged headline + clinical assessment narrative */}
+      <p className="mb-2 text-[13px] font-medium leading-relaxed text-text-base">{s.headline}</p>
+      <p className="mb-4 rounded-xl border border-border bg-surface p-3 text-[12px] leading-relaxed text-text-muted">{s.assessment}</p>
 
       {/* Signal tiles */}
       <div className="mb-4 grid grid-cols-3 gap-2.5">
@@ -78,9 +79,24 @@ const ChildSummaryCard = ({ childName, guardianEmail, summary: s }: Props) => {
         </div>
       )}
 
+      {/* Dentist actions */}
+      {s.dentistActions.length > 0 && (
+        <div className="mb-3 rounded-xl border border-border bg-surface p-3.5">
+          <p className="mb-2 text-[12px] font-semibold text-text-base">Эмчид зөвлөх</p>
+          <ul className="flex flex-col gap-1.5">
+            {s.dentistActions.map((a, i) => (
+              <li key={i} className="flex gap-2 text-[12px] text-text-muted">
+                <span className={`mt-1.5 size-1.5 shrink-0 rounded-full ${DOT[lvl]}`} />
+                {a}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Home steps */}
       <div className="rounded-xl border border-border bg-surface p-3.5">
-        <p className="mb-2 text-[12px] font-semibold text-text-base">Гэртээ хийх зөвлөмж</p>
+        <p className="mb-2 text-[12px] font-semibold text-text-base">Гэртээ хийх зөвлөмж ({s.ageYears} нас)</p>
         <ul className="flex flex-col gap-1.5">
           {s.homeSteps.map((step, i) => (
             <li key={i} className="flex gap-2 text-[12px] text-text-muted">

@@ -1,71 +1,36 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState, type FormEvent } from 'react'
-import { AuthShell, GoogleAuthButton } from '@/components/consumer/AuthShell'
-import Button from '@/components/ui/Button'
-import { apiFetch, authErrorText } from '@/lib/api'
-import { homeForRole, setToken } from '@/lib/auth'
-import { useSession } from '@/components/providers'
-
-type AuthData = { token: string; user: { id: string; name: string; role: string } }
 
 const LoginPage = () => {
   const router = useRouter()
-  const { refresh } = useSession()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [busy, setBusy] = useState(false)
-
-  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setBusy(true)
-    setError(null)
-    try {
-      const data = await apiFetch<AuthData>('/api/auth/login', { method: 'POST', body: { email, password } })
-      setToken(data.token)
-      refresh()
-      router.replace(homeForRole(data.user.role))
-    } catch (err) {
-      setError(authErrorText(err instanceof Error ? err.message : ''))
-    } finally {
-      setBusy(false)
-    }
-  }
 
   return (
-    <AuthShell
-      title="Нэвтрэх"
-      subtitle="Имэйл, нууц үгээр эсвэл Google-ээр нэвтэрнэ үү"
-      footer={
-        <p className="text-center text-[14px] text-text-muted">
-          Бүртгэлгүй юу?{' '}
-          <Link href="/register" className="font-semibold text-primary hover:underline">Бүртгүүлэх</Link>
-        </p>
-      }
-    >
-      <form onSubmit={onSubmit} className="space-y-4">
-        <label className="block space-y-2">
-          <span className="text-[13px] font-medium">Имэйл</span>
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="consumer-input" placeholder="name@email.com" />
-        </label>
-        <label className="block space-y-2">
-          <span className="text-[13px] font-medium">Нууц үг</span>
-          <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="consumer-input" placeholder="••••••••" />
-        </label>
-        {error ? <p className="text-[13px] text-triage-red">{error}</p> : null}
-        <Button type="submit" size="lg" className="w-full" disabled={busy}>
-          {busy ? 'Түр хүлээнэ үү…' : 'Нэвтрэх'}
-        </Button>
-      </form>
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
-        <p className="relative mx-auto w-fit bg-surface px-3 text-[11px] text-text-muted">эсвэл</p>
+    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 p-8">
+      <div>
+        <Image src="/smilo.png" alt="Toothlings" width={140} height={64} priority className="mb-3 h-auto w-35" />
+        <p className="mt-1 text-sm text-text-muted">Скрининг удирдлагын самбар</p>
       </div>
-      <GoogleAuthButton />
-    </AuthShell>
+      <div className="flex flex-col gap-3">
+        <input defaultValue="admin@screener.mn" className="rounded-lg border border-border bg-surface px-3 py-2 text-text-base" />
+        <input type="password" defaultValue="admin123" className="rounded-lg border border-border bg-surface px-3 py-2 text-text-base" />
+        <button
+          type="button"
+          onClick={() => router.push('/dashboard/admin')}
+          className="rounded-lg bg-primary px-3 py-2 font-medium text-text-on-primary transition-colors hover:bg-primary-hover"
+        >
+          Нэвтрэх
+        </button>
+      </div>
+      <p className="text-sm text-text-muted">
+        Шинэ скрининг хийгч үү?{' '}
+        <Link href="/register" className="font-medium text-primary hover:underline">
+          Бүртгүүлэх
+        </Link>
+      </p>
+    </main>
   )
 }
 

@@ -2,10 +2,9 @@
 
 import { useState } from 'react'
 import {
-  CameraIcon, ChevronLeftIcon, ChevronRightIcon, CheckCircleIcon,
-  XCircleIcon, MapPinIcon, ClockIcon, PhoneIcon,
+  CameraIcon, ChevronLeftIcon, ChevronRightIcon, MapPinIcon, ClockIcon, PhoneIcon,
 } from '@heroicons/react/24/outline'
-import type { QuestionnaireAnswers, HospitalGuide } from '@/hooks/useChildSummary'
+import type { HospitalGuide } from '@/hooks/useChildSummary'
 
 // Theme-aware triage tokens (NO hardcoded rose/amber/sky — those broke dark mode)
 export const TRIAGE_BADGE: Record<string, string> = {
@@ -17,17 +16,8 @@ export const TRIAGE_BLOCK: Record<string, string> = {
   red: 'border-triage-red/20 bg-triage-red-bg', yellow: 'border-triage-yellow/20 bg-triage-yellow-bg', green: 'border-triage-green/20 bg-triage-green-bg',
 }
 export const TRIAGE_LABEL: Record<string, string> = {
-  red: 'Яаралтай эмчилгээ шаардлагатай', yellow: 'Эмчилгээ шаардлагатай', green: 'Хэвийн',
+  red: 'Яаралтай эмчилгээ шаардлагатай', yellow: 'Эмчилгээ шаардлагатай', green: 'Аюулын шинж илрээгүй',
 }
-
-const SYMPTOMS: { key: keyof QuestionnaireAnswers; mn: string }[] = [
-  { key: 'swelling',                    mn: 'Хавдар / хавдсан байдал' },
-  { key: 'painDisturbingSleepOrEating', mn: 'Унтаж / идэж чадахгүй өвдөлт' },
-  { key: 'fever',                        mn: 'Халуурах' },
-  { key: 'gumPimpleOrFistula',           mn: 'Буйл дээр цэврүү эсвэл цоорхой' },
-  { key: 'trauma',                       mn: 'Шүдэнд гэмтэл учирсан' },
-  { key: 'bleedingGums',                 mn: 'Буйл цус алдах' },
-]
 
 const navBtn = 'btn absolute top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 disabled:opacity-30'
 
@@ -59,25 +49,6 @@ export const ImageGallery = ({ refs }: { refs: string[] }) => {
     </div>
   )
 }
-
-export const QuestionnairePanel = ({ q }: { q: QuestionnaireAnswers }) => (
-  <div className="rounded-2xl bg-surface-raised px-4 py-3">
-    <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-text-muted">Симптомын судалгаа</p>
-    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-      {SYMPTOMS.map(({ key, mn }) => {
-        const val = q[key], yes = val === true, unk = val === null
-        return (
-          <div key={key} className="flex items-center gap-2">
-            {unk ? <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-border text-[8px] text-text-muted">?</span>
-              : yes ? <XCircleIcon className="size-4 shrink-0 text-triage-red" />
-              : <CheckCircleIcon className="size-4 shrink-0 text-triage-green" />}
-            <span className="text-[12px] leading-tight text-text-base">{mn}</span>
-          </div>
-        )
-      })}
-    </div>
-  </div>
-)
 
 export const HospitalGuidePanel = ({ h }: { h: HospitalGuide }) => (
   <div className="rounded-2xl border border-fu-contacted/20 bg-fu-contacted-bg p-4">

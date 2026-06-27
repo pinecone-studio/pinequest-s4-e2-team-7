@@ -12,7 +12,9 @@ import {
   SectionHeader,
   SettingRow,
 } from '@/components/consumer/warm/WarmUI'
-import { FileDown, History } from '@/lib/icons'
+import { ArrowsRightLeft, FileDown, History } from '@/lib/icons'
+import { useSession } from '@/components/providers'
+import { homeForRole } from '@/lib/auth'
 import {
   clearQuestionnaire,
   getBrushSession,
@@ -187,6 +189,11 @@ const HistorySection = () => {
 
 const SettingsSection = () => {
   const router = useRouter()
+  const { role } = useSession()
+  // Single source of truth: any role whose landing route isn't the consumer
+  // home is a staff role with a board. Route them there (not always /admin).
+  const boardRoute = homeForRole(role ?? null)
+  const isStaff = boardRoute !== '/home'
 
   return (
   <section id="settings" className="scroll-mt-24">
@@ -237,6 +244,16 @@ const SettingsSection = () => {
         Шалгалтын асуумж дахин бөглөх
       </PillButton>
     </div>
+    {isStaff && (
+      <button
+        type="button"
+        onClick={() => router.push(boardRoute)}
+        className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-[#F3B900] px-6 py-3 text-[14px] font-bold text-slate-900 transition-all duration-200 hover:opacity-90"
+      >
+        <ArrowsRightLeft className="size-4" strokeWidth={2} />
+        Удирдлагын самбар руу шилжих
+      </button>
+    )}
   </section>
   )
 }

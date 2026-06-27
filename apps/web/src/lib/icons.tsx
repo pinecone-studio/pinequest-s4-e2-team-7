@@ -149,4 +149,10 @@ export const ChevronDown = ({ size, strokeWidth, className, ...rest }: IconProps
   </svg>
 )
 
+export const ArrowsRightLeft = ({ size, strokeWidth, className, ...rest }: IconProps) => (
+  <svg {...base(size, strokeWidth, className)} {...rest}>
+    <path d="M17 4l4 4-4 4M7 20l-4-4 4-4M21 8H3M21 16H3" />
+  </svg>
+)
+
 export type LucideIcon = typeof Home

@@ -6,10 +6,10 @@ import { authErrorText, inputCls, submitCls } from './authConfig'
 import Spinner from '@/components/ui/Spinner'
 
 /** Login by email OR phone (the API accepts either as the identifier). */
-const LoginForm = ({ onDone }: { onDone: () => void }) => {
+const LoginForm = ({ onDone, defaultIdentifier = 'admin@screener.mn', defaultPassword = '' }: { onDone: () => void; defaultIdentifier?: string; defaultPassword?: string }) => {
   const { submit, busy, error } = useAuth(onDone)
-  const [identifier, setIdentifier] = useState('')
-  const [password, setPassword] = useState('')
+  const [identifier, setIdentifier] = useState(defaultIdentifier)
+  const [password, setPassword] = useState(defaultPassword)
   const [errs, setErrs] = useState<{ id?: string; pw?: string }>({})
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
