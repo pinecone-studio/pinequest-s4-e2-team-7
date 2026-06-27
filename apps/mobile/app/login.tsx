@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Animated, Dimensions, ScrollView, StyleSheet, View, Text, TouchableOpacity } from 'react-native'
+import { Animated, Dimensions, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TouchableWithoutFeedback, View, Text, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTheme } from '@/lib/ThemeContext'
 import AuthBrand from '@/components/auth/AuthBrand'
@@ -15,38 +15,77 @@ const TABS: { mode: Mode; label: string }[] = [
 
 const { height } = Dimensions.get('window')
 
+const TAB_PAD = 4
+
 // Auth as a bottom slide-over: brand backdrop with the form sheet sliding up.
 const LoginScreen = () => {
   const { colors } = useTheme()
   const [mode, setMode] = useState<Mode>('login')
+  const [tabsW, setTabsW] = useState(0)
   const slide = useRef(new Animated.Value(height)).current
+  // 0 = login (left), 1 = register (right) — drives the sliding pill.
+  const pill = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
     Animated.timing(slide, { toValue: 0, duration: 320, useNativeDriver: true }).start()
   }, [slide])
 
+  useEffect(() => {
+    Animated.spring(pill, {
+      toValue: mode === 'login' ? 0 : 1,
+      useNativeDriver: true,
+      friction: 9,
+      tension: 90,
+    }).start()
+  }, [mode, pill])
+
+  const pillW = tabsW ? (tabsW - TAB_PAD * 2) / TABS.length : 0
+  const pillX = pill.interpolate({ inputRange: [0, 1], outputRange: [0, pillW] })
+
   return (
-    <View style={[s.root, { backgroundColor: colors.bg }]}>
-      <SafeAreaView style={s.brandWrap}>
-        <AuthBrand subtitle={'Хүүхдийн шүдний эрүүл мэндийн\nанхан шатны хяналт'} />
-      </SafeAreaView>
+    <KeyboardAvoidingView
+      style={[s.root, { backgroundColor: colors.bg }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <SafeAreaView style={s.brandWrap}>
+          <AuthBrand subtitle={'Хүүхдийн амны хөндийн байдлын хяналт ба чиглүүлэг'} />
+        </SafeAreaView>
+      </TouchableWithoutFeedback>
 
       <Animated.View style={[s.sheet, { backgroundColor: colors.surface, transform: [{ translateY: slide }] }]}>
         <View style={[s.grabber, { backgroundColor: colors.border }]} />
         <ScrollView
           contentContainerStyle={s.scroll}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
           showsVerticalScrollIndicator={false}
         >
-          <View style={[s.tabs, { backgroundColor: colors.surfaceRaised }]}>
+          <View
+            style={[s.tabs, { backgroundColor: colors.surfaceRaised, borderColor: colors.border }]}
+            onLayout={(e) => setTabsW(e.nativeEvent.layout.width)}
+          >
+            {pillW > 0 && (
+              <Animated.View
+                style={[
+                  s.pill,
+                  { width: pillW, backgroundColor: colors.primary, transform: [{ translateX: pillX }] },
+                ]}
+              />
+            )}
             {TABS.map(({ mode: m, label }) => (
               <TouchableOpacity
                 key={m}
-                style={[s.tab, mode === m && { backgroundColor: colors.surface }]}
+                style={s.tab}
                 onPress={() => setMode(m)}
                 activeOpacity={0.8}
               >
-                <Text style={[s.tabLabel, { color: mode === m ? colors.textBase : colors.textMuted }]}>
+                <Text
+                  style={[
+                    s.tabLabel,
+                    { color: mode === m ? colors.primaryText : colors.textMuted },
+                  ]}
+                >
                   {label}
                 </Text>
               </TouchableOpacity>
@@ -56,7 +95,7 @@ const LoginScreen = () => {
           {mode === 'login' ? <LoginForm /> : <RegisterForm />}
         </ScrollView>
       </Animated.View>
-    </View>
+    </KeyboardAvoidingView>
   )
 }
 
@@ -76,8 +115,20 @@ const s = StyleSheet.create({
   },
   grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, marginBottom: 8 },
   scroll: { padding: 22, gap: 20, paddingBottom: 40 },
-  tabs: { flexDirection: 'row', borderRadius: 12, padding: 4 },
-  tab: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
+  tabs: { flexDirection: 'row', borderRadius: 14, padding: TAB_PAD, borderWidth: 1, position: 'relative' },
+  pill: {
+    position: 'absolute',
+    top: TAB_PAD,
+    left: TAB_PAD,
+    bottom: TAB_PAD,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  tab: { flex: 1, paddingVertical: 11, alignItems: 'center', justifyContent: 'center' },
   tabLabel: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
 })
 

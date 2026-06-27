@@ -25,6 +25,10 @@ export const authErrorText = (msg: string): string => {
   switch (msg) {
     case 'invalid_credentials':
       return 'Имэйл/утас эсвэл нууц үг буруу байна'
+    case 'wrong_password':
+      return 'Нууц үг буруу байна'
+    case 'user_not_found':
+      return 'Та бүртгэлгүй байна. Бүртгүүлнэ үү'
     case 'passwords_mismatch':
       return 'Нууц үг таарахгүй байна'
     case 'phone_taken':

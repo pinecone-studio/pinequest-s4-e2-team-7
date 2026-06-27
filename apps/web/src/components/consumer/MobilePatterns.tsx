@@ -44,8 +44,8 @@ export const ScanHeroCard = ({ href, label = 'Зураг авах' }: { href: st
     className="flex items-center justify-between gap-4 rounded-[20px] bg-[#F3B900] p-6 shadow-[0_4px_20px_rgba(243,185,0,0.35)] transition-all hover:bg-[#E5AD00]"
   >
     <div>
-      <p className="text-[20px] font-bold text-slate-900">Шинэ шалгалт</p>
-      <p className="mt-1 text-[14px] text-slate-900/75">Хүүхдийн шүдийг шалгах</p>
+      <p className="text-[20px] font-bold text-slate-900">Урьдчилан сэргийлэх</p>
+      <p className="mt-1 text-[14px] text-slate-900/75">Амны хөндийн байдлын хяналт</p>
     </div>
     <span className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-[14px] font-semibold text-[#F3B900]">
       📷 {label}

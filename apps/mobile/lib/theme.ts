@@ -26,9 +26,9 @@ export const lightColors: ColorTokens = {
   primary: '#F2B705',        // Honey Gold — matches web brand primary
   primaryText: '#1A1407',    // dark text on gold button
   sidebar: '#2A2418',        // web brand-sidebar
-  bg: '#F3F1EA',             // warm cream canvas — matches web bg
+  bg: '#FFFFFF',             // all-white canvas on phone
   surface: '#FFFFFF',
-  surfaceRaised: '#F7F5EE',  // inputs / raised cards
+  surfaceRaised: '#FFFFFF',  // inputs / raised cards — white
   textBase: '#1D1D1F',
   textSecondary: '#3C3C43',
   textMuted: '#6E6E73',
