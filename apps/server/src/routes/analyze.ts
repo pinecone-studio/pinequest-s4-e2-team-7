@@ -76,7 +76,6 @@ analyzeRoutes.post('/analyze', authenticate, async (c) => {
       id: screeningId, childKey, classId, schoolId, seasonId,
       imageRefs: Array.from({ length: imageCount }, (_, i) => `analyze:${screeningId}:${i}`),
       findings, symptoms, modelName: 'yolov8',
-      contentVersionId: (body['contentVersionId'] as string | undefined) ?? 'content-v1',
       capturedAt: new Date().toISOString(),
       deviceId: body['deviceId'] as string | undefined,
     },

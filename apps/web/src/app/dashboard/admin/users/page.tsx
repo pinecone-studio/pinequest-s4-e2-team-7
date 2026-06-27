@@ -15,6 +15,7 @@ import {
   AcademicCapIcon, BuildingOffice2Icon, UserGroupIcon,
   ViewfinderCircleIcon, SparklesIcon, ShieldCheckIcon,
 } from '@heroicons/react/24/outline'
+import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
 
 const ROLE_LABEL: Record<UserRole, string> = {
   screener: 'Хэрэглэгч', teacher: 'Багш', parent: 'Эцэг эх', school_doctor: 'Сургуулийн эмч',
@@ -49,9 +50,10 @@ const AdminUsersPage = () => {
     patchUser.mutate({ id: userId, role: newRole })
   }
 
+  useSetPageHeader({ title: 'Хэрэглэгчид' })
+
   return (
     <section className="flex flex-col gap-5">
-      <h1 className="text-2xl font-semibold tracking-tight text-text-base">Хэрэглэгчид</h1>
 
       {canManage && <UserCreateForm />}
 

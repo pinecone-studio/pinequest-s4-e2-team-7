@@ -17,7 +17,6 @@ import { userRoutes } from './routes/users.js'
 import { statsRoutes } from './routes/stats.js'
 import { seasonRoutes } from './routes/seasons.js'
 import { auditRoutes } from './routes/audit.js'
-import { contentRoutes } from './routes/content.js'
 import { scheduleRoutes } from './routes/schedule.js'
 import { devRoutes } from './routes/dev.js'
 
@@ -43,7 +42,6 @@ app.route('/api/users', userRoutes)
 app.route('/api/stats', statsRoutes)
 app.route('/api/seasons', seasonRoutes)
 app.route('/api/audit', auditRoutes)
-app.route('/api/content', contentRoutes)
 app.route('/api/schedule', scheduleRoutes)
 app.route('/api/dev', devRoutes)
 

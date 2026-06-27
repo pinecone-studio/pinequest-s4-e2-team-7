@@ -8,6 +8,7 @@ import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import StatusPicker from '@/components/ui/StatusPicker'
 import StudentSummaryBody from '@/components/admin/summary/StudentSummaryBody'
+import LongitudinalDeltaBar from '@/components/admin/summary/LongitudinalDeltaBar'
 
 // Summary + editable follow-up status. Shares its body with StudentModal.
 type Props = { student: BoardStudent | null; onClose: () => void }
@@ -37,6 +38,17 @@ const FollowUpEditModal = ({ student, onClose }: Props) => {
         </>
       }
     >
+      {student.seasonCount >= 2 && (() => {
+        const prior = student.seasonHistory.at(-2)
+        const current = student.seasonHistory.at(-1)
+        return prior && current ? (
+          <LongitudinalDeltaBar
+            priorLevel={prior.effectiveLevel}
+            currentLevel={current.effectiveLevel}
+            priorSeasonId={prior.seasonId}
+          />
+        ) : null
+      })()}
       <StudentSummaryBody
         student={student}
         detail={detail}

@@ -18,7 +18,7 @@ export const screenings = sqliteTable('Screening', {
   triageReason: text('triageReason'),
   modelName: text('modelName').notNull(),
   modelVersion: text('modelVersion'),
-  contentVersionId: text('contentVersionId').notNull(),
+  contentVersionId: text('contentVersionId').default('default'),
   capturedAt: ts('capturedAt').notNull(),
   deviceId: text('deviceId'),
   createdAt: ts('createdAt').notNull().$defaultFn(() => new Date()),
@@ -30,6 +30,8 @@ export const screenings = sqliteTable('Screening', {
   index('Screening_school_triage_idx').on(t.schoolId, t.triageLevel),
   index('Screening_classId_idx').on(t.classId),
   index('Screening_capturedAt_idx').on(t.capturedAt),
+  index('Screening_childKey_capturedAt_idx').on(t.childKey, t.capturedAt),
+  index('Screening_childKey_season_capturedAt_idx').on(t.childKey, t.seasonId, t.capturedAt),
 ])
 
 export const screeningReviews = sqliteTable('ScreeningReview', {

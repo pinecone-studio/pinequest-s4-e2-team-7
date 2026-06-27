@@ -3,17 +3,6 @@ import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core'
 const uuid = () => text('id').primaryKey().$defaultFn(() => crypto.randomUUID())
 const ts = (name: string) => integer(name, { mode: 'timestamp_ms' })
 
-// Dentist-approved, versioned parent/education content. Apps pin a version.
-export const contentVersions = sqliteTable('ContentVersion', {
-  id: uuid(),
-  version: text('version').notNull(),
-  locale: text('locale').notNull(),
-  status: text('status').notNull().default('published'), // 'draft' | 'published'
-  notes: text('notes'),
-  publishedAt: ts('publishedAt').notNull().$defaultFn(() => new Date()),
-  publishedById: text('publishedById').notNull(),
-})
-
 export const auditLogs = sqliteTable('AuditLog', {
   id: uuid(),
   userId: text('userId').notNull(),

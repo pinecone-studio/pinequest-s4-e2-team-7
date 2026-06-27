@@ -8,7 +8,7 @@ import type { Child, TriageLevel } from '@pinequest/types'
 type Props = { rows: Child[]; levelByKey?: Record<string, TriageLevel> }
 
 const DOT: Record<string, string> = { green: 'bg-triage-green', yellow: 'bg-triage-yellow', red: 'bg-triage-red' }
-const LABEL: Record<string, string> = { green: 'Аюулгүй', yellow: 'Хяналт', red: 'Яаралтай' }
+const LABEL: Record<string, string> = { green: 'Дараагийн хяналт', yellow: 'Эмчилгээ', red: 'Яаралтай' }
 
 export const RosterTable = ({ rows, levelByKey = {} }: Props) => {
   const router = useRouter()

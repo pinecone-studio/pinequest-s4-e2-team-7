@@ -17,7 +17,7 @@ export const TRIAGE_BLOCK: Record<string, string> = {
   red: 'border-triage-red/20 bg-triage-red-bg', yellow: 'border-triage-yellow/20 bg-triage-yellow-bg', green: 'border-triage-green/20 bg-triage-green-bg',
 }
 export const TRIAGE_LABEL: Record<string, string> = {
-  red: 'Яаралтай эмчилгээ шаардлагатай', yellow: 'Эмчилгээ шаардлагатай', green: 'Хэвийн',
+  red: 'Яаралтай эмчилгээ шаардлагатай', yellow: 'Эмчилгээ шаардлагатай', green: 'Дараагийн хяналтанд хамруулах',
 }
 
 const SYMPTOMS: { key: keyof QuestionnaireAnswers; mn: string }[] = [

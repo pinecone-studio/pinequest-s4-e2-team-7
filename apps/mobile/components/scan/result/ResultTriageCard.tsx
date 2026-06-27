@@ -6,9 +6,9 @@ export type TriageLevel = 'green' | 'yellow' | 'red'
 // SCREENING-not-diagnosis wording: green never says "healthy"; no clinical words
 // (цоорол/decay) — only "danger signs seen in THESE photos". Mirrors @pinequest/core.
 const CONFIG: Record<TriageLevel, { label: string; subtitle: string; dotColor: string }> = {
-  green: { label: 'Аюулын шинж илрээгүй', subtitle: 'Эдгээр зурагт тодорхой шинж тэмдэг харагдсангүй', dotColor: '#2A7D4F' },
-  yellow: { label: 'Анхаарал шаардлагатай', subtitle: 'Шүдний эмчид үзүүлэхийг зөвлөж байна (яаралтай биш)', dotColor: '#8A6500' },
-  red: { label: 'Яаралтай', subtitle: 'Аль болох хурдан шүдний эмчид хандана уу', dotColor: '#B83838' },
+  green: { label: 'Дараагийн хяналтанд хамруулах', subtitle: 'Харьцангуй эрүүл, дараагийн улирлын хяналт хийх', dotColor: '#2A7D4F' },
+  yellow: { label: 'Эмчилгээ шаардлагатай', subtitle: 'Эмчлүүлэх шаардлагатай шүднүүд байгаа тул эмчид үзүүлэх', dotColor: '#8A6500' },
+  red: { label: 'Яаралтай эмчилгээ шаардлагатай', subtitle: 'Яаралтай эмчилгээ хийлгэх', dotColor: '#B83838' },
 }
 
 type Props = { level: TriageLevel; score: number }
@@ -29,7 +29,7 @@ export default function ResultTriageCard({ level, score }: Props) {
       <Text style={[s.subtitle, { color: textColor }]}>{subtitle}</Text>
       {pct > 0 && (
         <View style={s.badge}>
-          <Text style={[s.badgeText, { color: textColor }]}>Эрсдэлийн оноо · {pct}%</Text>
+          <Text style={[s.badgeText, { color: textColor }]}>Эрсдэл {pct}%</Text>
         </View>
       )}
     </View>

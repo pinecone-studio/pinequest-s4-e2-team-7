@@ -1,10 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { TriageLevel, FollowUpStatus } from '@pinequest/types'
+import type { TriageLevel, FollowUpStatus, ChildTrendSnapshot } from '@pinequest/types'
 import { apiFetch } from '@/lib/api'
 import { openParentEmail } from '@/lib/parentEmail'
 import { useSession } from '@/components/providers'
 import { useToast } from '@/components/ui/Toast'
 import type { ChildSummaryPayload } from './useChildSummary'
+
+export type SeasonSnapshot = {
+  seasonId: string
+  screeningId: string
+  triageLevel: TriageLevel
+  confirmedLevel: TriageLevel | null
+  effectiveLevel: TriageLevel
+  screenedAt: string
+}
 
 export type BoardStudent = {
   id: string
@@ -23,6 +32,10 @@ export type BoardStudent = {
   latestScreeningId: string | null
   screenedAt: string | null
   followUpStatus: FollowUpStatus | null
+  escalationFlag: boolean
+  seasonHistory: SeasonSnapshot[]
+  seasonCount: number
+  trend: ChildTrendSnapshot | null
 }
 
 /** Scope-aware roster + each child's latest triage status (admin/doctor/teacher/parent). */

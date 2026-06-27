@@ -1,62 +1,80 @@
 'use client'
 
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 import { PlusIcon, BuildingLibraryIcon } from '@heroicons/react/24/outline'
 import { useSchools, useCreateSchool } from '@/hooks/useSchools'
-import Card from '@/components/ui/Card'
-import Button from '@/components/ui/Button'
+import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
+import { useMe } from '@/hooks/useMe'
+import SchoolSection from '@/components/admin/cohorts/SchoolSection'
 import EmptyState from '@/components/ui/EmptyState'
-import CohortCard from '@/components/admin/cohorts/CohortCard'
+import { SkeletonTable } from '@/components/ui/Skeleton'
+import Button from '@/components/ui/Button'
+import Modal from '@/components/ui/Modal'
 
-// Schools/cohorts — relocated here from the admin board (Phase 0 decision).
 const CohortsPage = () => {
-  const { data: schools } = useSchools()
-  const createSchool = useCreateSchool()
-  const [showAdd, setShowAdd] = useState(false)
+  const { data: schools, isLoading } = useSchools()
+  const { data: me } = useMe()
+  const create = useCreateSchool()
+  const [adding, setAdding] = useState(false)
   const [name, setName] = useState('')
+  const [district, setDistrict] = useState('')
 
-  const onAdd = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  useSetPageHeader({ title: 'Сургууль ба анги бүлгүүд', subtitle: 'Үзүүлэлтийн хамрах сургуулиуд' })
+
+  const isAdmin = me?.role === 'admin'
+
+  const onAdd = () => {
     if (!name.trim()) return
-    createSchool.mutate({ name: name.trim() })
-    setName('')
-    setShowAdd(false)
+    create.mutate({ name: name.trim(), district: district.trim() || undefined }, {
+      onSuccess: () => { setAdding(false); setName(''); setDistrict('') },
+    })
   }
 
+  if (isLoading) return <SkeletonTable />
+
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-[22px] font-bold tracking-tight text-text-base">Сургууль ба анги бүлгүүд</h1>
-          <p className="text-[12px] text-text-muted">Үзүүлэлтийн хамрах сургуулиуд</p>
-        </div>
-        <Button variant="secondary" size="sm" onClick={() => setShowAdd((v) => !v)}>
-          <PlusIcon className="size-3.5" /> Сургууль нэмэх
-        </Button>
+    <section className="flex flex-col gap-5">
+      <div className="flex items-center justify-between">
+        <p className="text-[13px] text-text-muted">
+          {schools?.length ?? 0} сургууль
+        </p>
+        {isAdmin && (
+          <Button variant="primary" size="sm" onClick={() => setAdding(true)}>
+            <PlusIcon className="size-4" /> Сургууль нэмэх
+          </Button>
+        )}
       </div>
 
-      {showAdd && (
-        <form onSubmit={onAdd} className="flex gap-2">
-          <input
-            autoFocus
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Сургуулийн нэр"
-            className="flex-1 rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-          <Button type="submit">Нэмэх</Button>
-          <Button type="button" variant="secondary" onClick={() => setShowAdd(false)}>Болих</Button>
-        </form>
-      )}
-
-      {!schools || schools.length === 0 ? (
-        <Card><EmptyState Icon={BuildingLibraryIcon} title="Сургууль алга" hint="Эхний сургуулиа нэмж үзүүлэлт хамралтыг эхлүүл." /></Card>
+      {(!schools || schools.length === 0) ? (
+        <EmptyState
+          Icon={BuildingLibraryIcon}
+          title="Сургууль бүртгэгдээгүй"
+          hint="Сургуулийн мэдээлэл нэмснээр ангиуд энд харагдана."
+        />
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {schools.map((s) => <CohortCard key={s.id} school={s} />)}
+        <div className="flex flex-col gap-4">
+          {schools.map((s) => <SchoolSection key={s.id} school={s} />)}
         </div>
       )}
-    </div>
+
+      <Modal open={adding} onClose={() => setAdding(false)} title="Сургууль нэмэх" size="md"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setAdding(false)}>Болих</Button>
+            <Button variant="primary" onClick={onAdd} disabled={!name.trim() || create.isPending}>Нэмэх</Button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <input value={name} onChange={(e) => setName(e.target.value)}
+            placeholder="Сургуулийн нэр" autoFocus
+            className="rounded-xl border border-border bg-surface px-3 py-2 text-[13px] text-text-base placeholder:text-text-muted focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          <input value={district} onChange={(e) => setDistrict(e.target.value)}
+            placeholder="Дүүрэг / сум (заавал биш)"
+            className="rounded-xl border border-border bg-surface px-3 py-2 text-[13px] text-text-base placeholder:text-text-muted focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/30" />
+        </div>
+      </Modal>
+    </section>
   )
 }
 

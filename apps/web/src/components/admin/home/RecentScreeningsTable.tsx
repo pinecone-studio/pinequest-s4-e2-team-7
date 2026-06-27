@@ -12,9 +12,11 @@ import Dropdown, { type DropdownOption } from '@/components/ui/Dropdown'
 type Props = { screenings: ScreeningRow[] | undefined; loading?: boolean }
 type Sort  = 'recent' | 'oldest' | 'level'
 
+const PAGE_SIZE = 10
+
 const AVA:   Record<string, string> = { green: 'bg-triage-green-bg text-triage-green', yellow: 'bg-triage-yellow-bg text-triage-yellow', red: 'bg-triage-red-bg text-triage-red' }
 const TONE:  Record<string, Tone>   = { green: 'safe', yellow: 'check', red: 'danger' }
-const LABEL: Record<string, string> = { green: 'Аюулгүй', yellow: 'Анхаар', red: 'Яаралтай' }
+const LABEL: Record<string, string> = { green: 'Дараагийн хяналт', yellow: 'Эмчилгээ', red: 'Яаралтай' }
 const SORT_OPTS: DropdownOption<Sort>[] = [
   { value: 'level',  label: 'Эрэмбэ',  Icon: FireIcon },
   { value: 'recent', label: 'Сүүлийн', Icon: BarsArrowDownIcon },
@@ -28,6 +30,7 @@ const conf = (s: ScreeningRow) => (s.findings.length ? Math.round(Math.max(...s.
 
 const RecentScreeningsTable = ({ screenings, loading }: Props) => {
   const [sort, setSort] = useState<Sort>('level')
+  const [page, setPage] = useState(0)
 
   if (loading) return <SkeletonTable />
 
@@ -36,6 +39,10 @@ const RecentScreeningsTable = ({ screenings, loading }: Props) => {
     if (sort === 'level')  return (RANK[a.triageLevel] ?? 9) - (RANK[b.triageLevel] ?? 9)
     return new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime()
   })
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE))
+  const safePage   = Math.min(page, totalPages - 1)
+  const pageRows   = sorted.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE)
 
   return (
     <div className="blob-lg pop-in flex flex-col border border-border bg-surface shadow-(--shadow-card)" style={{ animationDelay: '240ms' }}>
@@ -56,7 +63,7 @@ const RecentScreeningsTable = ({ screenings, loading }: Props) => {
       {sorted.length === 0 ? (
         <EmptyState Icon={InboxIcon} title="Хэрэглэгчийн бүртгэл алга" hint="Шинэ хэрэглэгчээр нэвтрэхэд дараалал энд харагдана." />
       ) : (
-        sorted.map((s) => {
+        pageRows.map((s) => {
           const c = conf(s)
           return (
             <Link key={s.id} href={`/dashboard/dentist/screenings/${s.id}`}
@@ -87,10 +94,31 @@ const RecentScreeningsTable = ({ screenings, loading }: Props) => {
         })
       )}
 
-      <div className="border-t border-border-muted px-6 py-3">
+      <div className="flex items-center justify-between border-t border-border-muted px-6 py-3">
         <Link href="/dashboard/dentist" className="btn text-[12px] font-medium text-primary transition-all duration-150 hover:underline">
           Бүгдийг харах
         </Link>
+        {totalPages > 1 && (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setPage(p => Math.max(0, p - 1))}
+              disabled={safePage === 0}
+              className="rounded-lg border border-border px-3 py-1.5 text-[12px] font-medium text-text-base transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              ← Өмнөх
+            </button>
+            <span className="text-[12px] text-text-muted">
+              {safePage + 1} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+              disabled={safePage === totalPages - 1}
+              className="rounded-lg border border-border px-3 py-1.5 text-[12px] font-medium text-text-base transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Дараах →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -5,9 +5,9 @@ import type { ChildScreeningSummary } from '@pinequest/types'
 // SCREENING-not-diagnosis: hedged, versioned copy from buildChildSummary; no banned words.
 
 const LEVEL_MN: Record<string, string> = {
-  green: 'Аюулын шинж илрээгүй',
-  yellow: 'Хяналт зөвлөж байна',
-  red: 'Яаралтай хяналт зөвлөж байна',
+  green: 'Дараагийн хяналтанд хамруулах',
+  yellow: 'Эмчилгээ шаардлагатай',
+  red: 'Яаралтай эмчилгээ шаардлагатай',
 }
 
 const buildBody = (childName: string, s: ChildScreeningSummary): string =>
@@ -27,7 +27,6 @@ const buildBody = (childName: string, s: ChildScreeningSummary): string =>
     '',
     'Хүндэтгэсэн,',
     'Screener баг',
-    `(контент хувилбар: ${s.contentVersion})`,
   ].join('\n')
 
 export const openParentEmail = (childName: string, toEmail: string | null, s: ChildScreeningSummary): void => {

@@ -2,9 +2,9 @@ import type { ChildScreeningSummary } from '@pinequest/types'
 import type { HospitalGuide } from '@/hooks/useChildSummary'
 
 const LEVEL_MN: Record<string, string> = {
-  green: 'Аюулын шинж илрээгүй',
-  yellow: 'Хяналт зөвлөж байна',
-  red: 'Яаралтай хяналт зөвлөж байна',
+  green: 'Дараагийн хяналтанд хамруулах',
+  yellow: 'Эмчилгээ шаардлагатай',
+  red: 'Яаралтай эмчилгээ шаардлагатай',
 }
 const STAGE_MN: Record<string, string> = {
   primary: 'сүүн шүдний нас', mixed: 'холимог шүдний нас', permanent: 'байнгын шүдний нас',
@@ -56,7 +56,7 @@ export const buildParentEmailBody = (childName: string, s: ChildScreeningSummary
     `Эцсийн дүгнэлтийг шүдний эмч баталгаажуулна.`,
     ``,
     `Хүндэтгэсэн,`,
-    `Toothlings баг  (контент хувилбар: ${s.contentVersion})`,
+    `Toothlings баг`,
   )
 
   return lines.join('\n')

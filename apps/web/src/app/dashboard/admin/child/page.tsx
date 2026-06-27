@@ -3,17 +3,16 @@
 import { useBoardStudents } from '@/hooks/useBoard'
 import ParentChildCard from '@/components/admin/child/ParentChildCard'
 import { PageSpinner } from '@/components/ui/Spinner'
+import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
 
 // Parent landing — their own child(ren) only (scope-enforced server-side).
 const ChildPage = () => {
   const { data: students, isLoading } = useBoardStudents()
 
+  useSetPageHeader({ title: 'Миний хүүхэд', subtitle: 'Хүүхдийн шүдний урьдчилсан үзүүлэлтийн дүн ба зөвлөмж.' })
+
   return (
     <section className="flex max-w-xl flex-col gap-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-text-base">Миний хүүхэд</h1>
-        <p className="text-sm text-text-muted">Хүүхдийн шүдний урьдчилсан үзүүлэлтийн дүн ба зөвлөмж.</p>
-      </header>
 
       {isLoading ? (
         <PageSpinner />

@@ -1,7 +1,7 @@
 'use client'
 
 import {
-  EnvelopeIcon, DocumentTextIcon,
+  EnvelopeIcon, ArrowsPointingOutIcon,
   ExclamationTriangleIcon, ExclamationCircleIcon,
 } from '@heroicons/react/24/outline'
 import type { ComponentType, SVGProps } from 'react'
@@ -9,6 +9,7 @@ import type { FollowUpStatus } from '@pinequest/types'
 import type { BoardStudent } from '@/hooks/useBoard'
 import StatusPicker from '@/components/ui/StatusPicker'
 import IconButton from '@/components/ui/IconButton'
+import SeasonDotRail from '@/components/admin/summary/SeasonDotRail'
 
 // Triage is a STATUS accent ONLY — dot + icon + label + avatar initial. The
 // card surface itself stays neutral in BOTH themes; we never tint the whole
@@ -69,7 +70,7 @@ const FollowUpCard = ({ student: s, onSend, onStatus, onEdit, dragging, onDragSt
 
       {/* doc button — top right */}
       <div className="absolute right-4 top-4">
-        <IconButton Icon={DocumentTextIcon} tone="plain" size="sm" label="Дэлгэрэнгүй харах" onClick={onEdit} />
+        <IconButton Icon={ArrowsPointingOutIcon} tone="plain" size="sm" label="Дэлгэрэнгүй харах" onClick={onEdit} />
       </div>
 
       {/* avatar + name (avatar carries the soft status tint) */}
@@ -89,10 +90,20 @@ const FollowUpCard = ({ student: s, onSend, onStatus, onEdit, dragging, onDragSt
         <p className={`text-[14px] font-bold leading-snug ${t.text}`}>{t.label}</p>
       </div>
 
+      {/* escalation: prior treatment missed, now worsened */}
+      {s.escalationFlag && (
+        <div className="flex items-center gap-2 rounded-xl bg-triage-red-bg px-3 py-2">
+          <ExclamationTriangleIcon className="size-3.5 shrink-0 text-triage-red" />
+          <span className="text-[11px] font-semibold text-triage-red">Өмнөх эмчилгээ хийгдээгүй, одоо хүндэрсэн</span>
+        </div>
+      )}
+
+      <SeasonDotRail history={s.seasonHistory ?? []} trend={s.trend ?? null} />
+
       {/* action row — clicks here change status / send, never open the modal */}
       <div className="flex items-center gap-2" onClick={stop}>
         <StatusPicker value={s.followUpStatus ?? 'flagged'} onChange={onStatus} />
-        {onSend && <IconButton Icon={EnvelopeIcon} tone="plain" label="Эцэг эхэд илгээх" onClick={onSend} />}
+        {onSend && <IconButton Icon={EnvelopeIcon} tone="plain" size="sm" label="Эцэг эхэд илгээх" onClick={onSend} />}
       </div>
     </div>
   )

@@ -13,7 +13,9 @@ import ResultGreenAdvice from '@/components/scan/result/ResultGreenAdvice'
 import ResultYellowAdvice from '@/components/scan/result/ResultYellowAdvice'
 import ResultRedAdvice from '@/components/scan/result/ResultRedAdvice'
 import ResultDisclaimer from '@/components/scan/result/ResultDisclaimer'
+import ResultLongitudinalCard from '@/components/scan/result/ResultLongitudinalCard'
 import ResultBottomActions from '@/components/scan/result/ResultBottomActions'
+import { usePriorLevel } from '@/lib/usePriorLevel'
 
 export default function ResultScreen() {
   const router = useRouter()
@@ -35,6 +37,7 @@ export default function ResultScreen() {
     capturedAt?: string
   }>()
 
+  const priorLevel = usePriorLevel(params.childKey ?? '')
   const level = (params.triageLevel ?? 'green') as TriageLevel
   const score = Number(params.triageScore ?? '0')
   const screeningId = params.screeningId ?? ''
@@ -79,6 +82,7 @@ export default function ResultScreen() {
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <ResultTriageCard level={level} score={score} />
         <ResultDisclaimer />
+        {priorLevel && <ResultLongitudinalCard currentLevel={level} priorLevel={priorLevel} />}
         {photos.map((photo, i) => (
           <ResultPhotoCard key={`${photo.arch}-${i}`} photo={photo} />
         ))}

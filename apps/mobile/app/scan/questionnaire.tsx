@@ -23,7 +23,7 @@ const QUESTIONS: Q[] = [
       '4-өөс дээш хоног',
     ],
   },
-  { key: 'swellingFever', text: 'Халуурч нүүр хавдсан уу?', type: 'bool' },
+  { key: 'swellingFever', text: 'Халуурах эсвэл эрүү, нүүр орчмоор хавдаж байсан уу?', type: 'bool' },
 ]
 
 export default function QuestionnaireScreen() {
@@ -77,7 +77,7 @@ export default function QuestionnaireScreen() {
       )}
       {step > 0 && (
         <TouchableOpacity style={s.backBtn} onPress={() => setStep(s => s - 1)}>
-          <Text style={[s.backBtnText, { color: colors.textMuted }]}>← Буцах</Text>
+          <Text style={[s.backBtnText, { color: colors.textMuted }]}>Буцах</Text>
         </TouchableOpacity>
       )}
     </SafeAreaView>
