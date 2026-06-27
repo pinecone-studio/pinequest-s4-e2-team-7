@@ -37,7 +37,7 @@ export const seedDemo = async (db: DB, adminId: string) => {
   await inChunks(SCR.map((s) => ({
     id: s.id, childKey: s.key, classId: CLS, schoolId: SCHOOL, seasonId: SEASON, screenedById: SCREENER,
     triageLevel: s.level, triageScore: s.score, triageConfidentWording: s.level !== 'yellow',
-    triageReason: s.reason, modelName: 'yolov8', contentVersionId: 'content-v1',
+    triageReason: s.reason, modelName: 'yolov8',
     capturedAt: ago(s.d), syncedAt: ago(s.d),
   })), (b) => db.insert(screenings).values(b).onConflictDoNothing())
 

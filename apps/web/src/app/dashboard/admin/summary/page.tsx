@@ -10,6 +10,7 @@ import StudentGrid from '@/components/admin/summary/StudentGrid'
 import StudentModal from '@/components/admin/summary/StudentModal'
 import StudentEditModal from '@/components/admin/summary/StudentEditModal'
 import EmptyState from '@/components/ui/EmptyState'
+import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
 
 const SummaryBoard = () => {
   const { data: students, isLoading } = useBoardStudents()
@@ -21,13 +22,22 @@ const SummaryBoard = () => {
   const [editing, setEditing] = useState<BoardStudent | null>(null)
   const [deleting, setDeleting] = useState<BoardStudent | null>(null)
   const [q, setQ] = useState('')
+  const [classFilter, setClassFilter] = useState('')
+
+  const classes = useMemo(() => {
+    const all = students ?? []
+    const sorted = [...new Set(all.map((s) => s.className))].sort()
+    return sorted.map((name) => ({ name, count: all.filter((s) => s.className === name).length }))
+  }, [students])
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase()
-    const all = students ?? []
-    if (!needle) return all
-    return all.filter((s) => `${s.lastName} ${s.firstName} ${s.className}`.toLowerCase().includes(needle))
-  }, [students, q])
+    return (students ?? []).filter((s) => {
+      if (classFilter && s.className !== classFilter) return false
+      if (needle && !`${s.lastName} ${s.firstName} ${s.className}`.toLowerCase().includes(needle)) return false
+      return true
+    })
+  }, [students, q, classFilter])
 
   const handleSend = async (s: BoardStudent) => {
     try {
@@ -43,13 +53,12 @@ const SummaryBoard = () => {
     del.mutate(deleting.id, { onSettled: () => setDeleting(null) })
   }
 
+  useSetPageHeader({ title: 'Дүгнэлт', subtitle: `Хүүхэд бүр дээр дарж дэлгэнгүй зураг ба дүгнэлтийг харна уу` })
+
   return (
     <section className="flex flex-col gap-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-text-base">Дүгнэлт</h1>
-          <p className="text-sm text-text-muted">Бүх сурагч ({students?.length ?? 0}) — карт дээр дарж дэлгэрэнгүйг үзнэ.</p>
-        </div>
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Search */}
         <div className="relative">
           <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
           <input
@@ -57,17 +66,47 @@ const SummaryBoard = () => {
             onChange={(e) => setQ(e.target.value)}
             placeholder="Нэр, ангиар хайх…"
             aria-label="Сурагч хайх"
-            className="w-64 rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-52 rounded-xl border border-border bg-surface py-1.5 pl-9 pr-3 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
-      </header>
+
+        {/* Class filter tabs */}
+        {!isLoading && classes.length > 1 && (
+          <>
+            <div className="h-5 w-px bg-border" />
+            <button
+              onClick={() => setClassFilter('')}
+              className={`btn rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-all ${
+                classFilter === ''
+                  ? 'bg-primary text-text-on-primary'
+                  : 'border border-border bg-surface text-text-muted hover:border-primary hover:text-primary'
+              }`}
+            >
+              Бүгд <span className="ml-1 opacity-70">{students?.length ?? 0}</span>
+            </button>
+            {classes.map((cls) => (
+              <button
+                key={cls.name}
+                onClick={() => setClassFilter(cls.name === classFilter ? '' : cls.name)}
+                className={`btn rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-all ${
+                  classFilter === cls.name
+                    ? 'bg-primary text-text-on-primary'
+                    : 'border border-border bg-surface text-text-muted hover:border-primary hover:text-primary'
+                }`}
+              >
+                {cls.name} <span className="ml-1 opacity-70">{cls.count}</span>
+              </button>
+            ))}
+          </>
+        )}
+      </div>
 
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} rows={2} />)}
         </div>
       ) : filtered.length === 0 ? (
-        <EmptyState Icon={UsersIcon} title="Сурагч олдсонгүй" hint="Хайлтаа өөрчилж үзнэ үү." />
+        <EmptyState Icon={UsersIcon} title="Сурагч олдсонгүй" hint="Хайлт эсвэл ангийн шүүлтүүрийг өөрчилнө үү." />
       ) : (
         <StudentGrid
           students={filtered}

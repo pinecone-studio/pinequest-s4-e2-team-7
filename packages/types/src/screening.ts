@@ -69,8 +69,6 @@ export interface Screening {
   triage: TriageResult
   modelName: string
   modelVersion?: string
-  /** Pinned dentist-approved content version used to render parent text. */
-  contentVersionId: string
   /** Device wall-clock time of capture. */
   capturedAt: string
   deviceId?: string
@@ -118,6 +116,4 @@ export interface ChildScreeningSummary {
   headline: string
   /** Versioned, age-aware "what to do at home" steps. */
   homeSteps: string[]
-  /** Pinned content version backing headline + homeSteps. */
-  contentVersion: string
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import {
-  EnvelopeIcon, DocumentTextIcon,
+  EnvelopeIcon, ArrowsPointingOutIcon,
   ExclamationTriangleIcon, ExclamationCircleIcon,
 } from '@heroicons/react/24/outline'
 import type { ComponentType, SVGProps } from 'react'
@@ -69,7 +69,7 @@ const FollowUpCard = ({ student: s, onSend, onStatus, onEdit, dragging, onDragSt
 
       {/* doc button — top right */}
       <div className="absolute right-4 top-4">
-        <IconButton Icon={DocumentTextIcon} tone="plain" size="sm" label="Дэлгэрэнгүй харах" onClick={onEdit} />
+        <IconButton Icon={ArrowsPointingOutIcon} tone="plain" size="sm" label="Дэлгэрэнгүй харах" onClick={onEdit} />
       </div>
 
       {/* avatar + name (avatar carries the soft status tint) */}
@@ -92,7 +92,7 @@ const FollowUpCard = ({ student: s, onSend, onStatus, onEdit, dragging, onDragSt
       {/* action row — clicks here change status / send, never open the modal */}
       <div className="flex items-center gap-2" onClick={stop}>
         <StatusPicker value={s.followUpStatus ?? 'flagged'} onChange={onStatus} />
-        {onSend && <IconButton Icon={EnvelopeIcon} tone="plain" label="Эцэг эхэд илгээх" onClick={onSend} />}
+        {onSend && <IconButton Icon={EnvelopeIcon} tone="plain" size="sm" label="Эцэг эхэд илгээх" onClick={onSend} />}
       </div>
     </div>
   )

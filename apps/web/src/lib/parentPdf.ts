@@ -2,9 +2,9 @@ import type { ChildScreeningSummary } from '@pinequest/types'
 import type { HospitalGuide } from '@/hooks/useChildSummary'
 
 const LEVEL_MN: Record<string, string> = {
-  green: 'Аюулын шинж илрээгүй',
-  yellow: 'Хяналт зөвлөж байна',
-  red: 'Яаралтай хяналт зөвлөж байна',
+  green: 'Дараагийн хяналтанд хамруулах',
+  yellow: 'Эмчилгээ шаардлагатай',
+  red: 'Яаралтай эмчилгээ шаардлагатай',
 }
 const STAGE_MN: Record<string, string> = {
   primary: 'сүүн шүдний нас', mixed: 'холимог шүдний нас', permanent: 'байнгын шүдний нас',
@@ -63,8 +63,7 @@ export const printChildSummary = (childName: string, s: ChildScreeningSummary, i
   ${hospitalHtml}
   <div style="margin-top:24px;padding-top:14px;border-top:1px solid #E5E7EB;font-size:11px;color:#9CA3AF;line-height:1.6;">
     АНХААР: Энэ бол урьдчилсан скринингийн дүн бөгөөд <strong>ОНОШ БИШ</strong>.<br>
-    Эцсийн дүгнэлтийг мэргэжлийн шүдний эмч баталгаажуулна.<br>
-    Контент хувилбар: ${s.contentVersion}
+    Эцсийн дүгнэлтийг мэргэжлийн шүдний эмч баталгаажуулна.
   </div>
   <div class="no-print" style="margin-top:24px;text-align:center;">
     <button onclick="window.print()" style="background:#F2B705;border:none;border-radius:10px;padding:10px 28px;font-size:14px;font-weight:700;cursor:pointer;color:#1A1407;">PDF хадгалах / Хэвлэх</button>

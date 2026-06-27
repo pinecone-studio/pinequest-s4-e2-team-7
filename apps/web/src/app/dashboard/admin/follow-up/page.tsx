@@ -8,11 +8,8 @@ import FollowUpEditModal from '@/components/admin/follow-up/FollowUpEditModal'
 import EmptyState from '@/components/ui/EmptyState'
 import { SkeletonKanban } from '@/components/ui/Skeleton'
 import Button from '@/components/ui/Button'
-import Dropdown, { type DropdownOption } from '@/components/ui/Dropdown'
-import {
-  ClipboardDocumentListIcon, MagnifyingGlassIcon, AcademicCapIcon,
-  ExclamationTriangleIcon, ExclamationCircleIcon,
-} from '@heroicons/react/24/outline'
+import { ClipboardDocumentListIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
 
 type Column = { status: FollowUpStatus; label: string; dot: string; count: string; statuses: FollowUpStatus[] }
 const COLUMNS: Column[] = [
@@ -24,10 +21,10 @@ const columnFor = (st: FollowUpStatus): Column => COLUMNS.find((c) => c.statuses
 
 const PAGE_SIZE = 5
 const inp = 'rounded-xl border border-border bg-surface px-3 py-2 text-[13px] text-text-base placeholder:text-text-muted/60 transition-colors focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/30'
-const LEVEL_OPTS: DropdownOption[] = [
+const LEVELS = [
   { value: '', label: 'Бүх эрэмбэ' },
-  { value: 'red',    label: 'Яаралтай', Icon: ExclamationTriangleIcon, iconClass: 'text-triage-red' },
-  { value: 'yellow', label: 'Хяналт',   Icon: ExclamationCircleIcon,  iconClass: 'text-triage-yellow' },
+  { value: 'red',    label: 'Яаралтай' },
+  { value: 'yellow', label: 'Эмчилгээ' },
 ]
 const URGENCY: Record<string, number> = { red: 0, yellow: 1 }
 const byUrgency = (a: BoardStudent, b: BoardStudent) => {
@@ -54,10 +51,6 @@ const FollowUpBoard = () => {
     [students],
   )
   const classes = useMemo(() => [...new Set(flagged.map((s) => s.className))].sort(), [flagged])
-  const classOptions: DropdownOption[] = [
-    { value: '', label: 'Бүх анги', Icon: AcademicCapIcon },
-    ...classes.map((c) => ({ value: c, label: c })),
-  ]
 
   const filtered = useMemo(() => flagged.filter((s) => {
     if (search && !`${s.lastName} ${s.firstName}`.toLowerCase().includes(search.toLowerCase())) return false
@@ -79,22 +72,43 @@ const FollowUpBoard = () => {
     setDraggingKey(null); setDragOverCol(null)
   }
 
+  useSetPageHeader({ title: 'Хяналт', subtitle: 'Яаралтай болон эмчилгээ шаардлагатай хүүхдүүдийн жагсаалт' })
+
   return (
     <section className="flex min-h-0 flex-col gap-5">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-text-base">Хяналт</h1>
-        <p className="text-sm text-text-muted">Нийт {flagged.length} сурагч · Хамгийн яаралтай тусламж шаардлагатай хүүхэд нь эхэнд харагдана.</p>
-      </header>
 
       <div className="flex flex-wrap items-center gap-2">
-        <div className="relative flex-1 min-w-[200px]">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted/50" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Нэрээр хайх…" className={`${inp} pl-9 w-full`} />
+        {/* Search */}
+        <div className="relative">
+          <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Нэрээр хайх…" className={`${inp} w-52 pl-9`} />
         </div>
-        <Dropdown value={classFilter} options={classOptions} onChange={setClassFilter} ariaLabel="Ангиар шүүх" className="w-44" />
-        <Dropdown value={levelFilter} options={LEVEL_OPTS} onChange={setLevelFilter} ariaLabel="Эрэмбээр шүүх" className="w-40" />
+
+        {/* Class pills */}
+        {classes.length > 1 && (
+          <>
+            <div className="h-5 w-px bg-border" />
+            <button onClick={() => setClassFilter('')} className={`btn rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-all ${classFilter === '' ? 'bg-primary text-text-on-primary' : 'border border-border bg-surface text-text-muted hover:border-primary hover:text-primary'}`}>
+              Бүх анги
+            </button>
+            {classes.map((c) => (
+              <button key={c} onClick={() => setClassFilter(c === classFilter ? '' : c)} className={`btn rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-all ${classFilter === c ? 'bg-primary text-text-on-primary' : 'border border-border bg-surface text-text-muted hover:border-primary hover:text-primary'}`}>
+                {c}
+              </button>
+            ))}
+          </>
+        )}
+
+        {/* Level pills */}
+        <div className="h-5 w-px bg-border" />
+        {LEVELS.map((l) => (
+          <button key={l.value} onClick={() => setLevelFilter(l.value)} className={`btn rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-all ${levelFilter === l.value ? 'bg-primary text-text-on-primary' : 'border border-border bg-surface text-text-muted hover:border-primary hover:text-primary'}`}>
+            {l.label}
+          </button>
+        ))}
+
         {(search || classFilter || levelFilter) && (
-          <Button variant="outline" onClick={() => { setSearch(''); setClassFilter(''); setLevelFilter('') }}>Цэвэрлэх</Button>
+          <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setClassFilter(''); setLevelFilter('') }}>Цэвэрлэх</Button>
         )}
       </div>
 

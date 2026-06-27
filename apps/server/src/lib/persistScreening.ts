@@ -13,7 +13,6 @@ export type PersistInput = {
   symptoms: SymptomSet
   modelName: string
   modelVersion?: string
-  contentVersionId: string
   capturedAt: string
   deviceId?: string
 }
@@ -45,7 +44,6 @@ export const persistScreening = async (
     triageReason: result.reason ?? null,
     modelName: body.modelName,
     modelVersion: body.modelVersion ?? null,
-    contentVersionId: body.contentVersionId,
     capturedAt: new Date(body.capturedAt),
     deviceId: body.deviceId ?? null,
     syncedAt: new Date(),

@@ -67,7 +67,6 @@ const StudentSummaryBody = ({ student, detail, isLoading, statusSlot }: Props) =
               ))}
             </ul>
           )}
-          {summary.contentVersion && <p className="mt-3 text-[10px] text-text-muted/60">Контент: {summary.contentVersion}</p>}
         </div>
       )}
       {!summary && !isLoading && (

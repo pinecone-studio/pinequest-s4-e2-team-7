@@ -18,7 +18,7 @@ export const screenings = sqliteTable('Screening', {
   triageReason: text('triageReason'),
   modelName: text('modelName').notNull(),
   modelVersion: text('modelVersion'),
-  contentVersionId: text('contentVersionId').notNull(),
+  contentVersionId: text('contentVersionId').default('default'),
   capturedAt: ts('capturedAt').notNull(),
   deviceId: text('deviceId'),
   createdAt: ts('createdAt').notNull().$defaultFn(() => new Date()),

@@ -13,7 +13,7 @@ const TINT: Record<string, string> = {
 }
 const DOT: Record<string, string> = { green: 'bg-triage-green', yellow: 'bg-triage-yellow', red: 'bg-triage-red' }
 const TXT: Record<string, string> = { green: 'text-triage-green', yellow: 'text-triage-yellow', red: 'text-triage-red' }
-const LABEL: Record<string, string> = { green: 'Аюулын шинж илрээгүй', yellow: 'Хяналт зөвлөв', red: 'Яаралтай хяналт' }
+const LABEL: Record<string, string> = { green: 'Дараагийн хяналтанд хамруулах', yellow: 'Эмчилгээ шаардлагатай', red: 'Яаралтай эмчилгээ шаардлагатай' }
 const STAGE: Record<string, string> = { primary: 'Сүүн шүд', mixed: 'Холимог шүд', permanent: 'Байнгын шүд' }
 const SYMPTOM: Record<string, string> = {
   swelling: 'Хавдар', painDisturbingSleepOrEating: 'Нойр/хоолонд саад болсон өвдөлт',
@@ -93,7 +93,6 @@ const ChildSummaryCard = ({ childName, guardianEmail, summary: s }: Props) => {
 
       <p className="mt-3 text-[10px] leading-relaxed text-text-muted">
         Энэ бол урьдчилсан үзүүлэлт — онош биш. Эцсийн дүгнэлтийг шүдний эмч баталгаажуулна.
-        <span className="ml-1 font-mono">({s.contentVersion})</span>
       </p>
     </div>
   )

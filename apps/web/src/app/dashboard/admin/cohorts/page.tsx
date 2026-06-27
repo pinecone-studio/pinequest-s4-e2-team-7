@@ -7,56 +7,67 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import EmptyState from '@/components/ui/EmptyState'
 import CohortCard from '@/components/admin/cohorts/CohortCard'
+import Modal from '@/components/ui/Modal'
+import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
 
-// Schools/cohorts — relocated here from the admin board (Phase 0 decision).
 const CohortsPage = () => {
   const { data: schools } = useSchools()
   const createSchool = useCreateSchool()
-  const [showAdd, setShowAdd] = useState(false)
+  const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
+
+  useSetPageHeader({
+    title: 'Сургууль ба анги бүлгүүд',
+    subtitle: 'Үзүүлэлтийн хамрах сургуулиуд',
+    actions: (
+      <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
+        <PlusIcon className="size-3.5" /> Сургууль нэмэх
+      </Button>
+    ),
+  })
 
   const onAdd = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!name.trim()) return
     createSchool.mutate({ name: name.trim() })
     setName('')
-    setShowAdd(false)
+    setOpen(false)
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-[22px] font-bold tracking-tight text-text-base">Сургууль ба анги бүлгүүд</h1>
-          <p className="text-[12px] text-text-muted">Үзүүлэлтийн хамрах сургуулиуд</p>
-        </div>
-        <Button variant="secondary" size="sm" onClick={() => setShowAdd((v) => !v)}>
-          <PlusIcon className="size-3.5" /> Сургууль нэмэх
-        </Button>
-      </div>
-
-      {showAdd && (
-        <form onSubmit={onAdd} className="flex gap-2">
+    <>
+      <Modal
+        open={open}
+        onClose={() => { setOpen(false); setName('') }}
+        title="Сургууль нэмэх"
+        footer={
+          <>
+            <Button type="button" variant="secondary" onClick={() => setOpen(false)}>Болих</Button>
+            <Button type="submit" form="add-school-form" loading={createSchool.isPending}>Нэмэх</Button>
+          </>
+        }
+      >
+        <form id="add-school-form" onSubmit={onAdd}>
           <input
             autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Сургуулийн нэр"
-            className="flex-1 rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
           />
-          <Button type="submit">Нэмэх</Button>
-          <Button type="button" variant="secondary" onClick={() => setShowAdd(false)}>Болих</Button>
         </form>
-      )}
+      </Modal>
 
       {!schools || schools.length === 0 ? (
-        <Card><EmptyState Icon={BuildingLibraryIcon} title="Сургууль алга" hint="Эхний сургуулиа нэмж үзүүлэлт хамралтыг эхлүүл." /></Card>
+        <Card>
+          <EmptyState Icon={BuildingLibraryIcon} title="Сургууль алга" hint="Эхний сургуулиа нэмж үзүүлэлт хамралтыг эхлүүл." />
+        </Card>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {schools.map((s) => <CohortCard key={s.id} school={s} />)}
         </div>
       )}
-    </div>
+    </>
   )
 }
 

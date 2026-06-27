@@ -7,9 +7,12 @@ import UrgentActionCard from '@/components/shared/UrgentActionCard'
 import ReviewQueueCard from '@/components/dentist/ReviewQueueCard'
 import EmptyState from '@/components/ui/EmptyState'
 import { PageSpinner } from '@/components/ui/Spinner'
+import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
 
 const DentistQueuePage = () => {
   const { data, isLoading } = useReviewQueue()
+
+  useSetPageHeader({ title: 'Хянах дараалал' })
   const pending = (data ?? []).filter((s) => !s.review) // unreviewed only — confirmed items leave the queue
 
   const oldestRed = pending

@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import type { UserRole } from '@pinequest/types'
 import { useSession } from '@/components/providers'
-import { SeasonProvider } from '@/components/shared/SeasonProvider'
 import AppShell from '@/components/shell/AppShell'
 
 // The board shell is shared by every role-scoped viewer; scope is enforced server-side.
@@ -21,11 +20,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
   if (!ready || !token || !allowed) return null
 
-  return (
-    <AppShell>
-      <SeasonProvider>{children}</SeasonProvider>
-    </AppShell>
-  )
+  return <AppShell>{children}</AppShell>
 }
 
 export default AdminLayout

@@ -8,7 +8,7 @@ import Spinner from '@/components/ui/Spinner'
 const TINT:  Record<string, string> = { red: 'border-triage-red/30 bg-triage-red-bg', yellow: 'border-triage-yellow/30 bg-triage-yellow-bg', green: 'border-triage-green/30 bg-triage-green-bg' }
 const DOT:   Record<string, string> = { red: 'bg-triage-red', yellow: 'bg-triage-yellow', green: 'bg-triage-green' }
 const TXT:   Record<string, string> = { red: 'text-triage-red', yellow: 'text-triage-yellow', green: 'text-triage-green' }
-const LABEL: Record<string, string> = { red: 'Яаралтай', yellow: 'Хяналт', green: 'Аюулгүй' }
+const LABEL: Record<string, string> = { red: 'Яаралтай', yellow: 'Эмчилгээ', green: 'Дараагийн хяналт' }
 
 // Review-queue item with IN-PLACE confirm. "Батлах" confirms the AI triage
 // level (audited review event) → item leaves the queue. "Хянах" opens the full

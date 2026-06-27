@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ArrowUpRightIcon } from '@heroicons/react/24/outline'
 import { useMe } from '@/hooks/useMe'
 import { useStats } from '@/hooks/useStats'
@@ -17,6 +17,9 @@ const ProfileCard = () => {
   const { data: me } = useMe()
   const { data: stats } = useStats({ seasonId })
   const [open, setOpen] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+
+  useEffect(() => { setAvatarUrl(localStorage.getItem('toothlings.avatar')) }, [])
 
   const screened = stats?.coverage.screened ?? 0
   const total    = stats?.coverage.total ?? 0
@@ -26,8 +29,8 @@ const ProfileCard = () => {
     <>
       <PlayCard tone="dark" delay={0} grow={false}>
         <div className="flex items-start gap-3">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-[15px] font-bold text-text-on-primary">
-            {initials(me?.name)}
+          <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary text-[15px] font-bold text-text-on-primary">
+            {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : initials(me?.name)}
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="truncate text-[15px] font-bold">{me?.name ?? '—'}</h3>

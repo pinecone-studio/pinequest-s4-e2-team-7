@@ -7,9 +7,12 @@ import HeroStrip from '@/components/shared/HeroStrip'
 import UrgentActionCard from '@/components/shared/UrgentActionCard'
 import EmptyState from '@/components/ui/EmptyState'
 import { PageSpinner } from '@/components/ui/Spinner'
+import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
 
 const FollowUpWorklistPage = () => {
   const { data, isLoading } = useFollowUps()
+
+  useSetPageHeader({ title: 'Дагах жагсаалт' })
 
   const flagged = data?.filter(f => f.status === 'flagged') ?? []
 

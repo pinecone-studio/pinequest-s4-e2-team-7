@@ -14,10 +14,20 @@ import IconButton from '@/components/ui/IconButton'
 // stays neutral in both themes — never tint the whole card.
 type Triage = { text: string; soft: string; Icon: ComponentType<SVGProps<SVGSVGElement>>; head: string }
 const TONE: Record<string, Triage> = {
-  red:    { text: 'text-triage-red',    soft: 'bg-triage-red-bg',    Icon: ExclamationTriangleIcon, head: 'Яаралтай хяналт зөвлөв' },
-  yellow: { text: 'text-triage-yellow', soft: 'bg-triage-yellow-bg', Icon: ExclamationCircleIcon,   head: 'Хяналт зөвлөв' },
-  green:  { text: 'text-triage-green',  soft: 'bg-triage-green-bg',  Icon: ShieldCheckIcon,         head: 'Аюулын шинж үгүй' },
+  red:    { text: 'text-triage-red',    soft: 'bg-triage-red-bg',    Icon: ExclamationTriangleIcon, head: 'Яаралтай эмчилгээ шаардлагатай' },
+  yellow: { text: 'text-triage-yellow', soft: 'bg-triage-yellow-bg', Icon: ExclamationCircleIcon,   head: 'Эмчилгээ шаардлагатай' },
+  green:  { text: 'text-triage-green',  soft: 'bg-triage-green-bg',  Icon: ShieldCheckIcon,         head: 'Дараагийн хяналтанд хамруулах' },
   none:   { text: 'text-text-muted',    soft: 'bg-surface-raised',   Icon: ExclamationCircleIcon,   head: 'Шалгаагүй' },
+}
+
+type FuCategory = { label: string; dot: string; text: string; bg: string }
+const FU_CATEGORY: Partial<Record<FollowUpStatus, FuCategory>> = {
+  flagged:           { label: 'Шинэ',          dot: 'bg-fu-flagged',   text: 'text-fu-flagged',   bg: 'bg-fu-flagged-bg' },
+  contacted:         { label: 'Хяналтад',       dot: 'bg-fu-contacted', text: 'text-fu-contacted', bg: 'bg-fu-contacted-bg' },
+  doctor_connected:  { label: 'Хяналтад',       dot: 'bg-fu-contacted', text: 'text-fu-contacted', bg: 'bg-fu-contacted-bg' },
+  unclear:           { label: 'Хяналтад',       dot: 'bg-fu-contacted', text: 'text-fu-contacted', bg: 'bg-fu-contacted-bg' },
+  treatment_done:    { label: 'Шийдвэрлэсэн',  dot: 'bg-fu-done',      text: 'text-fu-done',      bg: 'bg-fu-done-bg' },
+  treatment_refused: { label: 'Шийдвэрлэсэн',  dot: 'bg-fu-done',      text: 'text-fu-done',      bg: 'bg-fu-done-bg' },
 }
 
 type Props = {
@@ -51,6 +61,17 @@ const StudentCard = ({ student: s, onOpen, onSend, onEdit, onDelete, onStatus }:
         <span className={`flex-1 truncate text-[13px] font-bold ${t.text}`}>{t.head}</span>
         <span className="shrink-0 text-[11px] text-text-muted">{date}</span>
       </button>
+
+      {/* follow-up category pill */}
+      {s.followUpStatus && (() => {
+        const fu = FU_CATEGORY[s.followUpStatus]
+        return fu ? (
+          <div className={`flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 ${fu.bg}`}>
+            <span className={`size-1.5 shrink-0 rounded-full ${fu.dot}`} />
+            <span className={`text-[11px] font-semibold ${fu.text}`}>{fu.label}</span>
+          </div>
+        ) : null
+      })()}
 
       {/* actions */}
       <div className="mt-auto flex items-center gap-1.5">

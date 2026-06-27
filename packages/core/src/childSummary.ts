@@ -6,12 +6,6 @@ import type {
   TriageLevel,
 } from '@pinequest/types'
 
-/**
- * Dentist-approved, versioned parent/teacher copy. SCREENING-not-diagnosis:
- * hedged wording, no banned clinical words (decay/caries/cavity, "эрүүл шүд",
- * "асуудалгүй"). Bump the version when the wording changes; the app pins it.
- */
-export const SUMMARY_CONTENT_VERSION = 'screen-mn-v1'
 
 const HEADLINE: Record<TriageLevel, string> = {
   green: 'Эдгээр зурагт аюулын шинж тэмдэг илрээгүй. Энэ нь онош биш — хяналтаар үргэлжлүүлээрэй.',
@@ -108,6 +102,5 @@ export const buildChildSummary = (input: BuildInput): ChildScreeningSummary => {
     dentitionStage: stage,
     headline: HEADLINE[effectiveLevel],
     homeSteps,
-    contentVersion: SUMMARY_CONTENT_VERSION,
   }
 }
