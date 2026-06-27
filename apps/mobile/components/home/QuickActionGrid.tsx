@@ -11,13 +11,16 @@ type Props = { actions: Action[] }
 const QuickActionGrid = ({ actions }: Props) => (
   <View style={s.grid}>
     {actions.slice(0, 4).map((a) => (
-      <QuickActionCard key={a.id} icon={a.icon} label={a.label} onPress={a.onPress} />
+      <View key={a.id} style={s.cell}>
+        <QuickActionCard icon={a.icon} label={a.label} onPress={a.onPress} />
+      </View>
     ))}
   </View>
 )
 
 const s = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  cell: { width: '48%', flexGrow: 1 },
 })
 
 export default QuickActionGrid

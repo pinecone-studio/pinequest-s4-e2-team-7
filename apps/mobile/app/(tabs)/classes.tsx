@@ -1,5 +1,13 @@
 import { useCallback, useState } from 'react'
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, StyleSheet } from 'react-native'
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+  StyleSheet,
+} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter, useFocusEffect } from 'expo-router'
@@ -22,7 +30,12 @@ const ClassesScreen = () => {
       .catch((err) => setError(toMongolian(err)))
   }, [])
 
-  useFocusEffect(useCallback(() => { void load(); return () => {} }, [load]))
+  useFocusEffect(
+    useCallback(() => {
+      void load()
+      return () => {}
+    }, [load]),
+  )
 
   const onRefresh = useCallback(() => {
     setRefreshing(true)
@@ -32,7 +45,7 @@ const ClassesScreen = () => {
   return (
     <SafeAreaView style={[s.safe, { backgroundColor: colors.bg }]}>
       <View style={s.head}>
-        <Text style={[s.title, { color: colors.textBase }]}>Миний ангиуд</Text>
+        <Text style={[s.title, { color: colors.textBase }]}>Анги</Text>
         <TouchableOpacity
           style={[s.add, { backgroundColor: colors.primary }]}
           onPress={() => router.push('/class/new')}
@@ -43,22 +56,38 @@ const ClassesScreen = () => {
       </View>
 
       {classes === null && !error ? (
-        <View style={s.center}><ActivityIndicator color={colors.primary} /></View>
+        <View style={s.center}>
+          <ActivityIndicator color={colors.primary} />
+        </View>
       ) : error ? (
-        <View style={s.center}><Text style={[s.muted, { color: colors.textMuted }]}>{error}</Text></View>
+        <View style={s.center}>
+          <Text style={[s.muted, { color: colors.textMuted }]}>{error}</Text>
+        </View>
       ) : classes && classes.length === 0 ? (
         <View style={s.center}>
           <Ionicons name="school-outline" size={40} color={colors.textDisabled} />
-          <Text style={[s.muted, { color: colors.textMuted }]}>Анги бүртгээгүй байна.{'\n'}“+” дарж эхний ангиа нэмнэ үү.</Text>
+          <Text style={[s.muted, { color: colors.textMuted }]}>
+            Анги бүртгээгүй байна.{'\n'}“+” дарж эхний ангиа нэмнэ үү.
+          </Text>
         </View>
       ) : (
         <ScrollView
           contentContainerStyle={s.list}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.primary}
+            />
+          }
         >
           {classes?.map((k) => (
-            <ClassCard key={k.id} klass={k} onPress={() => router.push(`/class/${k.id}` as never)} />
+            <ClassCard
+              key={k.id}
+              klass={k}
+              onPress={() => router.push(`/class/${k.id}` as never)}
+            />
           ))}
         </ScrollView>
       )}
@@ -68,7 +97,14 @@ const ClassesScreen = () => {
 
 const s = StyleSheet.create({
   safe: { flex: 1 },
-  head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 12 },
+  head: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
   title: { fontSize: 24, fontFamily: 'Inter_700Bold', letterSpacing: -0.4 },
   add: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   list: { paddingHorizontal: 20, paddingBottom: 28, gap: 14 },

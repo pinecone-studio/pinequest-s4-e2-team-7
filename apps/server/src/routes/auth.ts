@@ -20,11 +20,13 @@ authRoutes.post('/login', async (c) => {
   const user = await db.query.users.findFirst({
     where: or(eq(users.email, normalised), eq(users.phone, normalised)),
   })
+  // Distinguish "no such account" from "wrong password" so the UI can guide the
+  // user (register vs. retry). Inactive accounts read as not-registered.
   if (!user || !user.passwordHash || !user.isActive) {
-    return c.json({ success: false, data: null, message: 'invalid_credentials' }, 401)
+    return c.json({ success: false, data: null, message: 'user_not_found' }, 401)
   }
   const ok = await bcrypt.compare(password, user.passwordHash)
-  if (!ok) return c.json({ success: false, data: null, message: 'invalid_credentials' }, 401)
+  if (!ok) return c.json({ success: false, data: null, message: 'wrong_password' }, 401)
   const token = await sign(
     { sub: user.id, role: user.role as UserRole, schoolId: user.schoolId ?? undefined, exp: Math.floor(Date.now() / 1000) + TTL },
     secretOf(c.env),

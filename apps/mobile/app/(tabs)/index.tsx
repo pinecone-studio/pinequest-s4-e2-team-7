@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTheme } from '@/lib/ThemeContext'
 import { getUser, type AuthUser } from '@/lib/auth'
 import { useOutboxSync } from '@/lib/useOutboxSync'
+import { apiFetch, type TriageLevel } from '@/lib/api'
 import GreetingHeader from '@/components/home/GreetingHeader'
 
 import ScanHeroCard from '@/components/home/ScanHeroCard'
@@ -12,21 +13,45 @@ import LastScreeningCard from '@/components/home/LastScreeningCard'
 import QuickActionGrid from '@/components/home/QuickActionGrid'
 
 const QUICK_ACTIONS = [
-  { id: 'classes',  icon: 'school-outline' as const,      label: 'Миний\nангиуд' },
+  { id: 'classes',  icon: 'school-outline' as const,      label: 'Анги' },
   { id: 'stats',    icon: 'stats-chart-outline' as const, label: 'Статистик' },
   { id: 'calendar', icon: 'calendar-outline' as const,    label: 'Хуанли' },
   { id: 'history',  icon: 'list-outline' as const,        label: 'Түүх' },
 ]
+
+// SCREENING-not-diagnosis wording: green never says "healthy", no clinical words.
+const TRIAGE_SUMMARY: Record<TriageLevel, string> = {
+  green: 'Эдгээр зурагт аюулын шинж тэмдэг харагдсангүй',
+  yellow: 'Анхаарал шаардлагатай — шүдний эмчид үзүүлэхийг зөвлөж байна',
+  red: 'Яаралтай — аль болох хурдан шүдний эмчид хандана уу',
+}
+
+type LatestScreening = {
+  id: string
+  triageLevel: TriageLevel
+  capturedAt: string
+  review?: { confirmedLevel: TriageLevel | null } | null
+}
 
 const HomeScreen = () => {
   const { colors } = useTheme()
   const router = useRouter()
   const { sync } = useOutboxSync()
   const [user, setUser] = useState<AuthUser | null>(null)
-  const [online] = useState(true)
+  const [latest, setLatest] = useState<LatestScreening | null>(null)
 
   useEffect(() => { getUser().then(setUser) }, [])
-  useFocusEffect(useCallback(() => { void sync() }, [sync]))
+
+  const loadLatest = useCallback(() => {
+    apiFetch<LatestScreening[]>('/api/screenings')
+      .then((rows) => setLatest(rows[0] ?? null))
+      .catch(() => {})
+  }, [])
+
+  useFocusEffect(useCallback(() => {
+    void sync()
+    loadLatest()
+  }, [sync, loadLatest]))
 
   const handleScan = () => router.push('/scan')
 
@@ -43,14 +68,22 @@ const HomeScreen = () => {
   return (
     <SafeAreaView style={[s.safe, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
-        <GreetingHeader name={user?.name ?? '...'} online={online} />
-        <ScanHeroCard onScan={handleScan} />
-        <LastScreeningCard
-          date="2026-06-20"
-          triageLevel="green"
-          summary="Аюулын шинж тэмдэг олдсонгүй — шүдний эмчид хянуулахыг зөвлөж байна"
-          onPress={() => router.push('/(tabs)/history' as never)}
+        <GreetingHeader
+          name={user?.name ?? '...'}
+          onPressAvatar={() => router.push('/(tabs)/profile' as never)}
         />
+        <ScanHeroCard onScan={handleScan} />
+        {latest && (() => {
+          const level = latest.review?.confirmedLevel ?? latest.triageLevel
+          return (
+            <LastScreeningCard
+              date={new Date(latest.capturedAt).toLocaleDateString('mn-MN')}
+              triageLevel={level}
+              summary={TRIAGE_SUMMARY[level]}
+              onPress={() => router.push('/(tabs)/history' as never)}
+            />
+          )
+        })()}
         <QuickActionGrid actions={actions} />
       </ScrollView>
     </SafeAreaView>

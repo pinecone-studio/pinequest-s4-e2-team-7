@@ -24,7 +24,7 @@ const LastScreeningCard = ({ date, triageLevel, summary, onPress }: Props) => {
     >
       <View style={[s.dot, { backgroundColor: dotColor }]} />
       <View style={s.body}>
-        <Text style={[s.label, { color: colors.textMuted }]}>Сүүлийн шалгалт</Text>
+        <Text style={[s.label, { color: colors.textMuted }]}>Сүүлийн дүгнэлт</Text>
         <Text style={[s.summary, { color: colors.textBase }]} numberOfLines={2}>{summary}</Text>
         <Text style={[s.date, { color: colors.textMuted }]}>{date}</Text>
       </View>

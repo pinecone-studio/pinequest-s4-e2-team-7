@@ -82,7 +82,7 @@ const ExportSection = () => {
 
         <div className="warm-card divide-y divide-[#E8E4DA]/60 p-2">
           <ul className="px-4">
-            <FeatureRow icon={<span className="text-[12px] font-bold">20</span>} label="Сүүлийн шалгалтын түүх" />
+            <FeatureRow icon={<span className="text-[12px] font-bold">20</span>} label="Сүүлийн дүгнэлтийн түүх" />
             <FeatureRow icon={<span className="text-[12px] font-bold">Q</span>} label="Асуумжийн хариулт" />
             <FeatureRow icon={<span className="text-[12px] font-bold">B</span>} label="Угаалгын бүртгэл" />
           </ul>

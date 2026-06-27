@@ -38,7 +38,7 @@ export default function HistoryScreen() {
       <FlatList
         data={screenings}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16, gap: 10 }}
+        contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 32 }}
         ListEmptyComponent={<Text style={[s.empty, { color: colors.textDisabled }]}>Скрининг байхгүй байна</Text>}
         renderItem={({ item }) => (
           <View style={[s.card, { backgroundColor: colors.surface }]}>

@@ -1,5 +1,7 @@
 const SERVER_ERRORS: Record<string, string> = {
   invalid_credentials:      'Нэвтрэх мэдээлэл буруу байна',
+  wrong_password:           'Нууц үг буруу байна',
+  user_not_found:           'Та бүртгэлгүй байна. Бүртгүүлнэ үү',
   invalid_input:            'Оруулсан мэдээлэл дутуу эсвэл буруу байна',
   email_taken:              'Энэ и-мэйл хаяг бүртгэлтэй байна',
   unauthorized:             'Нэвтрэх эрх байхгүй байна',

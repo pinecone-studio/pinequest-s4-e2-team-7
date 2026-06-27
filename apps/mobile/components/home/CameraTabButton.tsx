@@ -18,8 +18,11 @@ const CameraTabButton = ({ onPress, style, ...rest }: Props) => {
       onPress={onPress}
       activeOpacity={0.85}
     >
-      <View style={[s.circle, { backgroundColor: colors.primary }]}>
-        <Ionicons name="camera-outline" size={26} color={colors.primaryText} />
+      {/* white ring with yellow outline — seats the button cleanly into the bar */}
+      <View style={[s.ring, { backgroundColor: colors.bg, borderColor: colors.primary }]}>
+        <View style={[s.circle, { backgroundColor: colors.primary }]}>
+          <Ionicons name="camera-outline" size={28} color={colors.primaryText} />
+        </View>
       </View>
     </TouchableOpacity>
   )
@@ -27,7 +30,15 @@ const CameraTabButton = ({ onPress, style, ...rest }: Props) => {
 
 const s = StyleSheet.create({
   wrap: {
-    top: -22,
+    top: -18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ring: {
+    width: 74,
+    height: 74,
+    borderRadius: 37,
+    borderWidth: 3,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -37,11 +48,11 @@ const s = StyleSheet.create({
     borderRadius: 31,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#F2B705',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    elevation: 10,
   },
 })
 

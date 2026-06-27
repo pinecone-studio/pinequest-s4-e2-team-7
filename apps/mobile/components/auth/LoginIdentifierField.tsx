@@ -11,7 +11,15 @@ const LoginIdentifierField = ({ value, onChange }: Props) => {
 
   return (
     <View style={s.group}>
-      <Text style={[s.label, { color: colors.textMuted }]}>УТАСНЫ ДУГААР / И-МЭЙ ХАЯГ</Text>
+      <Text style={s.label}>
+        <Text style={phoneMode ? [s.labelActive, { color: colors.textBase }] : { color: colors.textMuted }}>
+          УТАСНЫ ДУГААР
+        </Text>
+        <Text style={{ color: colors.textMuted }}> / </Text>
+        <Text style={!phoneMode ? [s.labelActive, { color: colors.textBase }] : { color: colors.textMuted }}>
+          И-МЭЙЛ ХАЯГ
+        </Text>
+      </Text>
       <View style={[s.row, { borderColor: colors.border, backgroundColor: colors.surfaceRaised }]}>
         {phoneMode && (
           <>
@@ -37,7 +45,8 @@ const LoginIdentifierField = ({ value, onChange }: Props) => {
 
 const s = StyleSheet.create({
   group: { gap: 6 },
-  label: { fontSize: 11, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.8 },
+  label: { fontSize: 11, fontFamily: 'Inter_500Medium', letterSpacing: 0.8 },
+  labelActive: { fontFamily: 'Inter_700Bold' },
   row: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, height: 52 },
   prefix: { fontSize: 16, fontFamily: 'Inter_500Medium', marginRight: 12 },
   divider: { width: 1, height: 20, marginRight: 12 },

@@ -3,7 +3,7 @@ import { useTheme } from '@/lib/ThemeContext'
 
 type Props = { value: string; onChange: (v: string) => void; label?: string; hint?: string }
 
-const PinField = ({ value, onChange, label = 'НЭВТРЭХ КОД', hint }: Props) => {
+const PinField = ({ value, onChange, label = 'НУУЦ ҮГ', hint }: Props) => {
   const { colors } = useTheme()
   return (
     <View style={s.group}>

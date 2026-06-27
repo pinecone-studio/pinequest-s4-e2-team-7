@@ -29,7 +29,7 @@ const QuickActionCard = ({ icon, label, onPress }: Props) => {
 
 const s = StyleSheet.create({
   card: {
-    flex: 1, aspectRatio: 1,
+    width: '100%', aspectRatio: 1,
     borderRadius: 16, borderWidth: 1,
     alignItems: 'flex-start', justifyContent: 'space-between',
     padding: 14,
