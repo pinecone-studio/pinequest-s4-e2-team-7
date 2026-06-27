@@ -40,6 +40,6 @@ export const authErrorText = (msg: string): string => {
     case 'child_not_found':
       return 'Энэ нэртэй хүүхэд олдсонгүй'
     default:
-      return 'Серверт холбогдсонгүй — дахин оролдоно уу'
+      return 'Серверт холбогдсонгүй, дахин оролдоно уу'
   }
 }

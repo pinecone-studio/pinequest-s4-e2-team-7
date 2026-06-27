@@ -6,6 +6,7 @@ import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import StudentSummaryBody from './StudentSummaryBody'
 import ChildHistoryTab from './ChildHistoryTab'
+import LongitudinalDeltaBar from './LongitudinalDeltaBar'
 import { useChildSummary } from '@/hooks/useChildSummary'
 import { useChildHistory } from '@/hooks/useChildHistory'
 import { openParentEmail, openParentSms } from '@/lib/parentEmail'
@@ -73,7 +74,22 @@ const StudentModal = ({ student, onClose }: { student: BoardStudent | null; onCl
           ))}
         </div>
       )}
-      {(tab === 'latest' || !hasHistory) && <StudentSummaryBody student={student} detail={detail} isLoading={isLoading} />}
+      {(tab === 'latest' || !hasHistory) && (() => {
+        const prior = hasHistory ? student.seasonHistory.at(-2) : undefined
+        const current = hasHistory ? student.seasonHistory.at(-1) : undefined
+        return (
+          <>
+            {tab === 'latest' && prior && current && (
+              <LongitudinalDeltaBar
+                priorLevel={prior.effectiveLevel}
+                currentLevel={current.effectiveLevel}
+                priorSeasonId={prior.seasonId}
+              />
+            )}
+            <StudentSummaryBody student={student} detail={detail} isLoading={isLoading} />
+          </>
+        )
+      })()}
       {tab === 'history' && hasHistory && (
         histLoading
           ? <p className="py-8 text-center text-sm text-text-muted">Уншиж байна…</p>

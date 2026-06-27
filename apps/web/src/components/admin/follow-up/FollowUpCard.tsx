@@ -89,6 +89,14 @@ const FollowUpCard = ({ student: s, onSend, onStatus, onEdit, dragging, onDragSt
         <p className={`text-[14px] font-bold leading-snug ${t.text}`}>{t.label}</p>
       </div>
 
+      {/* escalation: prior treatment missed, now worsened */}
+      {s.escalationFlag && (
+        <div className="flex items-center gap-2 rounded-xl bg-triage-red-bg px-3 py-2">
+          <ExclamationTriangleIcon className="size-3.5 shrink-0 text-triage-red" />
+          <span className="text-[11px] font-semibold text-triage-red">Өмнөх эмчилгээ хийгдээгүй, одоо хүндэрсэн</span>
+        </div>
+      )}
+
       {/* action row — clicks here change status / send, never open the modal */}
       <div className="flex items-center gap-2" onClick={stop}>
         <StatusPicker value={s.followUpStatus ?? 'flagged'} onChange={onStatus} />
