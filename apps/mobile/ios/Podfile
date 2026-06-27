@@ -52,6 +52,20 @@ target 'PineQuest' do
       :ccache_enabled => podfile_properties['apple.ccacheEnabled'] == 'true',
     )
 
+    # Patch fmt: Apple Clang 17 (Xcode 16+) strictly rejects consteval calls
+    # whose arguments are not compile-time constants. Replace every 'consteval'
+    # keyword in the fmt sources with 'constexpr' so the library compiles cleanly.
+    # The fmt header files are installed read-only, so we chmod each one writable
+    # before rewriting it.
+    fmt_root = File.join(installer.config.installation_root, 'Pods/fmt')
+    Dir.glob(File.join(fmt_root, '**', '*.{h,cc}')).each do |path|
+      content = File.read(path)
+      patched = content.gsub(/\bconsteval\b/, 'constexpr')
+      next if patched == content
+      File.chmod(0644, path)
+      File.write(path, patched)
+    end
+
     # This is necessary for Xcode 14, because it signs resource bundles by default
     # when building for devices.
     installer.target_installation_results.pod_target_installation_results

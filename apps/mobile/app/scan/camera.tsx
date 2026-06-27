@@ -5,6 +5,7 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { analyzeImages } from '@/lib/api'
 import { toMongolian } from '@/lib/errorMessages'
+import { downloadModel, isModelCached } from '@/lib/localInference'
 import CameraPermission from '@/components/scan/camera/CameraPermission'
 import CameraHintBanner from '@/components/scan/camera/CameraHintBanner'
 import CameraFrameOverlay from '@/components/scan/camera/CameraFrameOverlay'
@@ -31,6 +32,15 @@ export default function CameraScreen() {
   useEffect(() => {
     const t = setTimeout(() => setCameraReady(true), 1500)
     return () => clearTimeout(t)
+  }, [])
+
+  // Background model download so offline inference works later
+  useEffect(() => {
+    const modelUrl = process.env.EXPO_PUBLIC_MODEL_URL
+    if (!modelUrl) return
+    isModelCached().then((cached) => {
+      if (!cached) downloadModel(modelUrl).catch(() => {/* silent — works fine online only */})
+    })
   }, [])
 
   if (!permission) return <View style={s.root} />
@@ -74,6 +84,7 @@ export default function CameraScreen() {
           screeningId: result.screeningId, triageLevel: result.triageLevel,
           triageScore: String(result.triageScore),
           detectionsCount: String(result.detections.length),
+          photos: JSON.stringify(result.photos ?? []),
           guardianPhone: params.guardianPhone ?? '',
           childKey: params.childKey,
           classId: params.classId,

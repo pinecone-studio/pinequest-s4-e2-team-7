@@ -10,6 +10,7 @@ import TextField from '@/components/auth/TextField'
 import PrimaryButton from '@/components/auth/PrimaryButton'
 import OutlineButton from '@/components/auth/OutlineButton'
 import SettingsSection from '@/components/profile/SettingsSection'
+import HistorySection from '@/components/profile/HistorySection'
 
 const ROLE_LABEL: Record<string, string> = {
   screener: 'Хэрэглэгч', teacher: 'Багш', parent: 'Эцэг эх',
@@ -77,6 +78,7 @@ const ProfileScreen = () => {
           </View>
         )}
 
+        <HistorySection userId={me.id} role={me.role} />
         <SettingsSection />
       </ScrollView>
     </SafeAreaView>

@@ -8,14 +8,16 @@ import os
 from pathlib import Path
 
 from download_model import download
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from PIL import Image
 from ultralytics import YOLO
 
 PORT = int(os.environ.get("INFERENCE_PORT", "8765"))
 CONFIDENCE = float(os.environ.get("INFERENCE_CONF", "0.25"))
 MODEL_PATH = Path(__file__).resolve().parent / "best.pt"
+ONNX_PATH = Path(__file__).resolve().parent / "best.onnx"
 
 # Disease classes used for triage (exclude generic "Tooth" detections)
 DISEASE_CLASS_IDS = {0, 1, 2}
@@ -42,6 +44,13 @@ def get_model() -> YOLO:
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "model": str(MODEL_PATH.name)}
+
+
+@app.get("/model.onnx")
+def serve_onnx():
+    if not ONNX_PATH.exists():
+        raise HTTPException(404, "ONNX model not found — run: python3 -c \"from ultralytics import YOLO; YOLO('best.pt').export(format='onnx', imgsz=640)\"")
+    return FileResponse(str(ONNX_PATH), media_type="application/octet-stream", filename="best.onnx")
 
 
 @app.post("/")

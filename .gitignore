@@ -16,9 +16,14 @@ dist/
 .expo/
 
 # Python / model
-apps/inference/__pycache__/
-apps/inference/.venv/
-apps/inference/best.pt
+apps/model/__pycache__/
+apps/model/.venv/
+
+# Model weights are too large for git — fetch via apps/model/download_model.py
+apps/model/best.pt
+apps/model/best.onnx
+*.onnx
+*.pt
 .metrics-tool/
 
 # Env

@@ -81,7 +81,6 @@ export const CameraView = ({ onCapture }: Props) => {
         {mode === 'live' && !preview ? (
           <video ref={videoRef} className="size-full object-cover" playsInline muted />
         ) : preview ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img src={preview} alt="Capture" className="size-full object-contain" />
         ) : (
           <div className="flex size-full items-center justify-center text-text-muted">
