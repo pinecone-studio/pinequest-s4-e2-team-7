@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { MagnifyingGlassIcon, UsersIcon } from '@heroicons/react/24/outline'
+import { UsersIcon } from '@heroicons/react/24/outline'
 import { useBoardStudents, useSendToParent, useDeleteChild, useSetFollowUpStatus, type BoardStudent } from '@/hooks/useBoard'
 import { useToast } from '@/components/ui/Toast'
 import ConfirmModal from '@/components/ui/ConfirmModal'
@@ -9,6 +9,7 @@ import { SkeletonCard } from '@/components/ui/Skeleton'
 import StudentGrid from '@/components/admin/summary/StudentGrid'
 import StudentModal from '@/components/admin/summary/StudentModal'
 import StudentEditModal from '@/components/admin/summary/StudentEditModal'
+import SummaryFilterBar from '@/components/admin/summary/SummaryFilterBar'
 import EmptyState from '@/components/ui/EmptyState'
 import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
 
@@ -30,6 +31,7 @@ const SummaryBoard = () => {
   const [deleting, setDeleting] = useState<BoardStudent | null>(null)
   const [q, setQ] = useState('')
   const [classFilter, setClassFilter] = useState('')
+  const [trendFilter, setTrendFilter] = useState(false)
 
   const classes = useMemo(() => {
     const all = students ?? []
@@ -42,9 +44,13 @@ const SummaryBoard = () => {
     return (students ?? []).filter((s) => {
       if (classFilter && s.className !== classFilter) return false
       if (needle && !`${s.lastName} ${s.firstName} ${s.className}`.toLowerCase().includes(needle)) return false
+      if (trendFilter) {
+        const tag = s.trend?.tag
+        if (tag !== 'worsened' && tag !== 'deteriorating') return false
+      }
       return true
     })
-  }, [students, q, classFilter])
+  }, [students, q, classFilter, trendFilter])
 
   const groups = useMemo(() => {
     const by: Record<string, BoardStudent[]> = { red: [], yellow: [], green: [], none: [] }
@@ -70,49 +76,14 @@ const SummaryBoard = () => {
 
   return (
     <section className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center gap-2">
-        {/* Search */}
-        <div className="relative">
-          <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Нэр, ангиар хайх…"
-            aria-label="Сурагч хайх"
-            className="w-52 rounded-xl border border-border bg-surface py-1.5 pl-9 pr-3 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-
-        {/* Class filter tabs */}
-        {!isLoading && classes.length > 1 && (
-          <>
-            <div className="h-5 w-px bg-border" />
-            <button
-              onClick={() => setClassFilter('')}
-              className={`btn rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-all ${
-                classFilter === ''
-                  ? 'bg-primary text-text-on-primary'
-                  : 'border border-border bg-surface text-text-muted hover:border-primary hover:text-primary'
-              }`}
-            >
-              Бүгд <span className="ml-1 opacity-70">{students?.length ?? 0}</span>
-            </button>
-            {classes.map((cls) => (
-              <button
-                key={cls.name}
-                onClick={() => setClassFilter(cls.name === classFilter ? '' : cls.name)}
-                className={`btn rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-all ${
-                  classFilter === cls.name
-                    ? 'bg-primary text-text-on-primary'
-                    : 'border border-border bg-surface text-text-muted hover:border-primary hover:text-primary'
-                }`}
-              >
-                {cls.name} <span className="ml-1 opacity-70">{cls.count}</span>
-              </button>
-            ))}
-          </>
-        )}
-      </div>
+      <SummaryFilterBar
+        q={q} onQ={setQ}
+        classFilter={classFilter} onClass={setClassFilter}
+        trendFilter={trendFilter} onTrend={setTrendFilter}
+        classes={classes}
+        totalCount={students?.length ?? 0}
+        isLoading={isLoading}
+      />
 
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

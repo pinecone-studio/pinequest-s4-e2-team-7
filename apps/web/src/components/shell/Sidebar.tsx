@@ -28,7 +28,10 @@ const Sidebar = () => {
 
   return (
     <div className="flex w-[84px] flex-col items-center gap-1 py-5">
-      <Image src="/smilo.png" alt="Toothlings" width={52} height={24} priority className="float mb-5 h-auto w-[52px]" />
+      <Image src="/smilo.png" alt="Toothlings" width={56} height={56} priority className="object-contain" />
+      <p className="mb-4 text-center text-[10px] font-bold leading-tight tracking-wide">
+        <span className="text-primary">Tooth</span><span className="text-white">lings</span>
+      </p>
 
       <nav className="flex flex-1 flex-col items-center gap-2" aria-label="Үндсэн цэс">
         {items.map((item) => {

@@ -9,6 +9,7 @@ import type { FollowUpStatus } from '@pinequest/types'
 import type { BoardStudent } from '@/hooks/useBoard'
 import StatusPicker from '@/components/ui/StatusPicker'
 import IconButton from '@/components/ui/IconButton'
+import SeasonDotRail from './SeasonDotRail'
 
 // Triage = STATUS accent only (avatar tint + result row text). The card surface
 // stays neutral in both themes — never tint the whole card.
@@ -44,7 +45,9 @@ const StudentCard = ({ student: s, onOpen, onSend, onEdit, onDelete, onStatus }:
   const date = s.screenedAt ? new Date(s.screenedAt).toLocaleDateString('mn-MN', { month: 'numeric', day: 'numeric' }) : '—'
 
   return (
-    <div className="grow flex h-full flex-col gap-3 blob border border-border bg-surface p-4 shadow-(--shadow-card) hover:shadow-(--shadow-card-lg)">
+    <div className={`grow flex h-full flex-col gap-3 blob bg-surface p-4 shadow-(--shadow-card) hover:shadow-(--shadow-card-lg) ${
+      s.escalationFlag ? 'border border-triage-red/30 ring-1 ring-triage-red/20' : 'border border-border'
+    }`}>
       {/* header */}
       <div className="flex items-start gap-3">
         <span className={`flex size-10 shrink-0 items-center justify-center rounded-2xl text-[15px] font-black ${t.soft} ${t.text}`}>{s.lastName.charAt(0)}</span>
@@ -55,12 +58,23 @@ const StudentCard = ({ student: s, onOpen, onSend, onEdit, onDelete, onStatus }:
         <IconButton Icon={ArrowsPointingOutIcon} tone="plain" size="sm" label="Дэлгэрэнгүй" onClick={onOpen} />
       </div>
 
+      {/* escalation warning: prior treatment refused, now worsened */}
+      {s.escalationFlag && (
+        <div className="flex items-center gap-2 rounded-xl bg-triage-red-bg px-3 py-2">
+          <ExclamationTriangleIcon className="size-3.5 shrink-0 text-triage-red" />
+          <span className="text-[11px] font-semibold text-triage-red">Өмнөх эмчилгээ хийгдээгүй, одоо хүндэрсэн</span>
+        </div>
+      )}
+
       {/* status result — the ONLY coloured element; opens the summary modal */}
       <button onClick={onOpen} className="tap flex items-center gap-2 rounded-2xl bg-surface-raised px-3 py-2.5 text-left transition-colors hover:bg-border/50">
         <t.Icon className={`size-4 shrink-0 ${t.text}`} />
         <span className={`flex-1 truncate text-[13px] font-bold ${t.text}`}>{t.head}</span>
         <span className="shrink-0 text-[11px] text-text-muted">{date}</span>
       </button>
+
+      {/* season dot rail — only shown for multi-season children */}
+      <SeasonDotRail history={s.seasonHistory ?? []} trend={s.trend ?? null} />
 
       {/* follow-up category pill */}
       {s.followUpStatus && (() => {

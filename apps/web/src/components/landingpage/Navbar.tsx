@@ -22,7 +22,7 @@ export function Navbar({ active, onBegin }: { active: number; onBegin: () => voi
         <img
           src="/logo.png"
           alt="Tooth Fairy"
-          style={{ width: 90, height: 65, objectFit: 'contain', display: 'block' }}
+          style={{ width: 120, height: 120, objectFit: 'contain', display: 'block' }}
         />
         <div>
           <div

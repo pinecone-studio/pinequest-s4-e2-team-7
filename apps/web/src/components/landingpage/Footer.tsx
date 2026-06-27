@@ -15,7 +15,7 @@ export function Footer() {
               <img
                 src="/logo.png"
                 alt="Tooth Fairy"
-                style={{ width: 70, height: 65, objectFit: 'contain', display: 'block' }}
+                style={{ width: 100, height: 100, objectFit: 'contain', display: 'block' }}
               />
               <span style={{ fontFamily: 'var(--display)', fontWeight: 500, fontSize: 20 }}>
                 Tooth Fairy

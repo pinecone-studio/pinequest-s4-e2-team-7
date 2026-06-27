@@ -1,5 +1,28 @@
 import type { ScreeningCreate } from '@pinequest/types'
 
+/** No-PII prior-season result per child, cached from /api/teacher/classes/:id/history-cache. */
+export type HistoryCacheEntry = {
+  childKey: string
+  seasonId: string
+  triageLevel: 'green' | 'yellow' | 'red'
+  confirmedLevel: 'green' | 'yellow' | 'red' | null
+  /** Date-only ISO string (YYYY-MM-DD) — reduces fingerprinting risk. */
+  capturedAt: string
+  longitudinalFlags: Array<{ fdi: number; flag: string }>
+  cachedAt: string
+}
+
+/** Storage contract for the prior-season history cache. Adapter: expo-sqlite on mobile. */
+export interface IHistoryCache {
+  /** Upsert a batch (INSERT OR REPLACE by childKey). */
+  putEntries(entries: HistoryCacheEntry[]): Promise<void>
+  /** Return the cached entry for a child, or null if not yet loaded. */
+  getByChildKey(childKey: string): Promise<HistoryCacheEntry | null>
+  /** Evict specific children (use before a full class refresh). */
+  clearForKeys(childKeys: string[]): Promise<void>
+  clear(): Promise<void>
+}
+
 /** A pending sync event waiting to be flushed to the API. */
 export type OutboxEntry = {
   id: string
