@@ -9,6 +9,7 @@ import type { FollowUpStatus } from '@pinequest/types'
 import type { BoardStudent } from '@/hooks/useBoard'
 import StatusPicker from '@/components/ui/StatusPicker'
 import IconButton from '@/components/ui/IconButton'
+import SeasonDotRail from '@/components/admin/summary/SeasonDotRail'
 
 // Triage is a STATUS accent ONLY — dot + icon + label + avatar initial. The
 // card surface itself stays neutral in BOTH themes; we never tint the whole
@@ -96,6 +97,8 @@ const FollowUpCard = ({ student: s, onSend, onStatus, onEdit, dragging, onDragSt
           <span className="text-[11px] font-semibold text-triage-red">Өмнөх эмчилгээ хийгдээгүй, одоо хүндэрсэн</span>
         </div>
       )}
+
+      <SeasonDotRail history={s.seasonHistory ?? []} trend={s.trend ?? null} />
 
       {/* action row — clicks here change status / send, never open the modal */}
       <div className="flex items-center gap-2" onClick={stop}>

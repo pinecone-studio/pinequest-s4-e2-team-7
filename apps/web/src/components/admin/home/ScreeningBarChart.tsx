@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChartBarIcon } from '@heroicons/react/24/outline'
 import { useTimeseries } from '@/hooks/useStats'
 import { useSeason } from '@/components/shared/SeasonProvider'
@@ -33,6 +33,11 @@ const ScreeningBarChart = () => {
   const [season, setSeason] = useState<SeasonKey>(
     SEASONS.find((s) => seasonId?.endsWith(s.key))?.key ?? 'fall',
   )
+  // Sync season with the loaded seasonId (useState initializes before API responds).
+  useEffect(() => {
+    const derived = SEASONS.find((s) => seasonId?.endsWith(s.key))?.key
+    if (derived) setSeason(derived)
+  }, [seasonId])
   const { data, isLoading } = useTimeseries('CAL', `${year}-${season}`)
 
   if (isLoading) return <SkeletonChart />

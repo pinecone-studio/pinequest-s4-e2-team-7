@@ -9,15 +9,15 @@ const DOT_CLS: Record<TriageLevel, string> = {
   green: 'bg-triage-green',
 }
 
-type ArrowInfo = { icon: string; cls: string } | null
-const TREND_ARROW: Record<string, ArrowInfo> = {
-  improved:      { icon: '↑', cls: 'text-triage-green' },
-  improving:     { icon: '↑', cls: 'text-triage-green' },
-  worsened:      { icon: '↓', cls: 'text-triage-red' },
-  deteriorating: { icon: '↓', cls: 'text-triage-red' },
-  stable:        { icon: '→', cls: 'text-text-muted' },
-  chronic:       { icon: '⚠', cls: 'text-triage-yellow' },
-  volatile:      { icon: '~', cls: 'text-text-muted' },
+type TrendInfo = { icon: string; textCls: string; bg: string; label: string } | null
+const TREND: Record<string, TrendInfo> = {
+  worsened:      { icon: '↓', textCls: 'text-triage-red',    bg: 'bg-triage-red-bg',    label: 'Хүндэрсэн' },
+  deteriorating: { icon: '↓', textCls: 'text-triage-red',    bg: 'bg-triage-red-bg',    label: 'Хүндэрч байна' },
+  improved:      { icon: '↑', textCls: 'text-triage-green',  bg: 'bg-triage-green-bg',  label: 'Сайжирсан' },
+  improving:     { icon: '↑', textCls: 'text-triage-green',  bg: 'bg-triage-green-bg',  label: 'Сайжирч байна' },
+  chronic:       { icon: '⚠', textCls: 'text-triage-yellow', bg: 'bg-triage-yellow-bg', label: 'Архаг' },
+  volatile:      { icon: '~', textCls: 'text-text-muted',    bg: 'bg-surface-raised',   label: 'Тогтворгүй' },
+  stable:        { icon: '→', textCls: 'text-text-muted',    bg: 'bg-surface-raised',   label: 'Тогтвортой' },
   first_season:  null,
   unscreened:    null,
 }
@@ -26,16 +26,16 @@ const MAX = 6
 
 type Props = { history: SeasonSnapshot[]; trend: ChildTrendSnapshot | null }
 
-/** Colored season dots (oldest left → newest right) + direction arrow. Hidden when N < 2. */
+/** Season dots (oldest→newest) + labeled trend pill. Hidden when N < 2. */
 const SeasonDotRail = ({ history, trend }: Props) => {
   if (history.length < 2) return null
   const visible = history.slice(-MAX)
-  const arrow: ArrowInfo = trend ? (TREND_ARROW[trend.tag] ?? null) : null
+  const t: TrendInfo = trend ? (TREND[trend.tag] ?? null) : null
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1.5 flex-wrap">
       {history.length > MAX && (
-        <span className="mr-0.5 text-[10px] text-text-muted">+{history.length - MAX}</span>
+        <span className="text-[10px] text-text-muted">+{history.length - MAX}</span>
       )}
       {visible.map((s) => (
         <span
@@ -44,8 +44,10 @@ const SeasonDotRail = ({ history, trend }: Props) => {
           title={s.seasonId}
         />
       ))}
-      {arrow && (
-        <span className={`ml-1 text-[13px] font-bold leading-none ${arrow.cls}`}>{arrow.icon}</span>
+      {t && (
+        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${t.bg} ${t.textCls}`}>
+          {t.icon} {t.label}
+        </span>
       )}
     </div>
   )

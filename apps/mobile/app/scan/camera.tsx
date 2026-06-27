@@ -49,7 +49,7 @@ export default function CameraScreen() {
       {!cameraReady && (
         <View style={s.camLoading}>
           <ActivityIndicator size="large" color="#fff" />
-          <Text style={s.overlayText}>Камер бэлдэж байна...</Text>
+          <Text style={s.overlayText}>Уншиж байна...</Text>
         </View>
       )}
       <CameraFrameOverlay mode={mode} />
@@ -69,14 +69,14 @@ export default function CameraScreen() {
       {busy && (
         <View style={s.overlay}>
           <ActivityIndicator size="large" color="#fff" />
-          <Text style={s.overlayText}>{analyzing ? 'Шинжилж байна…' : 'Зураг боловсруулж байна…'}</Text>
+          <Text style={s.overlayText}>{analyzing ? 'Уншиж байна...' : 'Дүгнэлтийг гаргаж байна...'}</Text>
         </View>
       )}
       {!!error && <Text style={s.errorBanner}>{error}</Text>}
 
       <View style={s.bottomBar}>
         <TouchableOpacity style={s.modeBtn} onPress={toggleMode} disabled={busy}>
-          <Text style={s.modeTxt}>{mode === 'upper' ? '↓ Доод' : '↑ Дээд'}</Text>
+          <Text style={s.modeTxt}>{mode === 'upper' ? 'Эрүү' : 'Хоншоор'}</Text>
         </TouchableOpacity>
         <CameraShutterBar onCapture={capture} disabled={busy} />
         <View style={{ width: 72 }} />
