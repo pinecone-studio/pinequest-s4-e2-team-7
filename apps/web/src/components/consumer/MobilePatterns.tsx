@@ -72,7 +72,9 @@ export const LastScreeningCard = ({
   >
     <span className={cn('size-3 shrink-0 rounded-full', TRIAGE_DOT[triage])} />
     <div className="min-w-0 flex-1">
-      <p className="text-[11px] font-medium uppercase tracking-wide text-text-muted">Сүүлийн шалгалт</p>
+      <p className="text-[11px] font-medium uppercase tracking-wide text-text-muted">
+        Сүүлийн дүгнэлт
+      </p>
       <p className="mt-0.5 line-clamp-2 text-[14px] font-medium text-text-base">{summary}</p>
       <p className="mt-1 text-[12px] text-text-muted">{date}</p>
     </div>
@@ -92,8 +94,12 @@ export const QuickActionGrid = ({
         href={href}
         className="warm-card flex aspect-square flex-col justify-between p-4 transition-all hover:bg-surface-raised"
       >
-        <span className="flex size-10 items-center justify-center rounded-xl bg-[#F3B900]/12 text-lg">{icon}</span>
-        <span className="whitespace-pre-line text-[13px] font-semibold leading-snug text-text-base">{label}</span>
+        <span className="flex size-10 items-center justify-center rounded-xl bg-[#F3B900]/12 text-lg">
+          {icon}
+        </span>
+        <span className="whitespace-pre-line text-[13px] font-semibold leading-snug text-text-base">
+          {label}
+        </span>
       </Link>
     ))}
   </div>
@@ -125,11 +131,16 @@ export const TriageHeroCard = ({
 export const QuestionProgress = ({ step, total }: { step: number; total: number }) => (
   <div className="mb-6">
     <div className="mb-2 flex justify-between text-[12px] font-medium text-text-muted">
-      <span>Асуулт {step}/{total}</span>
+      <span>
+        Асуулт {step}/{total}
+      </span>
       <span>{Math.round((step / total) * 100)}%</span>
     </div>
     <div className="h-2 overflow-hidden rounded-full bg-consumer-chrome">
-      <div className="h-full rounded-full bg-[#F3B900] transition-all" style={{ width: `${(step / total) * 100}%` }} />
+      <div
+        className="h-full rounded-full bg-[#F3B900] transition-all"
+        style={{ width: `${(step / total) * 100}%` }}
+      />
     </div>
   </div>
 )
@@ -153,7 +164,14 @@ export const RadioCard = ({
       checked && 'ring-2 ring-[#F3B900]',
     )}
   >
-    <input type="radio" name={name} value={value} checked={checked} onChange={onChange} className="size-4 accent-[#F3B900]" />
+    <input
+      type="radio"
+      name={name}
+      value={value}
+      checked={checked}
+      onChange={onChange}
+      className="size-4 accent-[#F3B900]"
+    />
     <span className="text-[14px] font-medium text-text-base">{label}</span>
   </label>
 )

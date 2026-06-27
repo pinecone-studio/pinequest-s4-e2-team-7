@@ -95,7 +95,7 @@ const Row = ({ label, value, muted, base }: { label: string; value: string; mute
 const s = StyleSheet.create({
   root: { flex: 1 },
   loader: { marginTop: 48 },
-  scroll: { padding: 20, gap: 18 },
+  scroll: { padding: 20, gap: 18, paddingBottom: 32 },
   header: { alignItems: 'center', gap: 6, paddingVertical: 12 },
   avatar: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' },
   avatarText: { fontSize: 30, fontFamily: 'Inter_700Bold' },

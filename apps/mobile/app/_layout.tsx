@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { Text, TextInput, View } from 'react-native'
 import { useFonts } from 'expo-font'
 import { getToken } from '@/lib/auth'
-import { ThemeProvider } from '@/lib/ThemeContext'
+import { ThemeProvider, useTheme } from '@/lib/ThemeContext'
 
 const applyInterDefaults = () => {
   const base = { fontFamily: 'Inter_400Regular' }
@@ -45,15 +45,22 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <Stack>
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="scan" options={{ headerShown: false }} />
-        <Stack.Screen name="hospital" options={{ headerShown: false }} />
-        <Stack.Screen name="stats" options={{ title: 'Статистик', headerBackTitle: 'Буцах' }} />
-        <Stack.Screen name="class" options={{ headerShown: false }} />
-      </Stack>
+      <RootStack />
       <StatusBar style="auto" />
     </ThemeProvider>
+  )
+}
+
+const RootStack = () => {
+  const { colors } = useTheme()
+  return (
+    <Stack screenOptions={{ contentStyle: { backgroundColor: colors.bg } }}>
+      <Stack.Screen name="login" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="scan" options={{ headerShown: false }} />
+      <Stack.Screen name="hospital" options={{ headerShown: false }} />
+      <Stack.Screen name="stats" options={{ title: 'Статистик', headerBackTitle: 'Буцах' }} />
+      <Stack.Screen name="class" options={{ headerShown: false }} />
+    </Stack>
   )
 }
