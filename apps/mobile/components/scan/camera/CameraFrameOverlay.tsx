@@ -1,24 +1,18 @@
 import { View, Dimensions, StyleSheet } from 'react-native'
-import ToothGuide from './ToothGuide'
 
 const { width: SW, height: SH } = Dimensions.get('window')
 const FT = SH * 0.20        // frame top
 const FB = SH * 0.78        // frame bottom
 const FL = SW * 0.06        // left/right margin
 const FH = FB - FT
-const FC = (FT + FB) / 2    // frame vertical center
-const MAX_TOOTH_H = 42      // tallest tooth (central incisor)
-const OFFSET = 14           // half-gap between upper/lower guide
 const C = 28
 const DARK = 'rgba(0,0,0,0.65)'
 
+// The per-tooth `ToothGuide` overlay is temporarily disabled. `mode` is kept on
+// the prop contract so callers don't change when the guide is re-enabled.
 type Props = { mode: 'upper' | 'lower' }
 
-export default function CameraFrameOverlay({ mode }: Props) {
-  const guideTop = mode === 'upper'
-    ? FC - MAX_TOOTH_H - OFFSET   // upper teeth sit just above center
-    : FC + OFFSET                  // lower teeth sit just below center
-
+export default function CameraFrameOverlay(_props: Props) {
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
       {/* Blur simulation panels */}

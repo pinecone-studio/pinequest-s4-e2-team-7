@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
-  "name": "smilo",
+  "name": "toothlings",
   "compatibility_date": "2026-06-25",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
@@ -9,6 +9,9 @@
     "binding": "ASSETS"
   },
   "services": [
-    { "binding": "WORKER_SELF_REFERENCE", "service": "smilo" }
-  ]
+    { "binding": "WORKER_SELF_REFERENCE", "service": "toothlings" }
+  ],
+  "vars": {
+    "NEXT_PUBLIC_API_URL": "https://screener-api.ariunzul.workers.dev"
+  }
 }

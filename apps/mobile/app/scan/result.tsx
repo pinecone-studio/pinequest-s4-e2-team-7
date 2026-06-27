@@ -1,9 +1,12 @@
+import { useMemo } from 'react'
 import { ScrollView, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTheme } from '@/lib/ThemeContext'
+import type { PhotoAnalysis } from '@/lib/api'
 import ResultTriageCard, { TriageLevel } from '@/components/scan/result/ResultTriageCard'
-import ResultToothGrid from '@/components/scan/result/ResultToothGrid'
+import ResultPhotoCard from '@/components/scan/result/ResultPhotoCard'
+import ResultDetectionList from '@/components/scan/result/ResultDetectionList'
 import ResultGreenAdvice from '@/components/scan/result/ResultGreenAdvice'
 import ResultYellowAdvice from '@/components/scan/result/ResultYellowAdvice'
 import ResultRedAdvice from '@/components/scan/result/ResultRedAdvice'
@@ -24,19 +27,33 @@ export default function ResultScreen() {
     schoolId: string
     seasonId: string
     questionnaire: string
+    photos: string
   }>()
 
   const level = (params.triageLevel ?? 'green') as TriageLevel
   const score = Number(params.triageScore ?? '0')
-  const detectionsCount = Number(params.detectionsCount ?? '0')
   const screeningId = params.screeningId ?? ''
+
+  const photos = useMemo<PhotoAnalysis[]>(() => {
+    try {
+      const parsed = JSON.parse(params.photos ?? '[]')
+      return Array.isArray(parsed) ? (parsed as PhotoAnalysis[]) : []
+    } catch {
+      return []
+    }
+  }, [params.photos])
+
+  const allDetections = useMemo(() => photos.flatMap(p => p.detections), [photos])
 
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <ResultTriageCard level={level} score={score} />
         <ResultDisclaimer />
-        <ResultToothGrid level={level} detectionsCount={detectionsCount} />
+        {photos.map((photo, i) => (
+          <ResultPhotoCard key={`${photo.arch}-${i}`} photo={photo} />
+        ))}
+        <ResultDetectionList detections={allDetections} />
         {level === 'green' && <ResultGreenAdvice />}
         {level === 'yellow' && <ResultYellowAdvice />}
         {level === 'red' && <ResultRedAdvice guardianPhone={params.guardianPhone} />}

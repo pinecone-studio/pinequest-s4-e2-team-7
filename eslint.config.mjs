@@ -10,11 +10,16 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/dist/**',
       '**/.next/**',
+      '**/.open-next/**',
+      '**/.wrangler/**',
+      '**/.mf/**',
+      '**/.vercel/**',
       '**/.expo/**',
       '**/.turbo/**',
       '**/*.config.{js,mjs,cjs}',
       '**/next-env.d.ts',
-      'apps/inference/**',
+      '**/expo-env.d.ts',
+      'apps/model/**',
     ],
   },
   js.configs.recommended,
@@ -22,6 +27,18 @@ export default tseslint.config(
   {
     languageOptions: {
       globals: { ...globals.node },
+    },
+    rules: {
+      // Allow intentionally-unused identifiers prefixed with `_`
+      // (e.g. required-but-unused props/args).
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 )

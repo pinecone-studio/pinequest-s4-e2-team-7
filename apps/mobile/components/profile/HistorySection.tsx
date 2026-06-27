@@ -1,52 +1,74 @@
-import { View, Text, StyleSheet } from 'react-native'
-import { useState } from 'react'
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native'
+import { useEffect, useState } from 'react'
 import { useTheme } from '@/lib/ThemeContext'
-import {
-  MOCK_HISTORY,
-  MOCK_CHILDREN,
-  getProfileRole,
-  type ProfileRole,
-} from '@/lib/profileData'
+import { getMyScreenings, getMyClasses, getRosterStatus } from '@/lib/api'
+import type { ScreeningRow } from '@/lib/profileData'
 import HistoryRow from './HistoryRow'
-import ClassSelector from './ClassSelector'
 
-type Props = { role: string }
+type Props = { userId: string; role?: string }
 
-const HistorySection = ({ role }: Props) => {
+const toDate = (ts: number | string) =>
+  typeof ts === 'number'
+    ? new Date(ts).toISOString().slice(0, 10)
+    : new Date(ts).toISOString().slice(0, 10)
+
+const HistorySection = ({ userId, role }: Props) => {
   const { colors } = useTheme()
-  const [selectedClass, setSelectedClass] = useState<string | null>(null)
-  const profileRole: ProfileRole = getProfileRole(role)
+  const [rows, setRows] = useState<ScreeningRow[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const rows = MOCK_HISTORY.filter((r) => {
-    if (profileRole === 'child')        return r.childName === MOCK_HISTORY[0].childName
-    if (profileRole === 'parent')       return MOCK_CHILDREN.includes(r.childName)
-    if (profileRole === 'teacher')      return true
-    if (profileRole === 'school_doctor') return selectedClass ? r.classId === selectedClass : false
-    return true
-  })
-
-  const emptyText =
-    profileRole === 'school_doctor' && !selectedClass
-      ? 'Анги сонгоно уу'
-      : 'Түүх байхгүй байна'
+  useEffect(() => {
+    if (role === 'teacher') {
+      getMyClasses()
+        .then(async (classes) => {
+          const rosters = await Promise.all(
+            classes.map((c) =>
+              getRosterStatus(c.id).then((students) =>
+                students.map((s) => ({ ...s, classId: c.id }))
+              )
+            )
+          )
+          const screened = rosters.flat().filter((s) => s.screenedAt && s.latestLevel)
+          setRows(
+            screened.map((s) => ({
+              id: s.childKey,
+              childName: `${s.lastName} ${s.firstName}`,
+              triageLevel: s.latestLevel!,
+              date: toDate(s.screenedAt!),
+              classId: s.classId,
+            }))
+          )
+        })
+        .catch(() => setRows([]))
+        .finally(() => setLoading(false))
+    } else {
+      getMyScreenings(userId)
+        .then((items) =>
+          setRows(
+            items.map((s) => ({
+              id: s.id,
+              childName: '',
+              triageLevel: s.triageLevel,
+              date: toDate(s.capturedAt),
+              classId: s.classId,
+            }))
+          )
+        )
+        .catch(() => setRows([]))
+        .finally(() => setLoading(false))
+    }
+  }, [userId, role])
 
   return (
     <View>
       <Text style={[s.sectionTitle, { color: colors.textMuted }]}>ШАЛГАЛТЫН ТҮҮХ</Text>
       <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        {profileRole === 'school_doctor' && (
-          <ClassSelector selected={selectedClass} onSelect={setSelectedClass} />
-        )}
-        {rows.length === 0 ? (
-          <Text style={[s.empty, { color: colors.textDisabled }]}>{emptyText}</Text>
+        {loading ? (
+          <ActivityIndicator color={colors.primary} style={s.loader} />
+        ) : rows.length === 0 ? (
+          <Text style={[s.empty, { color: colors.textDisabled }]}>Түүх байхгүй байна</Text>
         ) : (
-          rows.map((r) => (
-            <HistoryRow
-              key={r.id}
-              row={r}
-              showName={profileRole !== 'child'}
-            />
-          ))
+          rows.map((r) => <HistoryRow key={r.id} row={r} showName={role === 'teacher'} />)
         )}
       </View>
     </View>
@@ -58,15 +80,15 @@ const s = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
     fontSize: 11,
     letterSpacing: 0.5,
-    paddingHorizontal: 16,
-    paddingTop: 20,
     paddingBottom: 8,
   },
   card: {
     borderRadius: 16,
     borderWidth: 1,
-    marginHorizontal: 16,
     overflow: 'hidden',
+  },
+  loader: {
+    paddingVertical: 28,
   },
   empty: {
     fontFamily: 'Inter_400Regular',

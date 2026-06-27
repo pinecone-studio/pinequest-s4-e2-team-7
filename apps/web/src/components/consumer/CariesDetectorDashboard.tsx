@@ -29,7 +29,6 @@ const DEFAULT_FILTERS = ['Болд', 'Сарнай', 'Энхбаяр']
 
 const IntraoralImageView = ({ imageUrl, detections }: { imageUrl: string; detections: ScanDetection[] }) => (
   <div className="relative overflow-hidden rounded-2xl bg-surface-raised">
-    {/* eslint-disable-next-line @next/next/no-img-element */}
     <img src={imageUrl} alt="Шүдний ойрын зураг" className="w-full object-contain" />
     {detections.map((d, i) => (
       <div

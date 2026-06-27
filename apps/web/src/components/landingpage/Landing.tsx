@@ -10,7 +10,6 @@ import { Problem } from './Problem'
 import { Solution } from './Solution'
 import { Features } from './Features'
 import { Footer } from './Footer'
-import { Lottie1 } from '../lotties/Lottie1'
 
 export const Landing = () => {
   const [active, setActive] = useState(0)

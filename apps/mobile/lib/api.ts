@@ -1,5 +1,7 @@
-import type { ChildScreeningSummary } from '@pinequest/types'
+import type { ChildScreeningSummary, InferenceDetection } from '@pinequest/types'
+import { normalizeInference, detectionsToFindings, triage } from '@pinequest/core'
 import { getToken } from './auth'
+import { runLocalInference, isModelCached } from './localInference'
 
 const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'https://screener-api.ariunzul.workers.dev'
 
@@ -136,6 +138,16 @@ export const updateSchedule = (classId: string, scheduledAt: string | null, remi
 export const updateMe = (patch: ProfilePatch) =>
   apiFetch<ProfileResult>('/api/auth/me', { method: 'PATCH', body: JSON.stringify(patch) })
 
+export type ScreeningListItem = {
+  id: string
+  triageLevel: 'green' | 'yellow' | 'red'
+  capturedAt: number
+  classId: string
+}
+
+export const getMyScreenings = (userId: string) =>
+  apiFetch<ScreeningListItem[]>(`/api/screenings?screenedById=${encodeURIComponent(userId)}`)
+
 export type HelpRequest = { id: string; status: 'open' | 'connected' | 'closed' }
 
 /** Ask a registered volunteer dentist to help a flagged (red/yellow) child. */
@@ -152,11 +164,37 @@ export type AnalyzeMeta = {
   questionnaire?: string // JSON-serialized questionnaire answers
 }
 
+/** One captured arch (upper/lower) tied to its own detections, for the result UI. */
+export type PhotoAnalysis = {
+  uri: string
+  arch: 'upper' | 'lower'
+  detections: InferenceDetection[]
+}
+
 export type AnalyzeResult = {
   screeningId: string
   triageLevel: 'green' | 'yellow' | 'red'
   triageScore: number
-  detections: unknown[]
+  detections: InferenceDetection[]
+  /** Per-photo breakdown (present from analyzeImages), used to draw boxes on each image. */
+  photos?: PhotoAnalysis[]
+}
+
+const isOfflineError = (err: unknown): boolean =>
+  err instanceof TypeError &&
+  (err.message.includes('Network request failed') || err.message.includes('fetch'))
+
+const analyzeImageLocally = async (imageUri: string): Promise<AnalyzeResult> => {
+  const raw = await runLocalInference(imageUri)
+  const normalized = normalizeInference(raw, 'on_device')
+  const findings = detectionsToFindings(normalized.detections, () => `local-${Math.random().toString(36).slice(2)}`)
+  const triageResult = triage(findings, {})
+  return {
+    screeningId: `local-${Date.now()}`,
+    triageLevel: triageResult.level,
+    triageScore: triageResult.score,
+    detections: normalized.detections,
+  }
 }
 
 const analyzeImage = async (imageUri: string, meta: AnalyzeMeta): Promise<AnalyzeResult> => {
@@ -166,15 +204,22 @@ const analyzeImage = async (imageUri: string, meta: AnalyzeMeta): Promise<Analyz
   for (const [k, v] of Object.entries(meta)) {
     if (v) form.append(k, v)
   }
-  const res = await fetch(`${BASE}/api/screenings/analyze`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token ?? ''}` },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    body: form as any,
-  })
-  const json = (await res.json()) as { success: boolean; data: AnalyzeResult; message?: string }
-  if (!res.ok) throw new Error(json.message ?? String(res.status))
-  return json.data
+  try {
+    const res = await fetch(`${BASE}/api/screenings/analyze`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token ?? ''}` },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      body: form as any,
+    })
+    const json = (await res.json()) as { success: boolean; data: AnalyzeResult; message?: string }
+    if (!res.ok) throw new Error(json.message ?? String(res.status))
+    return json.data
+  } catch (err) {
+    if (isOfflineError(err) && (await isModelCached())) {
+      return analyzeImageLocally(imageUri)
+    }
+    throw err
+  }
 }
 
 const LEVEL_RANK: Record<AnalyzeResult['triageLevel'], number> = { green: 0, yellow: 1, red: 2 }
@@ -184,17 +229,24 @@ export const analyzeImages = async (
   lowerUri: string,
   meta: AnalyzeMeta,
 ): Promise<AnalyzeResult> => {
-  const [upper, lower] = await Promise.allSettled([
-    analyzeImage(upperUri, meta),
-    analyzeImage(lowerUri, meta),
-  ])
-
-  const results: AnalyzeResult[] = [
-    ...(upper.status === 'fulfilled' ? [upper.value] : []),
-    ...(lower.status === 'fulfilled' ? [lower.value] : []),
+  const inputs = [
+    { uri: upperUri, arch: 'upper' as const },
+    { uri: lowerUri, arch: 'lower' as const },
   ]
+  const settled = await Promise.allSettled(inputs.map(i => analyzeImage(i.uri, meta)))
+
+  const results: AnalyzeResult[] = []
+  const photos: PhotoAnalysis[] = []
+  settled.forEach((outcome, i) => {
+    if (outcome.status === 'fulfilled') {
+      results.push(outcome.value)
+      photos.push({ uri: inputs[i].uri, arch: inputs[i].arch, detections: outcome.value.detections })
+    }
+  })
+
   if (!results.length) {
-    const err = upper.status === 'rejected' ? upper.reason : (lower as PromiseRejectedResult).reason
+    const rejected = settled.find(s => s.status === 'rejected') as PromiseRejectedResult
+    const err = rejected.reason
     throw new Error(err instanceof Error ? err.message : String(err))
   }
 
@@ -204,5 +256,6 @@ export const analyzeImages = async (
     triageLevel: worst.triageLevel,
     triageScore: Math.max(...results.map(r => r.triageScore)),
     detections: results.flatMap(r => r.detections),
+    photos,
   }
 }

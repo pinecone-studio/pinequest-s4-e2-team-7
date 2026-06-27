@@ -96,7 +96,6 @@ const DoctorChatContent = () => {
           {messages.map((m, i) => (
             <div key={i} className={`flex flex-col ${m.from === 'user' ? 'items-end' : 'items-start'}`}>
               {m.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img src={m.image} alt="Шалгалтын зураг" className="mb-2 max-h-40 rounded-2xl border border-border" />
               ) : null}
               <div
