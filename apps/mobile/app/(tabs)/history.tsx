@@ -12,13 +12,30 @@ type Screening = {
   triageLevel: string
   capturedAt: string
   childKey: string
+  classId?: string
   childName: string | null
 }
 
+// A screening is an immutable event; one child may have several (re-screens,
+// or separate upper/lower sessions). The history list is a per-child view, so
+// collapse to the latest screening per child. The API already orders by
+// capturedAt desc, but we re-sort defensively before keeping the first seen.
+const latestPerChild = (rows: Screening[]): Screening[] => {
+  const seen = new Set<string>()
+  const out: Screening[] = []
+  for (const r of [...rows].sort((a, b) => b.capturedAt.localeCompare(a.capturedAt))) {
+    const key = `${r.classId ?? ''}::${r.childKey}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(r)
+  }
+  return out
+}
+
 const LEVEL_LABEL: Record<string, string> = {
-  green: 'Нормаль',
-  yellow: 'Хянах',
-  red: 'Яаралтай',
+  green: 'Харьцангуй эрүүл',
+  yellow: 'Эмчилгээ шаардлагатай',
+  red: 'Яаралтай эмчилгээ шаардлагатай',
 }
 
 export default function HistoryScreen() {
@@ -30,7 +47,7 @@ export default function HistoryScreen() {
 
   useEffect(() => {
     apiFetch<Screening[]>('/api/screenings')
-      .then(setScreenings)
+      .then((rows) => setScreenings(latestPerChild(rows)))
       .catch((e: unknown) => setError(toMongolian(e)))
       .finally(() => setLoading(false))
   }, [])
@@ -104,8 +121,15 @@ const s = StyleSheet.create({
     gap: 10,
     elevation: 1,
   },
-  badge: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
-  badgeText: { color: '#fff', fontWeight: '700', fontSize: 12 },
+  badge: {
+    width: 120,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: { color: '#fff', fontWeight: '700', fontSize: 12, textAlign: 'center' },
   body: { flex: 1, gap: 2 },
   name: { fontSize: 15, fontFamily: 'Inter_600SemiBold' },
   date: { fontSize: 13 },

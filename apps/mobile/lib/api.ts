@@ -180,6 +180,7 @@ export type ScreeningDetail = {
   childName: string | null
   childBirthYear: number | null
   classId: string
+  className: string | null
   schoolId: string
   seasonId: string
   triageLevel: 'green' | 'yellow' | 'red'
@@ -260,24 +261,48 @@ const INFERENCE_RECOVERABLE = new Set(['inference_failed', 'inference_unreachabl
 const canFallbackToLocal = (err: unknown): boolean =>
   isOfflineError(err) || (err instanceof Error && INFERENCE_RECOVERABLE.has(err.message))
 
-const analyzeImageLocally = async (imageUri: string, symptoms: SymptomSet = {}): Promise<AnalyzeResult> => {
-  const raw = await runLocalInference(imageUri)
-  const normalized = normalizeInference(raw, 'on_device')
-  const findings = detectionsToFindings(normalized.detections, () => `local-${Math.random().toString(36).slice(2)}`)
+/** Run both arches locally (offline fallback), combining into ONE screening. */
+const analyzeImagesLocally = async (
+  upperUri: string,
+  lowerUri: string,
+  symptoms: SymptomSet = {},
+): Promise<AnalyzeResult> => {
+  const inputs = [
+    { uri: upperUri, arch: 'upper' as const },
+    { uri: lowerUri, arch: 'lower' as const },
+  ]
+  const photos: PhotoAnalysis[] = []
+  for (const i of inputs) {
+    const raw = await runLocalInference(i.uri)
+    photos.push({ uri: i.uri, arch: i.arch, detections: normalizeInference(raw, 'on_device').detections })
+  }
+  const detections = photos.flatMap(p => p.detections)
+  const findings = detectionsToFindings(detections, () => `local-${Math.random().toString(36).slice(2)}`)
   const triageResult = triage(findings, symptoms)
   return {
     screeningId: `local-${Date.now()}`,
     triageLevel: triageResult.level,
     triageScore: triageResult.score,
-    detections: normalized.detections,
+    detections,
+    photos,
     modelVersion: process.env.EXPO_PUBLIC_MODEL_VERSION ?? 'on-device-v1',
   }
 }
 
-const analyzeImage = async (imageUri: string, meta: AnalyzeMeta): Promise<AnalyzeResult> => {
+/**
+ * Send both arches in ONE request so the server creates a SINGLE screening that
+ * holds every finding. Sending them separately would split one capture across two
+ * screening records, and the report would only ever read one of them.
+ */
+export const analyzeImages = async (
+  upperUri: string,
+  lowerUri: string,
+  meta: AnalyzeMeta,
+): Promise<AnalyzeResult> => {
   const token = await getToken()
   const form = new FormData()
-  form.append('image', { uri: imageUri, type: 'image/jpeg', name: 'capture.jpg' } as unknown as Blob)
+  form.append('imageUpper', { uri: upperUri, type: 'image/jpeg', name: 'upper.jpg' } as unknown as Blob)
+  form.append('imageLower', { uri: lowerUri, type: 'image/jpeg', name: 'lower.jpg' } as unknown as Blob)
   for (const [k, v] of Object.entries(meta)) {
     if (v) form.append(k, v)
   }
@@ -290,50 +315,16 @@ const analyzeImage = async (imageUri: string, meta: AnalyzeMeta): Promise<Analyz
     })
     const json = (await res.json()) as { success: boolean; data: AnalyzeResult; message?: string }
     if (!res.ok) throw new Error(json.message ?? String(res.status))
-    return json.data
+    // The server has no device-side image URIs; re-attach them by arch so the
+    // result UI can render each photo with its own detection boxes.
+    const uriByArch: Record<'upper' | 'lower', string> = { upper: upperUri, lower: lowerUri }
+    const photos = (json.data.photos ?? []).map(p => ({ ...p, uri: uriByArch[p.arch] ?? p.uri }))
+    return { ...json.data, photos }
   } catch (err) {
     if (canFallbackToLocal(err) && (await isModelCached())) {
       const sym = (() => { try { return JSON.parse(meta.symptoms ?? '{}') as SymptomSet } catch { return {} } })()
-      return analyzeImageLocally(imageUri, sym)
+      return analyzeImagesLocally(upperUri, lowerUri, sym)
     }
     throw err
-  }
-}
-
-const LEVEL_RANK: Record<AnalyzeResult['triageLevel'], number> = { green: 0, yellow: 1, red: 2 }
-
-export const analyzeImages = async (
-  upperUri: string,
-  lowerUri: string,
-  meta: AnalyzeMeta,
-): Promise<AnalyzeResult> => {
-  const inputs = [
-    { uri: upperUri, arch: 'upper' as const },
-    { uri: lowerUri, arch: 'lower' as const },
-  ]
-  const settled = await Promise.allSettled(inputs.map(i => analyzeImage(i.uri, meta)))
-
-  const results: AnalyzeResult[] = []
-  const photos: PhotoAnalysis[] = []
-  settled.forEach((outcome, i) => {
-    if (outcome.status === 'fulfilled') {
-      results.push(outcome.value)
-      photos.push({ uri: inputs[i].uri, arch: inputs[i].arch, detections: outcome.value.detections })
-    }
-  })
-
-  if (!results.length) {
-    const rejected = settled.find(s => s.status === 'rejected') as PromiseRejectedResult
-    const err = rejected.reason
-    throw new Error(err instanceof Error ? err.message : String(err))
-  }
-
-  const worst = results.reduce((a, b) => LEVEL_RANK[a.triageLevel] >= LEVEL_RANK[b.triageLevel] ? a : b)
-  return {
-    screeningId: worst.screeningId,
-    triageLevel: worst.triageLevel,
-    triageScore: Math.max(...results.map(r => r.triageScore)),
-    detections: results.flatMap(r => r.detections),
-    photos,
   }
 }

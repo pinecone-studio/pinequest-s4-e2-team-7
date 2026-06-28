@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { and, desc, eq, inArray } from 'drizzle-orm'
 import { screeningCreateSchema, triage } from '@pinequest/core'
-import { screenings, screeningReviews, children } from '@pinequest/db/d1'
+import { screenings, screeningReviews, children, schoolClasses } from '@pinequest/db/d1'
 import { authenticate, authorize } from '../middleware/auth.js'
 import { writeAudit } from '../lib/audit.js'
 import { persistScreening } from '../lib/persistScreening.js'
@@ -66,7 +66,14 @@ screeningRoutes.get('/:id', authenticate, async (c) => {
     columns: { firstName: true, lastName: true, birthYear: true },
   })
   const childName = kid ? `${kid.lastName} ${kid.firstName}`.trim() : null
-  return c.json({ success: true, data: { ...screening, childName, childBirthYear: kid?.birthYear ?? null } })
+  const klass = await db.query.schoolClasses.findFirst({
+    where: eq(schoolClasses.id, screening.classId),
+    columns: { name: true },
+  })
+  return c.json({
+    success: true,
+    data: { ...screening, childName, childBirthYear: kid?.birthYear ?? null, className: klass?.name ?? null },
+  })
 })
 
 screeningRoutes.put('/:id/review', authorize('dentist', 'admin'), async (c) => {
