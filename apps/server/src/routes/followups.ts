@@ -4,7 +4,7 @@ import { followUpUpdateSchema } from '@pinequest/core'
 import { followUps, followUpEpisodes, followUpEvents, children } from '@pinequest/db/d1'
 import { authorize } from '../middleware/auth.js'
 import { writeAudit } from '../lib/audit.js'
-import { schoolScope, hasChildAccess } from '../lib/scopeFilter.js'
+import { schoolScope } from '../lib/scopeFilter.js'
 import type { AppEnv } from '../types.js'
 
 // Status transition rules: backward moves are forbidden; closed episodes are immutable.
