@@ -43,7 +43,7 @@ WINDOW_SEC = 1.3
 WINDOW_STRIDE_SEC = 0.25   # sliding step when slicing windows from a clip
 MIN_WINDOW_FRAMES = 8
 
-# Raw clip column layout written by import_clips.py (.npz "samples").
+# Raw clip column layout written by record.py (.npz "samples").
 #   t, qw, qx, qy, qz, yaw, pitch, roll, gx, gy, gz, ax, ay, az
 RAW_COLS = [
     "t", "qw", "qx", "qy", "qz", "yaw", "pitch", "roll",

@@ -1,6 +1,6 @@
 /**
- * Runtime constants shared by data-collection, training mirror, and live
- * inference. The authoritative copy for TRAINING lives in training/config.py;
+ * Runtime constants for live inference (mirror of training/config.py).
+ * The authoritative copy for TRAINING lives in training/config.py;
  * the exported metadata.json carries seqLen/featureDim so the web client can
  * detect a mismatch and refuse to run a stale model.
  */

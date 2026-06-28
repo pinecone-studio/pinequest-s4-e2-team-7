@@ -24,7 +24,6 @@ export const ROUTES = {
     root: '/brush',
     instructions: '/brush?tab=instructions',
     monitor: '/brush?tab=monitor',
-    collect: '/brush/collect',
   },
 
   profile: {

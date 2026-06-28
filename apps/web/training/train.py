@@ -9,7 +9,7 @@ Run:
     cd apps/web/training
     python3 -m venv .venv && source .venv/bin/activate
     pip install -r requirements.txt
-    python3 import_clips.py ~/Downloads/brush-dataset-*.json
+    python3 record.py --url ws://172.27.221.251:81   # collect clips
     python3 train.py
 
 Outputs:

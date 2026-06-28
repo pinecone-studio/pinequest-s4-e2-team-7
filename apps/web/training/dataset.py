@@ -105,8 +105,7 @@ def build_dataset():
     clips = load_clips()
     if not clips:
         raise SystemExit(
-            "Clip алга. Web дээр /brush/collect-оор дата цуглуулж, татаад "
-            "training/import_clips.py-оор оруулна уу."
+            "Clip алга. Эхлээд дата цуглуул: python3 record.py --url ws://<esp32-ip>:81"
         )
 
     labels = C.load_labels()

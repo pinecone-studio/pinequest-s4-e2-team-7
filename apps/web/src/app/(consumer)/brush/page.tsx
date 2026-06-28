@@ -211,13 +211,6 @@ const MonitorPanel = () => {
         )}
 
         <Link
-          href={ROUTES.brush.collect}
-          className="block text-center text-[12px] font-semibold text-[#B8860B] hover:underline"
-        >
-          Дата цуглуулах (ML сургалт) →
-        </Link>
-
-        <Link
           href={ROUTES.profile.history}
           className="block text-center text-[12px] font-semibold text-[#B8860B] hover:underline"
         >

@@ -7,20 +7,18 @@ brushed from the ESP32 + MPU6050 IMU stream, and how well each zone is covered.
 ESP32 (DMP quat + gyro/accel @50Hz)
         │  WebSocket
         ▼
-Browser /brush/collect  ──►  brush-dataset-*.json   (IndexedDB export)
+training/record.py  ──►  data/raw/<label>/*.npz     (stored IN the project)
         │
         ▼
-training/import_clips.py ──►  data/raw/<label>/*.npz
+training/train.py   ──►  artifacts/model.keras  +  ../public/models/brush/ (TFJS)
         │
         ▼
-training/train.py        ──►  artifacts/model.keras  +  ../public/models/brush/ (TFJS)
-        │
-        ▼
-Browser /brush?tab=monitor  (loads TFJS model, live zone + coverage)
+Web /brush?tab=monitor  (and later mobile) — RUN the trained model only
 ```
 
-The whole loop is **collect → train → refresh → live**. Until a model exists the
-web app runs an orientation heuristic, so it is useful from day one.
+Data lives in the repo at `apps/web/training/data/raw/` (git-ignored), exactly
+like `seq`. **Web/mobile never collect — they only run the trained model.** Until
+a model exists the web app falls back to an orientation heuristic.
 
 ## 0. Flash the firmware
 
@@ -30,25 +28,29 @@ web app runs an orientation heuristic, so it is useful from day one.
 - Set `WIFI_SSID` / `WIFI_PASS`. Note the printed `ws://<ip>:81`.
 - It streams `y,p,r,qw..qz,ax..az,gx..gz` at 50 Hz — everything the ML needs.
 
-## 1. Collect data (browser)
-
-1. `pnpm dev` → open `/brush/collect`.
-2. Enter the `ws://…:81` URL, connect.
-3. **Тэгшлэх** once (brush in front, head upright) — sets the yaw reference.
-4. Pick a zone, press **Бичих**, brush that zone for real for 2s. Repeat
-   **≥12 clips per zone**, varying speed/pose. Don't forget the `idle` label
-   (hold still / not brushing).
-5. **JSON татах** to download `brush-dataset-*.json`.
-
-## 2. Train
+## 1. Collect data (terminal recorder — stored in the project)
 
 ```bash
 cd apps/web/training
 python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-pip install -r requirements-export.txt        # TFJS export deps
+pip install -r requirements.txt               # numpy + websocket-client
+python3 record.py --url ws://172.27.221.251:81
+```
 
-python3 import_clips.py ~/Downloads/brush-dataset-*.json   # add --reset to wipe
+In the recorder:
+
+1. `c` once — brush in front, head upright — sets the yaw reference.
+2. Select a label (type its number, or `n`/`p`), press **Enter** and brush that
+   zone for real for 2s. Repeat **≥12 clips per label**, varying speed/pose.
+3. Don't forget the `idle` label (hold still / not brushing).
+4. `s` shows counts, `d` deletes the last clip, `q` quits.
+
+Each clip is written to `data/raw/<label>/<label>_<ts>.npz`.
+
+## 2. Train
+
+```bash
+pip install -r requirements-export.txt        # TFJS export deps
 python3 train.py                               # trains + exports TFJS automatically
 ```
 
