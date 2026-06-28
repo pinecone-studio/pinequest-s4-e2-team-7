@@ -33,6 +33,10 @@ export type OutboxEntry = {
   attempts: number
   lastError?: string
   sentAt?: string
+  /** ISO timestamp before which this entry should not be retried (exponential backoff). */
+  nextRetryAt?: string
+  /** Triage level extracted at enqueue time; used to sort urgent screenings first. */
+  triageLevel?: 'green' | 'yellow' | 'red'
 }
 
 /** Parsed form of an OutboxEntry used internally by Outbox. */

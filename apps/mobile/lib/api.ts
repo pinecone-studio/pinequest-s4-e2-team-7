@@ -179,6 +179,7 @@ export type AnalyzeResult = {
   detections: InferenceDetection[]
   /** Per-photo breakdown (present from analyzeImages), used to draw boxes on each image. */
   photos?: PhotoAnalysis[]
+  modelVersion?: string
 }
 
 const isOfflineError = (err: unknown): boolean =>
@@ -195,6 +196,7 @@ const analyzeImageLocally = async (imageUri: string, symptoms: SymptomSet = {}):
     triageLevel: triageResult.level,
     triageScore: triageResult.score,
     detections: normalized.detections,
+    modelVersion: process.env.EXPO_PUBLIC_MODEL_VERSION ?? 'on-device-v1',
   }
 }
 

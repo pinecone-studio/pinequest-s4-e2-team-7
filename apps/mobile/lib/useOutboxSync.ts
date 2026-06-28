@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
+import { AppState, type AppStateStatus } from 'react-native'
 import { Outbox } from '@pinequest/sync'
 import { SQLiteStore } from './sqliteStore'
 import { getToken } from './auth'
@@ -44,6 +45,18 @@ export const useOutboxSync = () => {
       setState({ syncing: false, lastResult: 'Синк амжилтгүй', ...after })
     }
   }, [])
+
+  // Re-sync when app returns to foreground after being backgrounded
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState)
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (next: AppStateStatus) => {
+      if (appStateRef.current.match(/inactive|background/) && next === 'active') {
+        void sync()
+      }
+      appStateRef.current = next
+    })
+    return () => sub.remove()
+  }, [sync])
 
   const retryStuck = useCallback(async (id: string) => {
     await outbox.resetStuck(id)

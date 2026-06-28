@@ -16,6 +16,7 @@ export class Outbox {
       payload: JSON.stringify(screening),
       createdAt: new Date().toISOString(),
       attempts: 0,
+      triageLevel: screening.triage.level,
     }
     await this.store.enqueue(entry)
   }
