@@ -23,8 +23,8 @@ export const MobileSection = () => (
         <span className="block text-white">апп</span>
       </h2>
       <p className="mb-10 text-[15px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.52)' }}>
-        ToothLings-г iOS ба Android утсан дээр татаж офлайн горимд ашиглана.
-        Зургийг авч, сүлжээ орсон үед автоматаар sync болно.
+        ToothLings-г iOS ба Android утсан дээр татаж сүлжээгүй нөхцөлд ашиглах боломжтой.
+       
       </p>
       <QRCard size={280} />
     </div>
@@ -36,8 +36,8 @@ export const MobileSection = () => (
           <span className="block text-white">апп</span>
         </h2>
         <p className="max-w-[38ch] text-[15px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.52)' }}>
-          ToothLings-г iOS ба Android утсан дээр татаж, сигналгүй нөхцөлд ч офлайн горимд хэрэглэнэ.
-          Зургийг авч, дараа нь синклэнэ.
+          ToothLings-г iOS ба Android утсан дээр татаж, сүлжээгүй нөхцөлд ашиглах боломжтой.
+        
         </p>
       </div>
       <div style={{ flex: '0 1 380px', minWidth: 280 }}>
