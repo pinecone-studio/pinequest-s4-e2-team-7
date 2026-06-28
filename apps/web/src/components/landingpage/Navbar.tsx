@@ -13,22 +13,22 @@ export function Navbar({ active, onBegin }: { active: number; onBegin: () => voi
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        background: 'rgba(244, 239, 230, 0.85)',
+        background: 'rgba(250, 248, 245, 0.85)',
         backdropFilter: 'blur(20px)',
         borderBottom: '1px solid var(--line)',
       }}
     >
       <a href="#hero" style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <img
-          src="/logo.png"
-          alt="Tooth Fairy"
-          style={{ width: 120, height: 120, objectFit: 'contain', display: 'block' }}
+          src="/logoBlack.png"
+          alt="Screener"
+          style={{ width: 44, height: 44, objectFit: 'contain', display: 'block', borderRadius: 10 }}
         />
         <div>
           <div
             style={{ fontFamily: 'var(--display)', fontWeight: 500, fontSize: 22, lineHeight: 2 }}
           >
-            Tooth Fairy
+            Screener
           </div>
           <div
             style={{

@@ -13,12 +13,12 @@ export function Footer() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
               <img
-                src="/logo.png"
-                alt="Tooth Fairy"
-                style={{ width: 100, height: 100, objectFit: 'contain', display: 'block' }}
+                src="/logoYellow.png"
+                alt="Screener"
+                style={{ width: 44, height: 44, objectFit: 'contain', display: 'block', borderRadius: 10 }}
               />
               <span style={{ fontFamily: 'var(--display)', fontWeight: 500, fontSize: 20 }}>
-                Tooth Fairy
+                Screener
               </span>
             </div>
             <p
@@ -39,7 +39,7 @@ export function Footer() {
           />
           <FooterCol
             title="Холбоо"
-            links={['hello@Tooth Fairy.mn', '+976 88595353', 'Улаанбаатар, Монгол']}
+            links={['hello@toothfairy.mn', '+976 88595353', 'Улаанбаатар, Монгол']}
           />
         </div>
         <div
@@ -60,7 +60,7 @@ export function Footer() {
               letterSpacing: '0.15em',
             }}
           >
-            © 2026 Tooth Fairy · ALL RIGHTS RESERVED
+            © 2026 Screener · ALL RIGHTS RESERVED
           </span>
           <span
             style={{

@@ -1,22 +1,21 @@
 export const GlobalStyles = () => (
   <style>{`
     :root {
-      --bg:       #f8efdf;
-      --paper:    #f8efdf;
-      --ink:      #0d4a4e;
-      --ink-soft: #2D453F;
-      --muted:    #6B7770;
-      --accent:   #0F4D3F;
-      --coral:    #E8654C;
-      --sage:     #A8C5A0;
-      --line:     rgba(14, 42, 36, 0.12);
-      --display:  'Fraunces', 'Syne', Georgia, serif;
-      --body:     'Plus Jakarta Sans', 'Inter', sans-serif;
-      --mono:     'JetBrains Mono', monospace;
+      --bg:       var(--color-bg);
+      --paper:    var(--color-bg);
+      --ink:      var(--color-text-base);
+      --ink-soft: var(--color-text-secondary, #3C3C43);
+      --muted:    var(--color-text-muted);
+      --accent:   var(--color-primary);
+      --coral:    var(--color-primary);
+      --sage:     var(--color-accent);
+      --line:     var(--color-border);
+      --display:  var(--font-sans);
+      --body:     var(--font-sans);
+      --mono:     var(--font-mono);
     }
-    html { scroll-behavior: smooth; background: var(--bg); }
-    body { background: var(--bg); color: var(--ink); font-family: var(--body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-    .Tooth Fairy a { text-decoration: none; color: inherit; }
+    html { scroll-behavior: smooth; }
+    .tooth-fairy a { text-decoration: none; color: inherit; }
     ::selection { background: var(--accent); color: var(--bg); }
 
     .deck { scroll-snap-type: y proximity; }

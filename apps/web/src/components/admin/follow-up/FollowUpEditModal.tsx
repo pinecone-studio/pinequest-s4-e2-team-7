@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button'
 import StatusPicker from '@/components/ui/StatusPicker'
 import StudentSummaryBody from '@/components/admin/summary/StudentSummaryBody'
 import LongitudinalDeltaBar from '@/components/admin/summary/LongitudinalDeltaBar'
+import { VolunteerDentistSection } from '@/components/admin/help/VolunteerDentistSection'
 
 type Channel = 'sms' | 'call' | 'in_person'
 const CHANNELS: { value: Channel; label: string }[] = [
@@ -78,6 +79,9 @@ const FollowUpEditModal = ({ student, onClose }: Props) => {
           />
         ) : null
       })()}
+      {student.latestLevel === 'red' && (
+        <VolunteerDentistSection student={student} detail={detail ?? undefined} />
+      )}
       <StudentSummaryBody
         student={student}
         detail={detail}

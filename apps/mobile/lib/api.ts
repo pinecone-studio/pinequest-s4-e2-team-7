@@ -154,6 +154,23 @@ export type HelpRequest = { id: string; status: 'open' | 'connected' | 'closed' 
 export const requestVolunteerHelp = (childKey: string, level: 'red' | 'yellow', note?: string) =>
   apiFetch<HelpRequest>('/api/help/requests', { method: 'POST', body: JSON.stringify({ childKey, level, note }) })
 
+export type VolunteerDentist = {
+  id: string
+  userId: string
+  displayName: string
+  specialty: string | null
+  org: string | null
+  area: string | null
+  avatarUrl: string | null
+  lat: number | null
+  lng: number | null
+  isAvailable: boolean
+  phone: string | null
+}
+
+export const getVolunteerDentists = () =>
+  apiFetch<VolunteerDentist[]>('/api/help/volunteers')
+
 export type AnalyzeMeta = {
   childKey: string
   classId: string

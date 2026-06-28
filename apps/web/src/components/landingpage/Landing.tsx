@@ -22,7 +22,7 @@ export const Landing = () => {
   useEffect(() => { if (params?.get('auth')) setAuthOpen(true) }, [params])
 
   useEffect(() => {
-    const ids = ['hero', 'team', 'problem', 'solution', 'features', 'cta']
+    const ids = ['hero', 'team', 'problem', 'solution', 'features']
     const obs = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -45,7 +45,7 @@ export const Landing = () => {
 
   return (
     <div
-      className="Tooth Fairy deck"
+      className="tooth-fairy deck"
       style={{ background: 'var(--bg)', color: 'var(--ink)', minHeight: '100vh' }}
     >
       <GlobalStyles />

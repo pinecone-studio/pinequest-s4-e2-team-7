@@ -11,36 +11,36 @@ export const TEAM = [
     name: 'Норовсүрэн',
     role: 'Full-stack developer',
     initials: 'БЭ',
-    focus: '',
-    img: '/norvooEgch.JPG',
+    focus: 'Веб самбар, Next.js',
+    img: '/images/team1.JPG',
   },
   {
     name: 'Ганхөлөг',
     role: 'Full-stack developer',
     initials: 'ГМ',
-    img: '/gankhulugAh.JPG',
-    focus: '',
+    img: '/images/team2.JPG',
+    focus: 'AI модель, YOLOv8',
   },
   {
     name: 'Чингүүн',
     role: 'Full-stack developer',
     initials: 'ДТ',
-    img: '/chinguunAh.png',
-    focus: '',
+    img: '/images/team3.JPG',
+    focus: 'Гар утасны апп, Expo',
   },
   {
     name: 'Ариунзул',
     role: 'Full-stack developer',
     initials: 'НС',
-    img: '/zulaaEgch.JPG',
-    focus: '',
+    img: '/images/team4.JPG',
+    focus: 'Сервер, Cloudflare',
   },
   {
     name: 'Мөнхжин',
     role: 'Full-stack developer',
     initials: 'ОБ',
-    img: '/munkhjin.JPG',
-    focus: '',
+    img: '/images/team5.png',
+    focus: 'Sync, оффлайн-first',
   },
 ]
 
@@ -63,22 +63,22 @@ export const FEATURES = [
   {
     tag: '01',
     title: 'Веб самбар',
-    body: 'Эмч, сумын эрүүл мэндийн ажилтан кейсүүдийг хянах, telemed зөвлөгөө өгөх удирдлагын самбар.',
+    body: 'Эмч, сумын эрүүл мэндийн ажилтан скрининг үр дүнг хянах, тэргүүлэх дарааллаар эрэмбэлэх, дагаж ажиллах удирдлагын самбар.',
   },
   {
     tag: '02',
     title: 'Гар утасны апп',
-    body: 'Оффлайн-first камер апп — зураг авч, шууд төхөөрөмж дотроо AI triage хийнэ. Сүлжээ ороход sync болно.',
+    body: 'Оффлайн-first камер апп — дээд, доод эрүүний зургийг авч, шууд төхөөрөмж дотроо AI triage хийнэ. Сүлжээ орсон үед автомат sync болно.',
   },
   {
     tag: '03',
     title: 'Сервер',
-    body: 'Зураг, telemetry-г аюулгүй хадгалж, эмч-эцэг эх хоёрыг холбож, тохиолдол бүрийн түүхийг хөтөлнө.',
+    body: 'Cloudflare Workers + D1 дээр ажиллах нимгэн sync сервис: скрининг событийг хүлээн авч, нэгтгэлийг гаргаж, дагаж ажиллах статусыг дамжуулна.',
   },
   {
     tag: '04',
     title: 'AI модель',
-    body: 'Хүүхдийн шүдний зургаас цоорол, ёзоор, эрсдэлийг таньж, түвшинд ангилна.',
+    body: 'YOLOv8 сургасан модель хүүхдийн шүдний зургаас цоорол, ёзоор, хагарлыг таньж, triage оноо тооцоолно. Сервер болон ONNX дэвшилтэт хэлбэрт хоёуланд нийтэнэ.',
   },
 ]
 

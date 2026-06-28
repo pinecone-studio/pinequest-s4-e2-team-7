@@ -130,13 +130,13 @@ export function Features() {
           <div className="marquee-track" style={{ gap: 48 }}>
             {[...Array(2)].map((_, k) =>
               [
-                'React Native',
-                'TensorFlow Lite',
-                'FastAPI',
-                'PostgreSQL',
+                'React Native · Expo',
+                'YOLOv8 · ONNX',
+                'FastAPI · Python',
+                'Cloudflare D1',
                 'On-device ML',
-                'Offline-first',
-                'WebRTC Telemed',
+                'Offline-first Sync',
+                'Drizzle ORM',
                 'MN Cyrillic',
               ].map((t, i) => (
                 <span

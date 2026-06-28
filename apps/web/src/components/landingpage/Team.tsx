@@ -25,12 +25,8 @@ export function Team() {
           flexDirection: 'column',
         }}
       >
-        <Eyebrow className="">Манай баг</Eyebrow>
-        <BigTitle>
-          <div> Нэг баг. </div>
-          <em />
-          <em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>Нэг зорилго.</em>
-        </BigTitle>
+        <Eyebrow className="">Багийн танилцуулга</Eyebrow>
+      
         <div
           className="grid-5 flex justify-center"
           style={{
