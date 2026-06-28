@@ -7,6 +7,10 @@ const API_URL =
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@pinequest/types', '@pinequest/core'],
+  // Linting runs separately as the commit gate (`turbo lint`); next build's own
+  // ESLint pass uses a different config that lacks the react-hooks plugin and
+  // errors on inline rule-disable comments, so skip it during the build.
+  eslint: { ignoreDuringBuilds: true },
   async rewrites() {
     return [
       {

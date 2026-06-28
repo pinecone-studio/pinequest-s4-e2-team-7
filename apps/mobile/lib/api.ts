@@ -126,6 +126,15 @@ export const getClass = (id: string) => apiFetch<ClassMeta>(`/api/classes/${id}`
 export const createClass = (payload: CreateClassPayload) =>
   apiFetch<TeacherClass>('/api/teacher/classes', { method: 'POST', body: JSON.stringify(payload) })
 
+/** A student to append to an existing class — server assigns the roster slot. */
+export type RosterAppendInput = Omit<RosterStudentInput, 'rosterSlot'>
+
+export const addStudents = (classId: string, students: RosterAppendInput[]) =>
+  apiFetch<{ added: number }>(`/api/teacher/classes/${classId}/students`, {
+    method: 'POST',
+    body: JSON.stringify({ students }),
+  })
+
 export const getRosterStatus = (classId: string) =>
   apiFetch<RosterStatusRow[]>(`/api/teacher/classes/${classId}/roster-status`)
 
@@ -147,6 +156,45 @@ export type ScreeningListItem = {
 
 export const getMyScreenings = (userId: string) =>
   apiFetch<ScreeningListItem[]>(`/api/screenings?screenedById=${encodeURIComponent(userId)}`)
+
+export type ScreeningFinding = {
+  id: string
+  fdi: number | null
+  className: string
+  confidence: number
+  longitudinal: string | null
+}
+
+export type ScreeningQuestionnaire = {
+  swelling: boolean | null
+  painDisturbingSleepOrEating: boolean | null
+  fever: boolean | null
+  gumPimpleOrFistula: boolean | null
+  trauma: boolean | null
+  bleedingGums: boolean | null
+}
+
+export type ScreeningDetail = {
+  id: string
+  childKey: string
+  childName: string | null
+  childBirthYear: number | null
+  classId: string
+  schoolId: string
+  seasonId: string
+  triageLevel: 'green' | 'yellow' | 'red'
+  triageScore: number
+  triageConfidentWording: boolean
+  triageReason: string | null
+  modelName: string
+  modelVersion: string | null
+  capturedAt: string
+  findings: ScreeningFinding[]
+  questionnaire: ScreeningQuestionnaire | null
+  review: { confirmedLevel: string; note: string | null } | null
+}
+
+export const getScreening = (id: string) => apiFetch<ScreeningDetail>(`/api/screenings/${id}`)
 
 export type HelpRequest = { id: string; status: 'open' | 'connected' | 'closed' }
 
@@ -203,6 +251,15 @@ const isOfflineError = (err: unknown): boolean =>
   err instanceof TypeError &&
   (err.message.includes('Network request failed') || err.message.includes('fetch'))
 
+// Server-side inference failures (e.g. the inference URL/tunnel is down) that a
+// cached on-device model can recover from. Unlike isOfflineError these come back
+// as a real HTTP response, so the fetch itself succeeds but the worker reports
+// the model was unreachable.
+const INFERENCE_RECOVERABLE = new Set(['inference_failed', 'inference_unreachable', 'inference_not_configured'])
+
+const canFallbackToLocal = (err: unknown): boolean =>
+  isOfflineError(err) || (err instanceof Error && INFERENCE_RECOVERABLE.has(err.message))
+
 const analyzeImageLocally = async (imageUri: string, symptoms: SymptomSet = {}): Promise<AnalyzeResult> => {
   const raw = await runLocalInference(imageUri)
   const normalized = normalizeInference(raw, 'on_device')
@@ -235,7 +292,7 @@ const analyzeImage = async (imageUri: string, meta: AnalyzeMeta): Promise<Analyz
     if (!res.ok) throw new Error(json.message ?? String(res.status))
     return json.data
   } catch (err) {
-    if (isOfflineError(err) && (await isModelCached())) {
+    if (canFallbackToLocal(err) && (await isModelCached())) {
       const sym = (() => { try { return JSON.parse(meta.symptoms ?? '{}') as SymptomSet } catch { return {} } })()
       return analyzeImageLocally(imageUri, sym)
     }

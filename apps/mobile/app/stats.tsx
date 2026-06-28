@@ -52,7 +52,7 @@ const StatsScreen = () => {
   const changeSeason = (sid: string) => { setSeasonId(sid); loadData(sid) }
 
   return (
-    <SafeAreaView style={[s.safe, { backgroundColor: colors.bg }]}>
+    <SafeAreaView edges={['left', 'right', 'bottom']} style={[s.safe, { backgroundColor: colors.bg }]}>
       <View style={s.header}>
         <Text style={[s.title, { color: colors.textBase }]}>Статистик</Text>
       </View>

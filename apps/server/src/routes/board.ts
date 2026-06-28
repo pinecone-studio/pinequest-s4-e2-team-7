@@ -4,7 +4,7 @@ import { children, screenings, screeningReviews, schoolClasses, followUps, follo
 import { authenticate, authorize } from '../middleware/auth.js'
 import { resolveScope, scopeWhere, hasChildAccess } from '../lib/scopeFilter.js'
 import { writeAudit } from '../lib/audit.js'
-import { computeChildTrendSnapshot, seasonOrdinal } from '@pinequest/core'
+import { computeChildTrendSnapshot } from '@pinequest/core'
 import type { ChildSeasonEntry, TriageLevel } from '@pinequest/types'
 import type { AppEnv } from '../types.js'
 

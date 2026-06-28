@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { and, asc, desc, eq, inArray, isNull } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray } from 'drizzle-orm'
 import { childKey, computeChildTrendSnapshot, rosterImportRowSchema } from '@pinequest/core'
 import { children, schoolClasses, screenings, screeningReviews, toothFindings, screeningImages, followUpEpisodes, followUpEvents } from '@pinequest/db/d1'
 import type { ChildSeasonEntry, FindingClass, LongitudinalFlag, TriageLevel } from '@pinequest/types'
@@ -167,7 +167,7 @@ childRoutes.get('/children/by-key/:childKey/history', authenticate, async (c) =>
     return diff > 0 ? 'worsened' : diff < 0 ? 'improved' : 'stable'
   }
 
-  const seasons = latestPerSeason.map((r, i) => {
+  const seasons = latestPerSeason.map((r) => {
     const ascIdx = ascending.findIndex((a) => a.id === r.id)
     const findings = findingsBy.get(r.id) ?? []
     return {
