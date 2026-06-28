@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Providers } from '@/components/providers'
+import { WelcomeDisclaimer } from '@/components/auth/WelcomeDisclaimer'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -15,7 +16,10 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => (
       <script dangerouslySetInnerHTML={{ __html: initThemeScript }} />
     </head>
     <body>
-      <Providers>{children}</Providers>
+      <Providers>
+        {children}
+        <WelcomeDisclaimer />
+      </Providers>
     </body>
   </html>
 )

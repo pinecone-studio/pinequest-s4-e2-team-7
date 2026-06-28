@@ -8,7 +8,7 @@ import Spinner from '@/components/ui/Spinner'
 /** Login by email OR phone (the API accepts either as the identifier). */
 const LoginForm = ({ onDone }: { onDone: () => void }) => {
   const { submit, busy, error } = useAuth(onDone)
-  const [identifier, setIdentifier] = useState('')
+  const [identifier, setIdentifier] = useState('admin@screener.mn')
   const [password, setPassword] = useState('')
   const [errs, setErrs] = useState<{ id?: string; pw?: string }>({})
 

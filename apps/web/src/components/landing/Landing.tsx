@@ -1,12 +1,14 @@
 'use client'
+import { LazyMotion, domAnimation } from 'framer-motion'
 import { LenisProvider } from './LenisProvider'
 import { Header } from './Header'
 import { HeroWordmark } from './HeroWordmark'
 import { Hero } from './hero/Hero'
 import { StatsSection } from './StatsSection'
-import { FeaturesSection } from './features/FeaturesSection'
+import { ScrollStory } from '../pitch/ScrollStory'
 import { MobileSection } from './MobileSection'
 import { PageNav } from './PageNav'
+import { ScrollLine } from './ScrollLine'
 import { Footer } from './Footer'
 import { AuthOverlay } from './AuthOverlay'
 
@@ -18,18 +20,21 @@ export const Landing = () => (
       }
       .landing-wrap { background: #000; color: #fff; }
     `}</style>
-    <LenisProvider>
-      <div className="landing-wrap">
-        <Header />
-        <HeroWordmark />
-        <Hero />
-        <StatsSection />
-        <FeaturesSection />
-        <MobileSection />
-        <Footer />
-        <PageNav />
-        <AuthOverlay />
-      </div>
-    </LenisProvider>
+    <LazyMotion features={domAnimation}>
+      <LenisProvider>
+        <div className="landing-wrap">
+          <Header />
+          <HeroWordmark />
+          <Hero />
+          <StatsSection />
+          <ScrollStory />
+          <MobileSection />
+          <Footer />
+          <PageNav />
+          <ScrollLine />
+          <AuthOverlay />
+        </div>
+      </LenisProvider>
+    </LazyMotion>
   </>
 )

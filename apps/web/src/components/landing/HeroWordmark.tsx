@@ -30,12 +30,12 @@ export const HeroWordmark = () => {
       aria-hidden="true"
     >
       <m.span
-        style={{ color: 'var(--olive)', fontWeight: 900, fontSize: 18 }}
+        style={{ fontWeight: 900, fontSize: 18 }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2.0, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
-        Screener
+        <span style={{ color: '#fff' }}>Tooth</span><span style={{ color: 'var(--olive)' }}>Lings</span>
       </m.span>
     </m.div>
   )

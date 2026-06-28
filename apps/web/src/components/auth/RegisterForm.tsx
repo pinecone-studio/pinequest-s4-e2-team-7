@@ -29,7 +29,7 @@ const RegisterForm = ({ onDone }: { onDone: () => void }) => {
   const { submit, busy, error } = useAuth(onDone)
   const [role, setRole] = useState<RoleChoice>('parent')
   const [instType, setInstType] = useState<string>('Сургууль')
-  const [f, setF] = useState({ name: '', phone: '', email: 'admin@screener.mn', extra: '', childName: '', password: '', confirm: '' })
+  const [f, setF] = useState({ name: '', phone: '', email: '', extra: '', childName: '', password: '', confirm: '' })
   const [errs, setErrs] = useState<Record<string, string>>({})
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => {
     setF((p) => ({ ...p, [k]: e.target.value }))
