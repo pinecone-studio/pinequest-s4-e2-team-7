@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import Image from 'next/image'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import LoginForm from './LoginForm'
 import RegisterForm from './RegisterForm'
@@ -58,13 +59,11 @@ const AuthModal = ({ open, onClose, initialMode = 'login' }: Props) => {
 
         {/* logo + name */}
         <div className="mb-5 flex items-center gap-2.5">
-          <div
-            className="flex size-10 items-center justify-center rounded-2xl text-[18px] font-bold shadow-(--shadow-card)"
-            style={{ backgroundColor: 'var(--color-accent)', color: 'var(--color-accent-fg)' }}
-          >
-            T
-          </div>
-          <span className="text-[18px] font-semibold tracking-tight text-text-base">Toothlings</span>
+          <Image src="/logoYellow.png" alt="Screener" width={40} height={40} className="hidden object-contain dark:block" />
+          <Image src="/logoBlack.png" alt="Screener" width={40} height={40} className="block object-contain dark:hidden" />
+          <span className="text-[18px] font-semibold tracking-tight">
+            <span className="text-gray-900 dark:text-white">Tooth</span><span className="text-primary">Lings</span>
+          </span>
         </div>
 
         {/* top toggle tabs */}

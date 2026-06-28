@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
+import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
 import { useSession } from '@/components/providers'
 import { useReviewQueue } from '@/hooks/useScreening'
 import { useFollowUps } from '@/hooks/useFollowUps'
@@ -71,9 +71,6 @@ const Sidebar = () => {
       </nav>
 
       <div className="mt-2 flex flex-col items-center gap-2 border-t border-border-muted pt-3">
-        <button aria-label="Тохиргоо" className="tap flex size-10 items-center justify-center rounded-2xl text-text-muted transition-all duration-150 hover:-translate-y-0.5 hover:bg-surface-raised hover:text-text-base">
-          <Cog6ToothIcon className="size-5" />
-        </button>
         <button onClick={onLogout} aria-label="Гарах" className="tap flex size-10 items-center justify-center rounded-2xl text-text-muted transition-all duration-150 hover:-translate-y-0.5 hover:bg-triage-red-bg hover:text-triage-red">
           <ArrowRightOnRectangleIcon className="size-5" />
         </button>
