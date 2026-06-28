@@ -26,9 +26,11 @@ export const Header = () => {
         transition={{ delay: 2.3, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
       />
       <Link href="/" className="flex items-center gap-2">
-        <img src="/logoYellow.png" alt="Screener" className="h-9 w-9 object-contain" />
+        <img src="/logoYellow.png" alt="ToothLings" className="h-9 w-9 object-contain" />
         <m.div style={{ opacity: wmarkOp }} className="flex items-baseline gap-1">
-          <span style={{ color: 'var(--olive)', fontWeight: 900, fontSize: 18 }}>Screener</span>
+          <span style={{ fontWeight: 900, fontSize: 18 }}>
+            <span style={{ color: '#fff' }}>Tooth</span><span style={{ color: 'var(--olive)' }}>Lings</span>
+          </span>
         </m.div>
       </Link>
       <div className="flex items-center gap-3">

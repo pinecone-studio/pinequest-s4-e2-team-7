@@ -7,8 +7,9 @@ import { homeForRole, setToken } from '@/lib/auth'
 import { useSession } from '@/components/providers'
 import type { AuthData } from './authConfig'
 
-/** Shared login/register submit: hit the API, store the token, redirect to the
- *  role's board, then close the modal. Keeps busy/error state for the forms. */
+/** Shared login/register submit: hit the API, store the token, close the modal,
+ *  then redirect to the role's board. Flags a one-shot welcome so the disclaimer
+ *  envelope overlays the dashboard on arrival. Keeps busy/error for the forms. */
 export const useAuth = (onDone: () => void) => {
   const router = useRouter()
   const { refresh } = useSession()
@@ -22,6 +23,7 @@ export const useAuth = (onDone: () => void) => {
       const data = await apiFetch<AuthData>(path, { method: 'POST', body })
       setToken(data.token)
       refresh()
+      try { sessionStorage.setItem('toothlings.welcome', '1') } catch { /* ignore */ }
       onDone()
       router.push(homeForRole(data.user.role))
     } catch (err) {

@@ -7,7 +7,7 @@ const QRCard = ({ size }: { size: number }) => (
       <Image src="/images/qr.png" alt="QR код" width={size} height={size} className="rounded-lg" />
     </div>
     <div className="px-6 py-5" style={{ background: '#111' }}>
-      <p className="mb-1 font-black text-white" style={{ fontSize: 'clamp(15px,1.6vw,20px)' }}>Screener — Гар утасны апп</p>
+      <p className="mb-1 font-black text-white" style={{ fontSize: 'clamp(15px,1.6vw,20px)' }}>ToothLings — Гар утасны апп</p>
       <div className="my-4 h-px" style={{ background: 'rgba(255,255,255,0.1)' }} />
       <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>QR уншуулж мобайл хувилбарыг үзнэ үү</span>
     </div>
@@ -23,7 +23,7 @@ export const MobileSection = () => (
         <span className="block text-white">апп</span>
       </h2>
       <p className="mb-10 text-[15px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.52)' }}>
-        Screener-г iOS ба Android утсан дээр татаж офлайн горимд ашиглана.
+        ToothLings-г iOS ба Android утсан дээр татаж офлайн горимд ашиглана.
         Зургийг авч, сүлжээ орсон үед автоматаар sync болно.
       </p>
       <QRCard size={280} />
@@ -36,7 +36,7 @@ export const MobileSection = () => (
           <span className="block text-white">апп</span>
         </h2>
         <p className="max-w-[38ch] text-[15px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.52)' }}>
-          Screener-г iOS ба Android утсан дээр татаж, сигналгүй нөхцөлд ч офлайн горимд хэрэглэнэ.
+          ToothLings-г iOS ба Android утсан дээр татаж, сигналгүй нөхцөлд ч офлайн горимд хэрэглэнэ.
           Зургийг авч, дараа нь синклэнэ.
         </p>
       </div>

@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useScroll, useMotionValueEvent, AnimatePresence, m } from 'framer-motion'
 import { getLenis } from './LenisProvider'
+import { NAV_ICONS } from './NavIcons'
 
 const LABELS = ['Эхлэл', 'Багийн танилцуулга', 'Асуудал', 'Шийдэл', 'Апп']
 
@@ -41,36 +42,40 @@ export const PageNav = () => {
   }
 
   return (
-    <div className="fixed bottom-10 left-8 z-50 flex flex-col gap-3">
-      {[0, 1, 2, 3, 4].map((i) => (
-        <div key={i} className="flex items-center gap-4"
-          onMouseEnter={() => setHovered(i)}
-          onMouseLeave={() => setHovered(null)}>
-          <AnimatePresence>
-            {hovered === i && (
-              <m.span
-                className="pointer-events-none whitespace-nowrap rounded-full px-4 py-1.5 font-black uppercase"
-                style={{ fontSize: 14, letterSpacing: '0.04em', background: active === i ? 'var(--olive)' : 'rgba(255,255,255,0.15)', color: active === i ? '#0d1e35' : '#fff', backdropFilter: 'blur(8px)', border: `1px solid ${active === i ? 'var(--olive)' : 'rgba(255,255,255,0.3)'}` }}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -8 }}
-                transition={{ duration: 0.15 }}
-              >
-                {LABELS[i]}
-              </m.span>
-            )}
-          </AnimatePresence>
-          <button
-            type="button"
-            onClick={() => goTo(i)}
-            aria-label={LABELS[i]}
-            className="flex shrink-0 items-center justify-center rounded-full font-black transition-all duration-300"
-            style={{ width: 34, height: active === i ? 56 : 30, background: active === i ? 'var(--olive)' : 'rgba(255,255,255,0.13)', color: active === i ? '#0d1e35' : 'rgba(255,255,255,0.6)', fontSize: active === i ? 15 : 13 }}
-          >
-            {i + 1}
-          </button>
-        </div>
-      ))}
+    <div className="fixed left-6 top-1/2 z-50 flex -translate-y-1/2 flex-col gap-3">
+      {[0, 1, 2, 3, 4].map((i) => {
+        const Icon = NAV_ICONS[i]
+        const on = active === i
+        return (
+          <div key={i} className="flex items-center gap-4"
+            onMouseEnter={() => setHovered(i)}
+            onMouseLeave={() => setHovered(null)}>
+            <button
+              type="button"
+              onClick={() => goTo(i)}
+              aria-label={LABELS[i]}
+              className="flex shrink-0 items-center justify-center transition-all duration-300"
+              style={{ width: 52, height: 52, borderRadius: 16, background: on ? 'var(--olive)' : 'rgba(255,255,255,0.08)', color: on ? '#0d1e35' : 'rgba(255,255,255,0.55)', border: `1px solid ${on ? 'var(--olive)' : 'rgba(255,255,255,0.12)'}` }}
+            >
+              <Icon />
+            </button>
+            <AnimatePresence>
+              {hovered === i && (
+                <m.span
+                  className="pointer-events-none whitespace-nowrap rounded-full px-4 py-1.5 font-black uppercase"
+                  style={{ fontSize: 14, letterSpacing: '0.04em', background: on ? 'var(--olive)' : 'rgba(255,255,255,0.15)', color: on ? '#0d1e35' : '#fff', backdropFilter: 'blur(8px)', border: `1px solid ${on ? 'var(--olive)' : 'rgba(255,255,255,0.3)'}` }}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -8 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  {LABELS[i]}
+                </m.span>
+              )}
+            </AnimatePresence>
+          </div>
+        )
+      })}
     </div>
   )
 }
