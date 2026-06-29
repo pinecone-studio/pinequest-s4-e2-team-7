@@ -61,12 +61,12 @@ const HistorySection = ({ userId, role }: Props) => {
 
   return (
     <View>
-      <Text style={[s.sectionTitle, { color: colors.textMuted }]}>ШАЛГАЛТЫН ТҮҮХ</Text>
+      <Text style={[s.sectionTitle, { color: colors.textMuted }]}>Өмнөх дүгнэлтүүд</Text>
       <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         {loading ? (
           <ActivityIndicator color={colors.primary} style={s.loader} />
         ) : rows.length === 0 ? (
-          <Text style={[s.empty, { color: colors.textDisabled }]}>Түүх байхгүй байна</Text>
+          <Text style={[s.empty, { color: colors.textDisabled }]}>Одоогоор дүгнэлт байхгүй байна</Text>
         ) : (
           rows.map((r) => <HistoryRow key={r.id} row={r} showName={role === 'teacher'} />)
         )}

@@ -14,7 +14,7 @@ import { SkeletonTable } from '@/components/ui/Skeleton'
 import {
   AcademicCapIcon, BuildingOffice2Icon, UserGroupIcon,
   ViewfinderCircleIcon, SparklesIcon, ShieldCheckIcon,
-} from '@heroicons/react/24/outline'
+} from '@heroicons/react/24/solid'
 import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
 
 const ROLE_LABEL: Record<UserRole, string> = {

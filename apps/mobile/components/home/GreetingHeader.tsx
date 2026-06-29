@@ -10,7 +10,13 @@ type Props = {
   deadCount?: number
 }
 
-const GreetingHeader = ({ name, onPressAvatar, syncing, pendingCount = 0, deadCount = 0 }: Props) => {
+const GreetingHeader = ({
+  name,
+  onPressAvatar,
+  syncing,
+  pendingCount = 0,
+  deadCount = 0,
+}: Props) => {
   const { colors } = useTheme()
   const initial = name.charAt(0).toUpperCase() || 'Б'
 
@@ -20,9 +26,7 @@ const GreetingHeader = ({ name, onPressAvatar, syncing, pendingCount = 0, deadCo
   return (
     <View style={s.root}>
       <View style={s.left}>
-        <Text style={[s.greeting, { color: colors.textBase }]}>
-          {`Сайн уу, ${name || '…'} 👋`}
-        </Text>
+        <Text style={[s.greeting, { color: colors.textBase }]}>{`Сайн уу, ${name || '…'} 👋`}</Text>
         <View style={s.syncRow}>
           {syncing ? (
             <>
@@ -32,12 +36,16 @@ const GreetingHeader = ({ name, onPressAvatar, syncing, pendingCount = 0, deadCo
           ) : hasDead ? (
             <>
               <Ionicons name="warning-outline" size={14} color="#B83838" />
-              <Text style={[s.syncText, { color: '#B83838' }]}>{`${deadCount} шалгалт илгээгдэхгүй байна`}</Text>
+              <Text
+                style={[s.syncText, { color: '#B83838' }]}
+              >{`${deadCount}  илгээгдэхгүй байна`}</Text>
             </>
           ) : hasPending ? (
             <>
               <Ionicons name="cloud-upload-outline" size={14} color={colors.textMuted} />
-              <Text style={[s.syncText, { color: colors.textMuted }]}>{`${pendingCount} хүлээгдэж байна`}</Text>
+              <Text
+                style={[s.syncText, { color: colors.textMuted }]}
+              >{`${pendingCount} хүлээгдэж байна`}</Text>
             </>
           ) : null}
         </View>
@@ -62,7 +70,14 @@ const s = StyleSheet.create({
   greeting: { fontSize: 24, fontFamily: 'Inter_700Bold', letterSpacing: -0.3, lineHeight: 30 },
   syncRow: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 18 },
   syncText: { fontSize: 13, fontFamily: 'Inter_400Regular' },
-  avatar: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', marginLeft: 12 },
+  avatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 12,
+  },
   avatarText: { fontSize: 17, fontFamily: 'Inter_700Bold' },
 })
 

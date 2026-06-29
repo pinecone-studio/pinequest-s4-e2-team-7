@@ -10,7 +10,7 @@ import Dropdown, { type DropdownOption } from '@/components/ui/Dropdown'
 import {
   AcademicCapIcon, BuildingOffice2Icon, UserGroupIcon, ViewfinderCircleIcon,
   SparklesIcon, ShieldCheckIcon, BuildingLibraryIcon,
-} from '@heroicons/react/24/outline'
+} from '@heroicons/react/24/solid'
 
 const ROLE_OPTS: DropdownOption<UserRole>[] = [
   { value: 'teacher',       label: 'Багш',           Icon: AcademicCapIcon },
@@ -21,7 +21,7 @@ const ROLE_OPTS: DropdownOption<UserRole>[] = [
   { value: 'admin',         label: 'Админ',          Icon: ShieldCheckIcon },
 ]
 
-const inp = 'rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary'
+const inp = 'rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary'
 
 const UserCreateForm = () => {
   const createUser = useCreateUser()

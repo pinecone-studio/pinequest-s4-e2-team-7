@@ -11,7 +11,7 @@ export default function ResultRedAdvice({ guardianPhone }: Props) {
   const callEmergency = () => Linking.openURL('tel:103')
   const smsGuardian = () => {
     if (!guardianPhone) return
-    const body = encodeURIComponent('Шүдний шалгалтын дүн: ЯАРАЛТАЙ. Аль болох хурдан шүдний эмчид хандуулна уу. (Оношилгоо биш, чиглүүлэг)')
+    const body = encodeURIComponent('Шүдний хяналтын дүн: Яаралтай эмчилгээ шаардлагатай ба шүдний эмч онош, эмчилгээг шийдэх болно')
     Linking.openURL(`sms:${guardianPhone}?body=${body}`)
   }
 
@@ -46,7 +46,7 @@ export default function ResultRedAdvice({ guardianPhone }: Props) {
 
 const s = StyleSheet.create({
   container: { gap: 10 },
-  emergencyBtn: { borderRadius: 16, padding: 18, alignItems: 'center' },
+  emergencyBtn: { borderRadius: 9999, padding: 18, alignItems: 'center' },
   emergencyText: { color: '#fff', fontSize: 16, fontFamily: 'Inter_700Bold' },
   clinicCard: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 14, padding: 12, borderWidth: 1 },
   clinicIcon: { width: 40, height: 40, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
@@ -54,10 +54,10 @@ const s = StyleSheet.create({
   clinicInfo: { flex: 1 },
   clinicName: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
   clinicSub: { fontSize: 12, fontFamily: 'Inter_400Regular' },
-  callBtn: { borderRadius: 10, paddingHorizontal: 14, paddingVertical: 8 },
+  callBtn: { borderRadius: 9999, paddingHorizontal: 14, paddingVertical: 8 },
   callBtnText: { fontSize: 13, fontFamily: 'Inter_700Bold' },
-  smsBtn: { borderRadius: 14, padding: 14, alignItems: 'center', borderWidth: 1 },
+  smsBtn: { borderRadius: 9999, padding: 14, alignItems: 'center', borderWidth: 1 },
   smsBtnText: { fontSize: 14, fontFamily: 'Inter_500Medium' },
-  hospitalBtn: { borderRadius: 14, padding: 14, alignItems: 'center' },
+  hospitalBtn: { borderRadius: 9999, padding: 14, alignItems: 'center' },
   hospitalBtnText: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
 })

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { MoonIcon, SunIcon } from '@heroicons/react/24/outline'
+import { MoonIcon, SunIcon } from '@heroicons/react/24/solid'
 
 // Inline light/dark icon toggle — sits beside the season calendar (top-right).
 // Chrome + height mirror the shared Dropdown trigger so they line up.
@@ -23,7 +23,7 @@ const ThemeToggle = () => {
     <button
       onClick={toggle}
       aria-label={dark ? 'Өдрийн горим' : 'Шөнийн горим'}
-      className="btn flex items-center justify-center rounded-xl border border-border bg-surface p-2 text-text-base transition-all duration-150 hover:border-primary"
+      className="btn flex items-center justify-center rounded-full border border-border bg-surface p-2 text-text-base transition-all duration-150 hover:border-primary"
     >
       {dark ? <SunIcon className="size-5" /> : <MoonIcon className="size-5" />}
     </button>

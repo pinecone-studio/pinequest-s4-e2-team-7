@@ -65,7 +65,7 @@ const s = StyleSheet.create({
   chip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 9999,
     borderWidth: 1,
   },
   chipText: { fontFamily: 'Inter_600SemiBold', fontSize: 14 },

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { InboxIcon, BarsArrowDownIcon, BarsArrowUpIcon, FireIcon } from '@heroicons/react/24/outline'
+import { InboxIcon, BarsArrowDownIcon, BarsArrowUpIcon, FireIcon } from '@heroicons/react/24/solid'
 import type { ScreeningRow } from '@/hooks/useScreenings'
 import { SkeletonTable } from '@/components/ui/Skeleton'
 import EmptyState from '@/components/ui/EmptyState'
@@ -69,7 +69,7 @@ const RecentScreeningsTable = ({ screenings, loading }: Props) => {
             <Link key={s.id} href={`/dashboard/dentist/screenings/${s.id}`}
               className={`group ${COLS} border-t border-border-muted px-6 py-3.5 transition-all duration-150 hover:bg-surface-raised`}>
               <div className="flex min-w-0 items-center gap-3">
-                <div className={`flex size-8 shrink-0 items-center justify-center rounded-xl text-[10px] font-bold transition-transform duration-200 group-hover:scale-110 ${AVA[s.triageLevel] ?? 'bg-surface-raised text-text-muted'}`}>
+                <div className={`flex size-8 shrink-0 items-center justify-center rounded-2xl text-[10px] font-bold transition-transform duration-200 group-hover:scale-110 ${AVA[s.triageLevel] ?? 'bg-surface-raised text-text-muted'}`}>
                   {s.childKey.slice(0, 3).toUpperCase()}
                 </div>
                 <span className="truncate font-mono text-[12.5px] text-text-base">{s.childKey.slice(0, 16)}</span>
@@ -103,7 +103,7 @@ const RecentScreeningsTable = ({ screenings, loading }: Props) => {
             <button
               onClick={() => setPage(p => Math.max(0, p - 1))}
               disabled={safePage === 0}
-              className="rounded-lg border border-border px-3 py-1.5 text-[12px] font-medium text-text-base transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-full border border-border px-3 py-1.5 text-[12px] font-medium text-text-base transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
             >
               ← Өмнөх
             </button>
@@ -113,7 +113,7 @@ const RecentScreeningsTable = ({ screenings, loading }: Props) => {
             <button
               onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
               disabled={safePage === totalPages - 1}
-              className="rounded-lg border border-border px-3 py-1.5 text-[12px] font-medium text-text-base transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-full border border-border px-3 py-1.5 text-[12px] font-medium text-text-base transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
             >
               Дараах →
             </button>

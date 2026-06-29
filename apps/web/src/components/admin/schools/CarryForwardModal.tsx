@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CalendarDaysIcon, PhoneIcon, UsersIcon, BellAlertIcon } from '@heroicons/react/24/outline'
+import { CalendarDaysIcon, PhoneIcon, UsersIcon, BellAlertIcon } from '@heroicons/react/24/solid'
 import type { SchoolClassRow } from '@pinequest/types'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
@@ -80,7 +80,7 @@ const CarryForwardModal = ({ open, onClose, source, schoolName, submitting, onSu
     >
       <div className="flex flex-col gap-4">
         {/* Enrollment summary */}
-        <div className="rounded-xl border border-border bg-surface-raised p-3.5">
+        <div className="rounded-2xl border border-border bg-surface-raised p-3.5">
           <div className="mb-2 flex items-center gap-2 text-text-base">
             <UsersIcon className="size-4 text-primary" />
             <span className="text-[13px] font-semibold">{source.enrolled} сурагч элссэн</span>
@@ -119,7 +119,7 @@ const CarryForwardModal = ({ open, onClose, source, schoolName, submitting, onSu
         <button
           type="button"
           onClick={() => setWantReminder((v) => !v)}
-          className="btn flex items-center gap-2.5 rounded-xl border border-border p-3 text-left transition-all duration-150 hover:border-primary"
+          className="btn flex items-center gap-2.5 rounded-full border border-border p-3 text-left transition-all duration-150 hover:border-primary"
         >
           <span className={`flex size-5 shrink-0 items-center justify-center rounded-md border transition-colors ${wantReminder ? 'border-primary bg-primary text-text-on-primary' : 'border-border bg-surface'}`}>
             {wantReminder && <BellAlertIcon className="size-3.5" />}

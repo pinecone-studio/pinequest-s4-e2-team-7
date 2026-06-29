@@ -3,6 +3,7 @@
 import { Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
+import { FilterPill } from '@/components/consumer/warm/WarmUI'
 import { BrushInstructions } from './BrushInstructions'
 import { BrushMonitor } from './BrushMonitor'
 
@@ -30,12 +31,7 @@ const BrushPageContent = () => {
     <div className="flex flex-col gap-5">
       <div className="flex gap-2">
         {TABS.map(({ id, label }) => (
-          <button key={id} type="button" onClick={() => setTab(id)}
-            className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition-colors ${
-              tab === id ? 'bg-primary text-text-on-primary' : 'bg-surface-raised text-text-muted hover:text-text-base'
-            }`}>
-            {label}
-          </button>
+          <FilterPill key={id} label={label} active={tab === id} onClick={() => setTab(id)} />
         ))}
       </div>
 

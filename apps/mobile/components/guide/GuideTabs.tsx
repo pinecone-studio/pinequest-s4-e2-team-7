@@ -41,7 +41,7 @@ export default function GuideTabs({ active, onChange }: Props) {
 
 const s = StyleSheet.create({
   container: { paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1 },
-  row: { flexDirection: 'row', borderRadius: 12, padding: 4 },
-  tab: { flex: 1, borderRadius: 10, paddingVertical: 9, paddingHorizontal: 4, alignItems: 'center' },
+  row: { flexDirection: 'row', borderRadius: 9999, padding: 4 },
+  tab: { flex: 1, borderRadius: 9999, paddingVertical: 9, paddingHorizontal: 4, alignItems: 'center' },
   tabText: { fontSize: 13, fontFamily: 'Inter_600SemiBold' },
 })

@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarDaysIcon } from '@heroicons/react/24/outline'
+import { CalendarDaysIcon } from '@heroicons/react/24/solid'
 import { useSeason } from '@/components/shared/SeasonProvider'
 import Dropdown, { type DropdownOption } from '@/components/ui/Dropdown'
 

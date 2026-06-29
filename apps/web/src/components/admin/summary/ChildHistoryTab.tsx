@@ -27,7 +27,7 @@ const DELTA_CLS: Record<string, { icon: string; cls: string }> = {
 /** Newest-first timeline of per-season screening results with delta connectors. */
 const ChildHistoryTab = ({ seasons }: { seasons: ChildSeasonDetail[] }) => {
   if (!seasons.length) return (
-    <p className="py-8 text-center text-sm text-text-muted">Өмнөх шалгалтын мэдээлэл байхгүй</p>
+    <p className="py-8 text-center text-sm text-text-muted">Өмнөх дүгнэлтийн мэдээлэл байхгүй</p>
   )
 
   return (

@@ -30,7 +30,7 @@ const s = StyleSheet.create({
   pill: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 7,
-    borderRadius: 20, borderWidth: 1.5,
+    borderRadius: 9999, borderWidth: 1.5,
   },
   label: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
 })

@@ -1,7 +1,8 @@
 'use client'
 
-import { EnvelopeIcon, ExclamationTriangleIcon, MagnifyingGlassCircleIcon, FaceSmileIcon } from '@heroicons/react/24/outline'
+import { EnvelopeIcon, ExclamationTriangleIcon, MagnifyingGlassCircleIcon, FaceSmileIcon } from '@heroicons/react/24/solid'
 import type { ChildScreeningSummary } from '@pinequest/types'
+import { childSummaryNarrative } from '@pinequest/core'
 import { openParentEmail } from '@/lib/parentEmail'
 
 type Props = { childName: string; guardianEmail: string | null; summary: ChildScreeningSummary }
@@ -39,28 +40,32 @@ const ChildSummaryCard = ({ childName, guardianEmail, summary: s }: Props) => {
         </div>
         <button
           onClick={() => openParentEmail(childName, guardianEmail, s)}
-          className="btn flex shrink-0 items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-[12px] font-semibold text-text-on-primary transition-all duration-150 hover:bg-primary-hover"
+          className="btn flex shrink-0 items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-[12px] font-semibold text-text-on-primary transition-all duration-150 hover:bg-primary-hover"
         >
           <EnvelopeIcon className="size-4" /> Эцэг эхэд илгээх
         </button>
       </div>
 
+      {/* Personalized by name + age + this child's screening data */}
+      <p className="mb-2 text-[13px] font-semibold leading-relaxed text-text-base">
+        {childName}, {childSummaryNarrative(s)}
+      </p>
       {/* Hedged headline */}
-      <p className="mb-4 text-[13px] leading-relaxed text-text-base">{s.headline}</p>
+      <p className="mb-4 text-[13px] leading-relaxed text-text-muted">{s.headline}</p>
 
       {/* Signal tiles */}
       <div className="mb-4 grid grid-cols-3 gap-2.5">
-        <div className="rounded-xl border border-border bg-surface p-3">
+        <div className="rounded-2xl border border-border bg-surface p-3">
           <MagnifyingGlassCircleIcon className="mb-1 size-4 text-text-muted" />
           <p className="text-[18px] font-bold text-text-base">{s.flaggedAreas}</p>
           <p className="text-[10px] leading-tight text-text-muted">Шалгуулах хэсэг</p>
         </div>
-        <div className="rounded-xl border border-border bg-surface p-3">
+        <div className="rounded-2xl border border-border bg-surface p-3">
           <ExclamationTriangleIcon className="mb-1 size-4 text-text-muted" />
           <p className="text-[18px] font-bold text-text-base">{s.symptoms.length}</p>
           <p className="text-[10px] leading-tight text-text-muted">Шинж тэмдэг</p>
         </div>
-        <div className="rounded-xl border border-border bg-surface p-3">
+        <div className="rounded-2xl border border-border bg-surface p-3">
           <FaceSmileIcon className="mb-1 size-4 text-text-muted" />
           <p className="text-[18px] font-bold text-text-base">{s.ageYears}</p>
           <p className="text-[10px] leading-tight text-text-muted">{STAGE[s.dentitionStage]}</p>
@@ -79,7 +84,7 @@ const ChildSummaryCard = ({ childName, guardianEmail, summary: s }: Props) => {
       )}
 
       {/* Home steps */}
-      <div className="rounded-xl border border-border bg-surface p-3.5">
+      <div className="rounded-2xl border border-border bg-surface p-3.5">
         <p className="mb-2 text-[12px] font-semibold text-text-base">Гэртээ хийх зөвлөмж</p>
         <ul className="flex flex-col gap-1.5">
           {s.homeSteps.map((step, i) => (

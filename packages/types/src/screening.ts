@@ -166,6 +166,12 @@ export interface ChildScreeningSummary {
   dentitionStage: DentitionStage
   /** Hedged, compliant one-line result statement. */
   headline: string
-  /** Versioned, age-aware "what to do at home" steps. */
+  /**
+   * "Дүгнэлт" — a few hedged lines synthesizing what the screening saw
+   * (triage level + flagged areas + reported symptoms + age/stage). SCREENING
+   * signals only: no per-tooth claims, no banned clinical words.
+   */
+  conclusion: string[]
+  /** "Цаашид хэвшүүлэх арга хэмжээ" — versioned, age-aware ongoing measures. */
   homeSteps: string[]
 }

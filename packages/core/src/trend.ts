@@ -39,11 +39,11 @@ const directionChanges = (history: ChildSeasonEntry[]): number => {
 }
 
 const MOBILE_BADGE_MN: Record<MobileChildTrend['badge'], string> = {
-  first:   'Анхны шалгалт',
+  first:   'Эхний хяналт',
   better:  'Сайжирсан',
-  worse:   'Хүнддэсэн',
+  worse:   'Хүндрэх эрсдэлтэй',
   same:    'Өөрчлөлтгүй',
-  chronic: 'Удаан хугацааны анхааруулга',
+  chronic: 'Архаг явцтай',
 }
 
 /**

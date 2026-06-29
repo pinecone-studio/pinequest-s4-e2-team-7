@@ -105,7 +105,7 @@ const s = StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
   rowLabel: { fontSize: 13, fontFamily: 'Inter_500Medium' },
   rowValue: { fontSize: 14, fontFamily: 'Inter_500Medium', flexShrink: 1 },
-  editBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderRadius: 12, paddingVertical: 12 },
+  editBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderRadius: 9999, paddingVertical: 12 },
   editText: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
   error: { fontSize: 13, color: '#ef4444' },
 })

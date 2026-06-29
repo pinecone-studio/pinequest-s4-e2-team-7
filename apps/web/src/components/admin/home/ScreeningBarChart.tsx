@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ChartBarIcon } from '@heroicons/react/24/outline'
+import { ChartBarIcon } from '@heroicons/react/24/solid'
 import { useTimeseries } from '@/hooks/useStats'
 import { useSeason } from '@/components/shared/SeasonProvider'
 import { SkeletonChart } from '@/components/ui/Skeleton'

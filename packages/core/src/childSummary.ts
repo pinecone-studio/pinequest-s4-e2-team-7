@@ -5,6 +5,7 @@ import type {
   ToothFinding,
   TriageLevel,
 } from '@pinequest/types'
+import { buildConclusion } from './conclusion.js'
 
 
 const HEADLINE: Record<TriageLevel, string> = {
@@ -28,6 +29,46 @@ const STAGE_STEP: Record<DentitionStage, string> = {
   primary: 'Бага насны хүүхдэд эцэг эх нь шүд угаахад нь туслах.',
   mixed: 'Шинээр ургаж буй байнгын араа шүдэнд онцгой анхаарах.',
   permanent: 'Шүдний цэвэрлэгээний утас өдөр бүр хэрэглэж эхлэх.',
+}
+
+// Dentist-approved at-home care for a non-urgent (yellow) referral. Age-aware.
+const YELLOW_HYGIENE = [
+  'Шүдээ өдөрт 2 удаа, доод тал нь 2 минут фтортой оохойгоор угаах.',
+  'Угаасны дараа амаа усаар зайлахгүй — фтор шүдэнд үлдэж хамгаална.',
+  'Хэлээ хойноос урагш зөөлөн шүүрдэж цэвэрлэх (амны эвгүй үнэрээс сэргийлнэ).',
+  'Чихэрлэг хоол, ундааны хэрэглээг багасгах.',
+]
+
+const YELLOW_STAGE_STEP: Record<DentitionStage, string> = {
+  primary: 'Бага насны хүүхдэд эцэг эх нь шүд угаахад нь өдөр бүр туслах.',
+  mixed: 'Хатуу хоол (хатуу мах, ааруул) зажилснаар байнгын шүдэнд зай тавигдана. Шинээр ургасан байнгын араанд ховил битүүлэх (sealant) хийлгэхийг эмчээс асуух.',
+  permanent: 'Шүд хоорондын зайг өдөр бүр цэвэрлэгээний утсаар цэвэрлэх.',
+}
+
+const buildYellowSteps = (stage: DentitionStage, flaggedAreas: number): string[] => {
+  const steps = [...YELLOW_HYGIENE, YELLOW_STAGE_STEP[stage]]
+  if (flaggedAreas > 0)
+    steps.push(`Шүдний эмчид үзүүлэхдээ тэмдэглэгдсэн ${flaggedAreas} хэсгийг шалгуулж эмчлүүлэх.`)
+  return steps
+}
+
+/**
+ * Dentist-approved, age-aware note on the child's dentition stage. PII-free —
+ * callers prepend the child's name + age from the roster at the render layer.
+ */
+export const childDevelopmentNote = (stage: DentitionStage): string =>
+  ({
+    primary: 'сүүн шүдний үе шат. Сүүн шүдийг сайн арчилснаар ирээдүйн шүдний суурь тавигдана.',
+    mixed: 'сүү ба байнгын шүд солигдох үе шат. Ойролцоогоор 13 нас хүртэл сүүн шүд байнгын шүдээр солигдоно — хатуу хоол зажилж, шинээр ургасан араагаа хамгаалах нь чухал.',
+    permanent: 'байнгын шүдтэй болсон үе шат. Эдгээр шүд насан туршийнх тул өдөр тутмын арчилгаа онцгой ач холбогдолтой.',
+  })[stage]
+
+/** Personalized, PII-free narrative from the child's own screening data. */
+export const childSummaryNarrative = (s: ChildScreeningSummary): string => {
+  const parts = [`${s.ageYears} настай — ${childDevelopmentNote(s.dentitionStage)}`]
+  if (s.flaggedAreas > 0) parts.push(`Энэ удаа шүдний эмчид үзүүлэх ${s.flaggedAreas} хэсэг тэмдэглэгдсэн.`)
+  if (s.symptoms.length > 0) parts.push(`Асуумжид анхаарах ${s.symptoms.length} шинж тэмдэг бүртгэгдсэн.`)
+  return parts.join(' ')
 }
 
 /** Expected dentition stage by age (educational only — not a per-tooth claim). */
@@ -84,7 +125,20 @@ export const buildChildSummary = (input: BuildInput): ChildScreeningSummary => {
     .map((f) => f.fdi)
     .filter((n): n is number => typeof n === 'number')
 
-  const homeSteps = [...BASE_STEPS, ...LEVEL_STEPS[effectiveLevel], STAGE_STEP[stage]]
+  const homeSteps =
+    effectiveLevel === 'yellow'
+      ? buildYellowSteps(stage, input.findings.length)
+      : [...BASE_STEPS, ...LEVEL_STEPS[effectiveLevel], STAGE_STEP[stage]]
+
+  const symptoms = symptomKeys(input.symptoms)
+  const conclusion = buildConclusion({
+    level: effectiveLevel,
+    flaggedAreas: input.findings.length,
+    highConfidence: flaggedByConfidence.high,
+    symptoms,
+    ageYears,
+    stage,
+  })
 
   return {
     screeningId: input.screeningId,
@@ -97,10 +151,11 @@ export const buildChildSummary = (input: BuildInput): ChildScreeningSummary => {
     flaggedAreas: input.findings.length,
     flaggedByConfidence,
     loci,
-    symptoms: symptomKeys(input.symptoms),
+    symptoms,
     ageYears,
     dentitionStage: stage,
     headline: HEADLINE[effectiveLevel],
+    conclusion,
     homeSteps,
   }
 }

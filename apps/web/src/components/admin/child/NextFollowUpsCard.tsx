@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarDaysIcon } from '@heroicons/react/24/outline'
+import { CalendarDaysIcon } from '@heroicons/react/24/solid'
 import { useFollowUps } from '@/hooks/useFollowUps'
 import PlayCard from '@/components/ui/PlayCard'
 import { SkeletonCard } from '@/components/ui/Skeleton'

@@ -69,7 +69,7 @@ export const BrushMonitor = () => {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {ZONES.map(({ id, label }) => (
               <button key={id} type="button" onClick={() => setActiveZone(id)}
-                className={`rounded-2xl border px-3 py-2.5 text-left transition ${activeZone === id ? 'border-primary bg-primary/10' : 'border-border bg-surface hover:bg-surface-raised'}`}>
+                className={`rounded-full border px-3 py-2.5 text-left transition ${activeZone === id ? 'border-primary bg-primary/10' : 'border-border bg-surface hover:bg-surface-raised'}`}>
                 <p className="text-[11px] font-semibold text-text-muted">{label}</p>
                 <p className="font-mono text-[18px] font-bold text-text-base">{seconds[id]}s</p>
               </button>

@@ -28,7 +28,7 @@ const ClassCard = ({ klass, onPress }: { klass: TeacherClass; onPress: () => voi
       <CoverageBar screened={klass.screened} enrolled={klass.enrolled} />
       <View style={s.foot}>
         <Ionicons name="calendar-outline" size={14} color={colors.textMuted} />
-        <Text style={[s.footText, { color: colors.textMuted }]}>Дараагийн шалгалт: {fmtDate(klass.scheduledAt)}</Text>
+        <Text style={[s.footText, { color: colors.textMuted }]}>Дараагийн хяналт: {fmtDate(klass.scheduledAt)}</Text>
       </View>
     </TouchableOpacity>
   )

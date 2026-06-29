@@ -29,10 +29,10 @@ const ProfileEditForm = ({ name, email, phone, onName, onEmail, onPhone, onSave,
       <input value={phone} onChange={(e) => onPhone(e.target.value)} placeholder="+976 9900 0000" className={inp} />
     </div>
     <div className="flex gap-2 pt-1">
-      <button onClick={onCancel} className="btn flex-1 rounded-xl bg-btn-fill px-4 py-2.5 text-[13px] font-semibold text-text-base hover:bg-btn-fill-hover">
+      <button onClick={onCancel} className="btn flex-1 rounded-full bg-btn-fill px-4 py-2.5 text-[13px] font-semibold text-text-base hover:bg-btn-fill-hover">
         Болих
       </button>
-      <button onClick={onSave} disabled={isPending} className="btn flex-1 rounded-xl bg-primary px-4 py-2.5 text-[13px] font-semibold text-text-on-primary hover:bg-primary-hover disabled:opacity-60">
+      <button onClick={onSave} disabled={isPending} className="btn flex-1 rounded-full bg-primary px-4 py-2.5 text-[13px] font-semibold text-text-on-primary hover:bg-primary-hover disabled:opacity-60">
         {isPending ? 'Хадгалж байна…' : 'Хадгалах'}
       </button>
     </div>

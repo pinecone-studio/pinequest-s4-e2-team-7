@@ -3,7 +3,7 @@
 import {
   EnvelopeIcon, ArrowsPointingOutIcon,
   ExclamationTriangleIcon, ExclamationCircleIcon,
-} from '@heroicons/react/24/outline'
+} from '@heroicons/react/24/solid'
 import type { ComponentType, SVGProps } from 'react'
 import type { FollowUpStatus } from '@pinequest/types'
 import type { BoardStudent } from '@/hooks/useBoard'
@@ -92,7 +92,7 @@ const FollowUpCard = ({ student: s, onSend, onStatus, onEdit, dragging, onDragSt
 
       {/* escalation: prior treatment missed, now worsened */}
       {s.escalationFlag && (
-        <div className="flex items-center gap-2 rounded-xl bg-triage-red-bg px-3 py-2">
+        <div className="flex items-center gap-2 rounded-2xl bg-triage-red-bg px-3 py-2">
           <ExclamationTriangleIcon className="size-3.5 shrink-0 text-triage-red" />
           <span className="text-[11px] font-semibold text-triage-red">Өмнөх эмчилгээ хийгдээгүй, одоо хүндэрсэн</span>
         </div>

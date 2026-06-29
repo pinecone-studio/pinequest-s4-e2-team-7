@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { UsersIcon } from '@heroicons/react/24/outline'
+import { UsersIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { useBoardStudents, useSendToParent, useDeleteChild, useSetFollowUpStatus, type BoardStudent } from '@/hooks/useBoard'
 import { useToast } from '@/components/ui/Toast'
 import ConfirmModal from '@/components/ui/ConfirmModal'
@@ -14,10 +14,10 @@ import EmptyState from '@/components/ui/EmptyState'
 import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
 
 const TRIAGE_GROUPS = [
-  { level: 'red',    label: 'Яаралтай эмчилгээ шаардлагатай', dot: 'bg-triage-red',    text: 'text-triage-red' },
-  { level: 'yellow', label: 'Эмчилгээ шаардлагатай',           dot: 'bg-triage-yellow', text: 'text-triage-yellow' },
-  { level: 'green',  label: 'Дараагийн хяналтанд хамруулах',   dot: 'bg-triage-green',  text: 'text-triage-green' },
-  { level: 'none',   label: 'Шалгаагүй',                       dot: 'bg-border',        text: 'text-text-muted' },
+  { level: 'red',    label: 'Яаралтай эмчилгээ шаардлагатай', dot: 'bg-triage-red',    pill: 'bg-triage-red-bg text-triage-red' },
+  { level: 'yellow', label: 'Эмчилгээ шаардлагатай',           dot: 'bg-triage-yellow', pill: 'bg-triage-yellow-bg text-triage-yellow' },
+  { level: 'green',  label: 'Дараагийн хяналтанд хамруулах',   dot: 'bg-triage-green',  pill: 'bg-triage-green-bg text-triage-green' },
+  { level: 'none',   label: 'Шалгаагүй',                       dot: 'bg-border',        pill: 'bg-surface-raised text-text-muted' },
 ]
 
 const SummaryBoard = () => {
@@ -92,16 +92,16 @@ const SummaryBoard = () => {
       ) : filtered.length === 0 ? (
         <EmptyState Icon={UsersIcon} title="Сурагч олдсонгүй" hint="Хайлт эсвэл ангийн шүүлтүүрийг өөрчилнө үү." />
       ) : (
-        <div className="flex flex-col gap-8">
-          {TRIAGE_GROUPS.map(({ level, label, dot, text }) => {
+        <div className="grid grid-cols-1 items-start gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {TRIAGE_GROUPS.map(({ level, label, dot, pill }) => {
             const list = groups[level]
             if (!list?.length) return null
             return (
               <div key={level} className="flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <span className={`size-2 shrink-0 rounded-full ${dot}`} />
-                  <span className={`text-[13px] font-bold ${text}`}>{label}</span>
-                  <span className="text-[12px] text-text-muted">· {list.length}</span>
+                <div className={`inline-flex items-center gap-2 self-start rounded-full px-3 py-1.5 text-[12.5px] font-bold ${pill}`}>
+                  <span className={`size-2 rounded-full ${dot}`} />
+                  {label}
+                  <span className="rounded-full bg-surface/80 px-1.5 py-0.5 text-[11px] tabular-nums shadow-sm">{list.length}</span>
                 </div>
                 <StudentGrid
                   students={list}
@@ -127,6 +127,7 @@ const SummaryBoard = () => {
         isPending={del.isPending}
         title="Сурагч устгах"
         message={deleting ? `${deleting.lastName} ${deleting.firstName}-г жагсаалтаас хасах уу? Энэ үйлдлийг буцааж болохгүй.` : ''}
+        confirmIcon={TrashIcon}
       />
     </section>
   )

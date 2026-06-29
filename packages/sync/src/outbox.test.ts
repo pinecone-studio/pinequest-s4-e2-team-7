@@ -15,7 +15,6 @@ const makeScreening = (id = 'sc-1'): ScreeningCreate => ({
   symptoms: {},
   triage: { level: 'green', score: 0.1, confidentWording: true },
   modelName: 'yolov8',
-  contentVersionId: 'content-v1',
   capturedAt: '2026-01-01T00:00:00.000Z',
 })
 

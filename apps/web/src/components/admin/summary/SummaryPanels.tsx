@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import {
   CameraIcon, ChevronLeftIcon, ChevronRightIcon, CheckCircleIcon,
-  XCircleIcon, MapPinIcon, ClockIcon, PhoneIcon,
-} from '@heroicons/react/24/outline'
+  XCircleIcon, MapPinIcon, ClockIcon, PhoneIcon, QuestionMarkCircleIcon,
+} from '@heroicons/react/24/solid'
 import type { QuestionnaireAnswers, HospitalGuide } from '@/hooks/useChildSummary'
 
 // Theme-aware triage tokens (NO hardcoded rose/amber/sky — those broke dark mode)
@@ -62,13 +62,13 @@ export const ImageGallery = ({ refs }: { refs: string[] }) => {
 
 export const QuestionnairePanel = ({ q }: { q: QuestionnaireAnswers }) => (
   <div className="rounded-2xl bg-surface-raised px-4 py-3">
-    <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-text-muted">Симптомын судалгаа</p>
+    <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-text-muted">Асуумжаар</p>
     <div className="grid grid-cols-2 gap-x-4 gap-y-2">
       {SYMPTOMS.map(({ key, mn }) => {
         const val = q[key], yes = val === true, unk = val === null
         return (
           <div key={key} className="flex items-center gap-2">
-            {unk ? <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-border text-[8px] text-text-muted">?</span>
+            {unk ? <QuestionMarkCircleIcon className="size-4 shrink-0 text-text-muted/60" />
               : yes ? <XCircleIcon className="size-4 shrink-0 text-triage-red" />
               : <CheckCircleIcon className="size-4 shrink-0 text-triage-green" />}
             <span className="text-[12px] leading-tight text-text-base">{mn}</span>
@@ -88,7 +88,7 @@ export const HospitalGuidePanel = ({ h }: { h: HospitalGuide }) => (
       <div className="flex items-center gap-2"><ClockIcon className="size-3.5 shrink-0 text-fu-contacted" />{h.travelMinutes} минутын зайд · {h.distanceKm} км</div>
       <div className="flex items-center gap-2"><span className="font-medium text-text-base">Цагийн хуваарь:</span>{h.schedule}</div>
     </div>
-    <a href={`tel:${h.phone}`} className="btn mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-fu-contacted py-2 text-[13px] font-semibold text-surface transition-all hover:brightness-95 active:scale-[0.98]">
+    <a href={`tel:${h.phone}`} className="btn mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-fu-contacted py-2 text-[13px] font-semibold text-surface transition-all hover:brightness-95 active:scale-[0.98]">
       <PhoneIcon className="size-4" />{h.phone}
     </a>
   </div>

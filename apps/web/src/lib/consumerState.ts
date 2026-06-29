@@ -4,6 +4,7 @@ const SCAN_RESULT_KEY = 'screener.lastScanResult.v1'
 const SCAN_HISTORY_KEY = 'screener.scanHistory.v1'
 const BRUSH_LOGS_KEY = 'screener.brushLogs.v1'
 const APPOINTMENT_KEY = 'screener.appointment.v1'
+const CHILD_NAMES_KEY = 'screener.childNames.v1'
 
 export type PainWhen = 'cold' | 'hot' | 'spontaneous' | 'night' | 'pressure'
 export type PainSince = 'yesterday' | '2days' | '4days'
@@ -159,6 +160,18 @@ export const saveScanResult = (result: ScanResult): void => {
 export const getLastScanResult = (): ScanResult | null => read(SCAN_RESULT_KEY)
 
 export const getScanHistory = (): ScanResult[] => read(SCAN_HISTORY_KEY) ?? []
+
+/** Child names the user has added, by name (no age/PII). Persisted locally. */
+export const getChildNames = (): string[] => read<string[]>(CHILD_NAMES_KEY) ?? []
+
+export const addChildName = (name: string): string[] => {
+  const trimmed = name.trim()
+  const names = getChildNames()
+  if (!trimmed || names.includes(trimmed)) return names
+  const next = [...names, trimmed]
+  write(CHILD_NAMES_KEY, next)
+  return next
+}
 
 export const getAppointment = (): Appointment =>
   read(APPOINTMENT_KEY) ?? {

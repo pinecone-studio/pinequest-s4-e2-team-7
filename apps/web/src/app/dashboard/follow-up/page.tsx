@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircleIcon } from '@heroicons/react/24/outline'
+import { CheckCircleIcon } from '@heroicons/react/24/solid'
 import { FollowUpRow } from '@/components/follow-up/FollowUpRow'
 import { useFollowUps } from '@/hooks/useFollowUps'
 import HeroStrip from '@/components/shared/HeroStrip'
@@ -35,7 +35,7 @@ const FollowUpWorklistPage = () => {
       {isLoading ? (
         <PageSpinner />
       ) : data && data.length > 0 ? (
-        <div className="overflow-hidden rounded-lg border border-border bg-surface">
+        <div className="overflow-hidden rounded-2xl border border-border bg-surface">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border">

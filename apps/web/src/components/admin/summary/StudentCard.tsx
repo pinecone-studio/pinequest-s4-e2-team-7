@@ -3,7 +3,7 @@
 import {
   ArrowsPointingOutIcon, EnvelopeIcon, PencilSquareIcon, TrashIcon,
   ExclamationTriangleIcon, ExclamationCircleIcon, ShieldCheckIcon,
-} from '@heroicons/react/24/outline'
+} from '@heroicons/react/24/solid'
 import type { ComponentType, SVGProps } from 'react'
 import type { FollowUpStatus } from '@pinequest/types'
 import type { BoardStudent } from '@/hooks/useBoard'
@@ -60,14 +60,14 @@ const StudentCard = ({ student: s, onOpen, onSend, onEdit, onDelete, onStatus }:
 
       {/* escalation warning: prior treatment refused, now worsened */}
       {s.escalationFlag && (
-        <div className="flex items-center gap-2 rounded-xl bg-triage-red-bg px-3 py-2">
+        <div className="flex items-center gap-2 rounded-2xl bg-triage-red-bg px-3 py-2">
           <ExclamationTriangleIcon className="size-3.5 shrink-0 text-triage-red" />
           <span className="text-[11px] font-semibold text-triage-red">Өмнөх эмчилгээ хийгдээгүй, одоо хүндэрсэн</span>
         </div>
       )}
 
       {/* status result — the ONLY coloured element; opens the summary modal */}
-      <button onClick={onOpen} className="tap flex items-center gap-2 rounded-2xl bg-surface-raised px-3 py-2.5 text-left transition-colors hover:bg-border/50">
+      <button onClick={onOpen} className="tap flex items-center gap-2 rounded-full bg-surface-raised px-3 py-2.5 text-left transition-colors hover:bg-border/50">
         <t.Icon className={`size-4 shrink-0 ${t.text}`} />
         <span className={`flex-1 truncate text-[13px] font-bold ${t.text}`}>{t.head}</span>
         <span className="shrink-0 text-[11px] text-text-muted">{date}</span>
