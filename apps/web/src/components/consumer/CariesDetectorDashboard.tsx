@@ -1,14 +1,15 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Camera, Upload, Sparkles, Eraser, Stethoscope, MapPin, AlertTriangle } from '@/lib/icons'
+import { useEffect, useRef, useState } from 'react'
+import { Plus, RotateCcw, Upload, Stethoscope, MapPin, AlertTriangle } from '@/lib/icons'
 import Link from 'next/link'
 import { DetectedRow, FilterPill, FlatCard, PillButton } from '@/components/consumer/warm/WarmUI'
 import { TriageHeroCard } from '@/components/consumer/MobilePatterns'
 import {
+  addChildName,
+  getChildNames,
   getLastScanResult,
   getQuestionnaire,
-  getScanHistory,
   saveScanResult,
   type ScanDetection,
   type ScanResult,
@@ -47,14 +48,17 @@ const DETECTION_META: Record<string, DetectionMeta> = {
     description: 'Асуудал илрэхгүй байна',
     emoji: '🟢',
   },
+const DETECTION_LABEL: Record<string, string> = {
+  Caries: 'Шүдний цоорол',
+  Cavity: 'Цоорлын том хөндий',
+  Crack: 'Шүдний гэмтэл, цуурал',
 }
 
 const getMeta = (d: ScanDetection): DetectionMeta =>
   DETECTION_META[d.label] ?? { label: d.label, description: '', emoji: '⚪' }
 
-const DEFAULT_FILTERS = ['Болд', 'Сарнай', 'Энхбаяр']
-
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+
 
 const fileToDataUrl = (file: File, maxEdge = 640): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -139,9 +143,13 @@ const ResultsPanel = ({ result }: { result: ScanResult }) => {
   const triageLevel =
     result.triage === 'red' ? 'red' : result.triage === 'yellow' ? 'yellow' : 'green'
 
+  const urgent =
+    result.urgent || result.triage === 'red' || (result.needsDoctor && result.triage === 'yellow')
+  const triageLevel =
+    result.triage === 'red' ? 'red' : result.triage === 'yellow' ? 'yellow' : 'green'
   const triageLabel =
     triageLevel === 'red'
-      ? 'Яаралтай — эмчид үзүүлэх'
+      ? 'Яаралтай эмчилгээх хийлгэх'
       : triageLevel === 'yellow'
         ? 'Анхаарал шаардлагатай'
         : 'Хэвийн байдалтай'
@@ -152,6 +160,11 @@ const ResultsPanel = ({ result }: { result: ScanResult }) => {
   // Healthy-ийг тооцохгүйгээр асуудалтай зүйлсийг тоол
   const problemDetections = result.detections.filter((d) => d.label !== 'Healthy')
   const healthyDetections = result.detections.filter((d) => d.label === 'Healthy')
+        ? 'Эмчилгээ шаардлагатай'
+        : 'Харьцангуй эрүүл, дараагийн хяналтыг хийгээрэй'
+  const triageSummary = urgent
+    ? 'Зургийг таньсны дагуу ойрын хугацаанд мэргэжилтэн эмчид үзүүлэхийг зөвлөж байна.'
+    : result.advice
 
   return (
     <div className="flex flex-col gap-5">
@@ -160,6 +173,9 @@ const ResultsPanel = ({ result }: { result: ScanResult }) => {
         {/* FIX: YOLOv8 биш Gemini AI гэж зөв харуулна */}
         <p className="mt-1 text-[13px] text-text-muted">
           Шинжилгээ: Gemini AI Vision (судалгаа / демо)
+        <h2 className="text-[22px] font-bold tracking-tight text-text-base">Дүгнэлт</h2>
+        <p className="mt-1 text-[13px] text-text-muted">
+        YOLOv8 шүдний цоорол таних модел
         </p>
       </div>
 
@@ -184,6 +200,18 @@ const ResultsPanel = ({ result }: { result: ScanResult }) => {
               <DetectionItem key={`problem-${i}`} d={d} />
             ))}
           </div>
+      <div>
+        <p className="mb-3 text-[12px] font-bold uppercase tracking-wide text-text-muted">
+          Таньсан цооролтой шүд ({result.detections.length})
+        </p>
+        <div className="space-y-2">
+          {result.detections.map((d) => (
+            <DetectedRow
+              key={d.label + d.confidence}
+              label={formatLabel(d)}
+              value={`${(d.confidence * 100).toFixed(1)}%`}
+            />
+          ))}
         </div>
       )}
 
@@ -208,7 +236,7 @@ const ResultsPanel = ({ result }: { result: ScanResult }) => {
       <Link href={ROUTES.doctor.chat}>
         <PillButton variant="primary" className="w-full">
           <Stethoscope className="size-4" strokeWidth={2} />
-          Эмчийн зөвлөгөө авах
+          Бүртгэлтэй шүдний эмчтэй холбогдон зөвөлгөө авах
         </PillButton>
       </Link>
 
@@ -216,14 +244,14 @@ const ResultsPanel = ({ result }: { result: ScanResult }) => {
         <Link href={ROUTES.doctor.map}>
           <PillButton variant="secondary" className="w-full">
             <MapPin className="size-4" strokeWidth={2} />
-            Ойрын эмнэлэг хайх
+            Өөрт хамгийн ойр шүдний эмнэлэг 
           </PillButton>
         </Link>
       )}
 
       <p className="flex items-start gap-2 text-[12px] leading-relaxed text-text-muted">
         <AlertTriangle className="mt-0.5 size-3.5 shrink-0" strokeWidth={2} />
-        Энэ бол урьдчилсан скрининг — онош биш. Эцсийн дүгнэлтийг шүдний эмч гаргана.
+        Бид зурагт үндэслэсэн дүгнэлт гаргаж амны хөндийн байдлыг үнэлэн чиглүүлэх зорилготой.
       </p>
     </div>
   )
@@ -232,32 +260,35 @@ const ResultsPanel = ({ result }: { result: ScanResult }) => {
 // ── Үндсэн компонент ──────────────────────────────────────────────────────────
 
 export const CariesDetectorDashboard = ({ initialResult = false }: { initialResult?: boolean }) => {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
-  const streamRef = useRef<MediaStream | null>(null)
 
   const [preview, setPreview] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [result, setResult] = useState<ScanResult | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
-  const [cameraOn, setCameraOn] = useState(false)
-  const [cameraError, setCameraError] = useState<string | null>(null)
   const [analysisError, setAnalysisError] = useState<string | null>(null)
+  const [childNames, setChildNames] = useState<string[]>([])
+  const [newName, setNewName] = useState('')
   const [activeFilter, setActiveFilter] = useState('')
   const [dragOver, setDragOver] = useState(false)
 
-  const filterOptions = useMemo(() => {
+  useEffect(() => {
+    const stored = getChildNames()
     const q = getQuestionnaire()
-    const names = new Set(DEFAULT_FILTERS)
-    if (q?.childName) names.add(q.childName)
-    getScanHistory().forEach(() => {})
-    return Array.from(names)
+    const names = q?.childName && !stored.includes(q.childName) ? [...stored, q.childName] : stored
+    setChildNames(names)
+    if (names.length) setActiveFilter((cur) => cur || names[0])
   }, [])
 
-  useEffect(() => {
-    if (!activeFilter && filterOptions.length) setActiveFilter(filterOptions[0])
-  }, [activeFilter, filterOptions])
+  const handleAddChild = (e: React.FormEvent) => {
+    e.preventDefault()
+    const trimmed = newName.trim()
+    setNewName('')
+    if (!trimmed || childNames.includes(trimmed)) return
+    addChildName(trimmed)
+    setChildNames((prev) => [...prev, trimmed])
+    setActiveFilter(trimmed)
+  }
 
   useEffect(() => {
     if (initialResult) {
@@ -269,34 +300,6 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
     }
   }, [initialResult])
 
-  const stopCamera = useCallback(() => {
-    streamRef.current?.getTracks().forEach((t) => t.stop())
-    streamRef.current = null
-    setCameraOn(false)
-  }, [])
-
-  const startCamera = useCallback(async () => {
-    setCameraError(null)
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
-        audio: false,
-      })
-      streamRef.current = stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        await videoRef.current.play()
-      }
-      setCameraOn(true)
-      setPreview(null)
-      setResult(null)
-    } catch {
-      setCameraError('Камер нээгдэхгүй — файл оруулна уу.')
-    }
-  }, [])
-
-  useEffect(() => () => stopCamera(), [stopCamera])
-
   const onFile = (f: File | null) => {
     if (!f) return
     if (!f.type.startsWith('image/')) {
@@ -307,7 +310,6 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
       setAnalysisError('Зураг хэт том байна — 10MB-аас бага зураг оруулна уу.')
       return
     }
-    stopCamera()
     setFile(f)
     setPreview(URL.createObjectURL(f))
     setResult(null)
@@ -358,7 +360,6 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
     setFile(null)
     setResult(null)
     setAnalysisError(null)
-    stopCamera()
     if (fileRef.current) fileRef.current.value = ''
   }
 
@@ -371,6 +372,11 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
       <div className="flex flex-wrap items-center gap-2">
         <span className="mr-2 text-[13px] font-medium text-text-muted">Хүүхэд:</span>
         {filterOptions.map((name) => (
+    <div className="flex h-full flex-col gap-8">
+      {/* Child selector — add a child by name */}
+      <div className="flex flex-wrap items-center gap-2">
+       
+        {childNames.map((name) => (
           <FilterPill
             key={name}
             label={name}
@@ -378,6 +384,25 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
             onClick={() => setActiveFilter(name)}
           />
         ))}
+        <form onSubmit={handleAddChild} className="flex items-center gap-2">
+          <input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Хүүхдийн нэр"
+            aria-label="Хүүхдийн нэр нэмэх"
+            className="w-36 rounded-full border border-border bg-surface-raised px-4 py-2 text-[13px] text-text-base outline-none transition-colors placeholder:text-text-muted focus:border-[#F3B900]"
+          />
+          <button
+            type="submit"
+            disabled={!newName.trim()}
+            aria-label="Хүүхэд нэмэх"
+            title="Хүүхэд нэмэх"
+            className="btn flex items-center justify-center rounded-full border border-border bg-surface p-2 text-text-base transition-all duration-150 hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Plus className="size-5" strokeWidth={2} />
+          
+          </button>
+        </form>
       </div>
 
       <div className="grid gap-8 xl:grid-cols-[1.15fr_0.85fr]">
@@ -401,8 +426,20 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
                 onChange={(e) => onFile(e.target.files?.[0] ?? null)}
               />
             </div>
+      <div className="grid min-h-0 flex-1 gap-8 xl:grid-cols-[1.15fr_0.85fr]">
+        {/* Left column */}
+        <div className="flex min-h-0 flex-col gap-6">
+          <FlatCard className="flex h-full flex-col overflow-y-auto p-8">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => onFile(e.target.files?.[0] ?? null)}
+            />
+          
 
-            {!displayImage && !cameraOn ? (
+            {!displayImage ? (
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
@@ -417,21 +454,22 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
                   onFile(e.dataTransfer.files?.[0] ?? null)
                 }}
                 className={cn(
-                  'mt-6 flex min-h-[320px] w-full flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed p-10 text-center transition-all duration-200',
+                  'flex min-h-[320px] w-full flex-1 flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed p-10 text-center transition-all duration-200',
                   dragOver
                     ? 'border-[#F3B900] bg-[#F3B900]/10'
                     : 'border-border bg-surface-raised hover:border-[#F3B900]/50 hover:bg-[#F3B900]/5',
                 )}
               >
-                <span className="flex size-14 items-center justify-center rounded-2xl bg-surface shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+                <span className="flex size-14 items-center justify-center rounded-full bg-surface shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
                   <Upload className="size-7 text-text-muted" strokeWidth={1.5} />
                 </span>
                 <div>
                   <p className="text-[16px] font-semibold text-text-base">
                     Шүдний ойрын зураг оруулна уу
+                    Амны хөндийн ойрын зураг оруулна уу.
                   </p>
                   <p className="mt-2 max-w-sm text-[13px] text-text-muted">
-                    Зургийг энд чирч оруулах, дарж сонгох, эсвэл камер ашиглаарай
+                    Зургийг энд чирэх эсвэл дарж оруулж болно.
                   </p>
                 </div>
               </button>
@@ -468,6 +506,17 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
             ) : null}
 
             <canvas ref={canvasRef} className="hidden" />
+            {analysisError ? (
+              <p className="mt-4 text-[13px] text-red-600">{analysisError}</p>
+            ) : null}
+
+            {displayImage ? (
+              <div className="mt-6">
+                {displayImage && (
+                  <IntraoralImageView imageUrl={displayImage} detections={displayDetections} />
+                )}
+              </div>
+            ) : null}
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <PillButton
@@ -481,15 +530,31 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
               <PillButton variant="ghost" onClick={clearAll}>
                 <Eraser className="size-4" strokeWidth={2} />
                 Цэвэрлэх
+                className="min-w-[160px]"
+                disabled={!file || !preview || analyzing}
+                onClick={runAnalysis}
+              >
+                {analyzing ? 'Уншиж байна...' : 'Эхлэх'}
               </PillButton>
+              <button
+                type="button"
+                onClick={clearAll}
+                aria-label="Дахин эхлэх"
+                title="Дахин эхлэх"
+                className="inline-flex size-12 shrink-0 items-center justify-center rounded-full text-text-muted transition-all duration-200 hover:bg-surface-raised hover:text-text-base active:scale-[0.96]"
+              >
+                <RotateCcw className="size-5" strokeWidth={2} />
+              </button>
             </div>
           </FlatCard>
         </div>
 
         {/* Баруун багана */}
         <div className="xl:sticky xl:top-28 xl:self-start">
+        {/* Right column — glass accent panel */}
+        <div className="min-h-0 xl:sticky xl:top-28">
           {result ? (
-            <FlatCard glass className="p-6 xl:p-8">
+            <FlatCard glass className="h-full overflow-y-auto p-6 xl:p-8">
               <ResultsPanel result={result} />
             </FlatCard>
           ) : (
@@ -504,6 +569,12 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
               <p className="mt-2 max-w-xs text-[14px] leading-relaxed text-text-muted">
                 Зураг оруулсны дараа «AI шинжилгээ хийх» дарж ангилал, зөвлөмж, илрүүлсэн зүйлсийг
                 хараарай.
+              className="flex h-full min-h-[420px] flex-col items-center justify-center p-10 text-center"
+            >
+              
+              <p className="mt-5 text-[17px] font-bold text-text-base">Дүгнэлт энд харагдана</p>
+              <p className="mt-2 max-w-xs text-[14px] leading-relaxed text-text-muted">
+                Зураг оруулсны дараа эхлэх товчийг дарна уу.
               </p>
             </FlatCard>
           )}

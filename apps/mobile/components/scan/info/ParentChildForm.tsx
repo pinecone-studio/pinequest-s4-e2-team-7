@@ -61,6 +61,6 @@ const s = StyleSheet.create({
   sectionLabel: { fontSize: 15, fontFamily: 'Inter_700Bold', marginTop: 20 },
   hint: { fontSize: 12, fontFamily: 'Inter_400Regular', marginTop: 2 },
   input: { borderWidth: 1, borderRadius: 12, padding: 13, fontSize: 15 },
-  btn: { borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 28 },
+  btn: { borderRadius: 9999, padding: 16, alignItems: 'center', marginTop: 28 },
   btnText: { fontFamily: 'Inter_700Bold', fontSize: 16 },
 })

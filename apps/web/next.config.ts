@@ -7,10 +7,20 @@ const API_URL =
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@pinequest/types', '@pinequest/core'],
-  // Linting runs separately as the commit gate (`turbo lint`); next build's own
-  // ESLint pass uses a different config that lacks the react-hooks plugin and
-  // errors on inline rule-disable comments, so skip it during the build.
+  // Lint is its own gate (turbo). next build's bundled ESLint can't resolve the
+  // Next/react-hooks plugin rules in this monorepo, so skip it at build time —
+  // typecheck still runs. Without this, `pnpm --filter web deploy` fails.
   eslint: { ignoreDuringBuilds: true },
+  webpack: (config) => {
+    // Workspace packages (@pinequest/*) use NodeNext-style explicit `.js`
+    // import specifiers that resolve to `.ts` sources. Teach webpack the mapping.
+    config.resolve.extensionAlias = {
+      ...config.resolve.extensionAlias,
+      '.js': ['.ts', '.tsx', '.js', '.jsx'],
+      '.mjs': ['.mts', '.mjs'],
+    }
+    return config
+  },
   async rewrites() {
     return [
       {

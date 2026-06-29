@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { HandRaisedIcon, PhoneIcon, CheckCircleIcon, MapPinIcon } from '@heroicons/react/24/outline'
+import { HandRaisedIcon, PhoneIcon, CheckCircleIcon, MapPinIcon } from '@heroicons/react/24/solid'
 import Card from '@/components/ui/Card'
 import StatusPill, { type Tone } from '@/components/ui/StatusPill'
 import EmptyState from '@/components/ui/EmptyState'
@@ -27,7 +27,7 @@ const RequestCard = ({ r, action }: { r: HelpRequestRow; action?: React.ReactNod
           <StatusPill tone={t.tone} variant="soft" className="mt-0.5">{t.label}</StatusPill>
         </div>
       </div>
-      {r.note && <p className="rounded-lg bg-surface/70 px-3 py-2 text-[12px] text-text-secondary">"{r.note}"</p>}
+      {r.note && <p className="rounded-2xl bg-surface/70 px-3 py-2 text-[12px] text-text-secondary">"{r.note}"</p>}
       {r.child?.guardianPhone && (
         <a href={`tel:${r.child.guardianPhone}`} className="flex items-center gap-1.5 text-[12px] font-medium text-primary hover:underline">
           <PhoneIcon className="size-3.5" /> {r.child.guardianPhone}
@@ -60,7 +60,7 @@ const DentistHelpPage = () => {
   const [geoLoading, setGeoLoading] = useState(false)
   const [confirmId, setConfirmId] = useState<string | null>(null)
 
-  const inp = 'rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary'
+  const inp = 'rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary'
   const open = (requests ?? []).filter((r) => r.status === 'open')
   const connected = (requests ?? []).filter((r) => r.status === 'connected')
 
@@ -98,7 +98,7 @@ const DentistHelpPage = () => {
             </div>
             <button
               onClick={() => upsert.mutate({ displayName: profile.displayName, org: profile.org ?? undefined, area: profile.area ?? undefined, isAvailable: !profile.isAvailable })}
-              className={`btn rounded-lg px-3 py-2 text-[13px] font-semibold transition-colors ${profile.isAvailable ? 'bg-triage-green-bg text-triage-green' : 'bg-surface-raised text-text-muted'}`}
+              className={`btn rounded-full px-3 py-2 text-[13px] font-semibold transition-colors ${profile.isAvailable ? 'bg-triage-green-bg text-triage-green' : 'bg-surface-raised text-text-muted'}`}
             >
               {profile.isAvailable ? 'Боломжтой' : 'Завгүй'}
             </button>
@@ -116,13 +116,13 @@ const DentistHelpPage = () => {
               <input value={area} onChange={(e) => setArea(e.target.value)} placeholder="Бүс/сум (заавал биш)" className={inp} />
               <input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="Зургийн URL (заавал биш)" className={inp} />
               <button type="button" onClick={getLocation} disabled={geoLoading}
-                className="flex items-center justify-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-muted hover:bg-surface-raised disabled:opacity-50">
+                className="flex items-center justify-center gap-2 rounded-full border border-border bg-surface px-3 py-2 text-sm text-text-muted hover:bg-surface-raised disabled:opacity-50">
                 <MapPinIcon className="size-4" />
                 {lat != null ? `${lat.toFixed(4)}, ${lng?.toFixed(4)}` : geoLoading ? 'Тодорхойлж байна…' : 'Байршил авах'}
               </button>
             </div>
             <button type="submit" disabled={upsert.isPending}
-              className="btn self-start rounded-lg bg-primary px-4 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-hover disabled:opacity-60">
+              className="btn self-start rounded-full bg-primary px-4 py-2 text-sm font-medium text-text-on-primary hover:bg-primary-hover disabled:opacity-60">
               Бүртгүүлэх
             </button>
           </form>
@@ -140,7 +140,7 @@ const DentistHelpPage = () => {
                 {open.map((r) => (
                   <RequestCard key={r.id} r={r} action={
                     <button onClick={() => setConfirmId(r.id)} disabled={connect.isPending}
-                      className="btn mt-1 rounded-lg bg-primary px-3 py-2 text-[13px] font-semibold text-text-on-primary hover:bg-primary-hover disabled:opacity-60">
+                      className="btn mt-1 rounded-full bg-primary px-3 py-2 text-[13px] font-semibold text-text-on-primary hover:bg-primary-hover disabled:opacity-60">
                       Холбогдох
                     </button>
                   } />

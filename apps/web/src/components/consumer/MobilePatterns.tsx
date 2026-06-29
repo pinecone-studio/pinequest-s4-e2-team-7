@@ -41,13 +41,13 @@ export const ChildrenTabRow = ({
 export const ScanHeroCard = ({ href, label = 'Зураг авах' }: { href: string; label?: string }) => (
   <Link
     href={href}
-    className="flex items-center justify-between gap-4 rounded-[20px] bg-[#F3B900] p-6 shadow-[0_4px_20px_rgba(243,185,0,0.35)] transition-all hover:bg-[#E5AD00]"
+    className="flex items-center justify-between gap-4 rounded-2xl bg-[#F3B900] p-6 shadow-[0_4px_20px_rgba(243,185,0,0.35)] transition-all hover:bg-[#E5AD00]"
   >
     <div>
       <p className="text-[20px] font-bold text-slate-900">Урьдчилан сэргийлэх</p>
       <p className="mt-1 text-[14px] text-slate-900/75">Амны хөндийн байдлын хяналт</p>
     </div>
-    <span className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-[14px] font-semibold text-[#F3B900]">
+    <span className="inline-flex shrink-0 items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-[14px] font-semibold text-[#F3B900]">
       📷 {label}
     </span>
   </Link>
@@ -94,7 +94,7 @@ export const QuickActionGrid = ({
         href={href}
         className="warm-card flex aspect-square flex-col justify-between p-4 transition-all hover:bg-surface-raised"
       >
-        <span className="flex size-10 items-center justify-center rounded-xl bg-[#F3B900]/12 text-lg">
+        <span className="flex size-10 items-center justify-center rounded-2xl bg-[#F3B900]/12 text-lg">
           {icon}
         </span>
         <span className="whitespace-pre-line text-[13px] font-semibold leading-snug text-text-base">
@@ -121,7 +121,7 @@ export const TriageHeroCard = ({
         ? 'bg-triage-yellow-bg text-triage-yellow'
         : 'bg-triage-red-bg text-triage-red'
   return (
-    <div className={cn('rounded-[20px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]', styles)}>
+    <div className={cn('rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]', styles)}>
       <p className="text-[20px] font-extrabold">{label}</p>
       <p className="mt-2 text-[15px] leading-relaxed opacity-90">{summary}</p>
     </div>

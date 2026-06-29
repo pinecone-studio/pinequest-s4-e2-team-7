@@ -69,11 +69,11 @@ const CalendarScreen = () => {
             <View style={[s.alert, { backgroundColor: colors.triageRedBg }]}>
               <Ionicons name="alert-circle-outline" size={18} color={colors.triageRedText} />
               <Text style={[s.alertText, { color: colors.triageRedText }]}>
-                {overdue ? `${overdue} ангийн шалгалт хугацаа хэтэрсэн. ` : ''}{unscheduled ? `${unscheduled} анги товлоогүй.` : ''}
+                {overdue ? `${overdue} ангийн хяналт хийх хугацаа хэтэрсэн. ` : ''}{unscheduled ? `${unscheduled} анги товлоогүй.` : ''}
               </Text>
             </View>
           )}
-          <Text style={[s.hint, { color: colors.textMuted }]}>Улирал бүр (намар/өвөл/хавар) дор хаяж нэг удаа шалгана.</Text>
+          <Text style={[s.hint, { color: colors.textMuted }]}>Улирал бүр (намар/өвөл/хавар) дор хаяж нэг удаа хяналт хийнэ үү.</Text>
 
           {list.map((k) => {
             const over = k.scheduledAt && startOfDay(k.scheduledAt) < today
@@ -128,7 +128,7 @@ const s = StyleSheet.create({
   cardName: { fontSize: 17, fontFamily: 'Inter_700Bold' },
   cardSeason: { fontSize: 13, fontFamily: 'Inter_400Regular' },
   cardDate: { fontSize: 13, fontFamily: 'Inter_600SemiBold', textAlign: 'right', flexShrink: 1 },
-  pickBtn: { borderWidth: 1, borderRadius: 12, paddingVertical: 11, alignItems: 'center' },
+  pickBtn: { borderWidth: 1, borderRadius: 9999, paddingVertical: 11, alignItems: 'center' },
   pickText: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
   muted: { fontSize: 14, fontFamily: 'Inter_400Regular', textAlign: 'center' },
 })

@@ -17,7 +17,7 @@ const OutlineButton = ({ label, onPress }: Props) => {
 }
 
 const s = StyleSheet.create({
-  btn: { height: 52, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
+  btn: { height: 52, borderRadius: 9999, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
   label: { fontSize: 16, fontFamily: 'Inter_600SemiBold' },
 })
 

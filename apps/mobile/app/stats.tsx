@@ -180,7 +180,7 @@ const s = StyleSheet.create({
   header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 4 },
   title: { fontSize: 24, fontFamily: 'Inter_700Bold', letterSpacing: -0.4 },
   seasonRow: { paddingHorizontal: 20, paddingVertical: 10, gap: 8 },
-  seasonBtn: { borderRadius: 20, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 7 },
+  seasonBtn: { borderRadius: 9999, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 7 },
   seasonText: { fontSize: 13, fontFamily: 'Inter_600SemiBold' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20 },
   err: { color: '#ef4444', textAlign: 'center' },

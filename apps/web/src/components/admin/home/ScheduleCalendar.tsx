@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid'
 import { useSchedule, type ScheduleEvent } from '@/hooks/useSchedule'
 import PlayCard from '@/components/ui/PlayCard'
 import { SkeletonCard } from '@/components/ui/Skeleton'
@@ -45,9 +45,9 @@ const ScheduleCalendar = () => {
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-[15px] font-semibold text-text-base">Календар</h2>
         <div className="flex items-center gap-1">
-          <button onClick={() => shift(-1)} aria-label="Өмнөх сар" className="btn rounded-lg p-1 text-text-muted hover:bg-surface-raised hover:text-text-base"><ChevronLeftIcon className="size-4" /></button>
+          <button onClick={() => shift(-1)} aria-label="Өмнөх сар" className="btn rounded-full p-1 text-text-muted hover:bg-surface-raised hover:text-text-base"><ChevronLeftIcon className="size-4" /></button>
           <span className="min-w-23 text-center text-[12px] font-medium text-text-base">{first.toLocaleDateString('mn-MN', { year: 'numeric', month: 'long' })}</span>
-          <button onClick={() => shift(1)} aria-label="Дараагийн сар" className="btn rounded-lg p-1 text-text-muted hover:bg-surface-raised hover:text-text-base"><ChevronRightIcon className="size-4" /></button>
+          <button onClick={() => shift(1)} aria-label="Дараагийн сар" className="btn rounded-full p-1 text-text-muted hover:bg-surface-raised hover:text-text-base"><ChevronRightIcon className="size-4" /></button>
         </div>
       </div>
 
@@ -61,7 +61,7 @@ const ScheduleCalendar = () => {
           const isSel = k === sel
           return (
             <button key={i} onClick={() => setSel(k)}
-              className={`btn relative flex aspect-square items-center justify-center rounded-lg text-[12px] tabular-nums transition-colors ${
+              className={`btn relative flex aspect-square items-center justify-center rounded-full text-[12px] tabular-nums transition-colors ${
                 isSel ? 'bg-primary font-bold text-text-on-primary' : isToday ? 'bg-primary-subtle font-semibold text-primary' : 'text-text-base hover:bg-surface-raised'
               }`}>
               {d.getDate()}

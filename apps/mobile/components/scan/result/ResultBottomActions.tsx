@@ -30,10 +30,10 @@ export default function ResultBottomActions({ screeningId: _screeningId, onRetak
 const s = StyleSheet.create({
   container: { gap: 10 },
   row: { flexDirection: 'row', gap: 10 },
-  outlineBtn: { flex: 1, borderRadius: 14, padding: 16, alignItems: 'center', borderWidth: 1 },
+  outlineBtn: { flex: 1, borderRadius: 9999, padding: 16, alignItems: 'center', borderWidth: 1 },
   outlineText: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
-  primaryBtn: { flex: 1, borderRadius: 14, padding: 16, alignItems: 'center' },
+  primaryBtn: { flex: 1, borderRadius: 9999, padding: 16, alignItems: 'center' },
   primaryText: { fontSize: 14, fontFamily: 'Inter_700Bold' },
-  homeBtn: { borderRadius: 14, padding: 16, alignItems: 'center', borderWidth: 1 },
+  homeBtn: { borderRadius: 9999, padding: 16, alignItems: 'center', borderWidth: 1 },
   homeText: { fontSize: 14, fontFamily: 'Inter_500Medium' },
 })

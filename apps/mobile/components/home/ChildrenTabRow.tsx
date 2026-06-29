@@ -48,7 +48,7 @@ const s = StyleSheet.create({
   row: { gap: 8, paddingHorizontal: 2 },
   tab: {
     paddingHorizontal: 16, paddingVertical: 8,
-    borderRadius: 20, borderWidth: 1.5,
+    borderRadius: 9999, borderWidth: 1.5,
   },
   label: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
 })

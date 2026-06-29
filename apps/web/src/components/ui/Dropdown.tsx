@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ComponentType, type SVGProps } from 'react'
 import { createPortal } from 'react-dom'
-import { ChevronDownIcon, CheckIcon } from '@heroicons/react/24/outline'
+import { ChevronDownIcon, CheckIcon } from '@heroicons/react/24/solid'
 import { cn } from '@/lib/utils'
 
 export type DropdownOption<T extends string = string> = {
@@ -76,7 +76,7 @@ const Dropdown = <T extends string>({ value, options, onChange, ariaLabel, size 
         aria-expanded={open}
         aria-label={ariaLabel}
         onClick={toggle}
-        className={cn('btn flex w-full items-center rounded-xl border border-border bg-surface font-semibold text-text-base transition-all duration-150 hover:border-primary', SIZE[size])}
+        className={cn('btn flex w-full items-center rounded-full border border-border bg-surface font-semibold text-text-base transition-all duration-150 hover:border-primary', SIZE[size])}
       >
         {current.Icon && <current.Icon className={cn('size-4 shrink-0', current.iconClass ?? 'text-text-muted')} />}
         <span className="flex-1 truncate text-left">{current.label}</span>
@@ -99,7 +99,7 @@ const Dropdown = <T extends string>({ value, options, onChange, ariaLabel, size 
                 role="option"
                 aria-selected={active}
                 onClick={() => { onChange(opt.value); setOpen(false) }}
-                className={cn('btn flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[12px] transition-colors duration-100 hover:bg-surface-raised', active ? 'bg-surface-raised font-semibold text-text-base' : 'text-text-muted')}
+                className={cn('btn flex w-full items-center gap-2.5 rounded-full px-3 py-2 text-left text-[12px] transition-colors duration-100 hover:bg-surface-raised', active ? 'bg-surface-raised font-semibold text-text-base' : 'text-text-muted')}
               >
                 {opt.Icon && <opt.Icon className={cn('size-4 shrink-0', opt.iconClass ?? 'text-text-muted')} />}
                 <span className="flex-1 truncate">{opt.label}</span>

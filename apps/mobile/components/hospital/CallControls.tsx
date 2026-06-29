@@ -33,7 +33,7 @@ const s = StyleSheet.create({
   btn: {
     width: 60,
     height: 60,
-    borderRadius: 30,
+    borderRadius: 9999,
     alignItems: 'center',
     justifyContent: 'center',
   },

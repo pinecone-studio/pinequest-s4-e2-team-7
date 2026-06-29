@@ -28,7 +28,7 @@ export const ReviewForm = ({
           <button
             key={l}
             onClick={() => setLevel(l)}
-            className={`rounded-lg border px-2 py-1 transition-colors ${level === l ? 'border-primary bg-primary-subtle' : 'border-border hover:border-primary/50'}`}
+            className={`rounded-full border px-2 py-1 transition-colors ${level === l ? 'border-primary bg-primary-subtle' : 'border-border hover:border-primary/50'}`}
           >
             <TriageBadge level={l} />
           </button>
@@ -39,12 +39,12 @@ export const ReviewForm = ({
         onChange={(e) => setNote(e.target.value)}
         placeholder="Тэмдэглэл (заавал биш)"
         rows={2}
-        className="rounded-lg border border-border bg-surface p-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+        className="rounded-xl border border-border bg-surface p-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
       />
       <button
         onClick={() => level && submit.mutate({ confirmedLevel: level, note: note || undefined })}
         disabled={!level || submit.isPending}
-        className="self-start rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-hover disabled:opacity-50"
+        className="self-start rounded-full bg-primary px-3 py-1.5 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-hover disabled:opacity-50"
       >
         {submit.isPending ? <Spinner /> : 'Хадгалах'}
       </button>

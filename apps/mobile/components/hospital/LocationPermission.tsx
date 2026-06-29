@@ -62,7 +62,7 @@ const s = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 24,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: 9999,
     marginTop: 8,
   },
   btnText: {

@@ -1,6 +1,6 @@
 'use client'
 
-import { ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline'
+import { ClipboardDocumentCheckIcon } from '@heroicons/react/24/solid'
 import { useReviewQueue } from '@/hooks/useScreening'
 import HeroStrip from '@/components/shared/HeroStrip'
 import UrgentActionCard from '@/components/shared/UrgentActionCard'

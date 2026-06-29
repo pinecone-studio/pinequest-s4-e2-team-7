@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowUpRightIcon, ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline'
+import { ArrowUpRightIcon, ClipboardDocumentCheckIcon } from '@heroicons/react/24/solid'
 import { useReviewQueue } from '@/hooks/useScreening'
 import { useSeason } from '@/components/shared/SeasonProvider'
 import PlayCard from '@/components/ui/PlayCard'

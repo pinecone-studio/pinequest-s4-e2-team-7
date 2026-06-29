@@ -19,7 +19,7 @@ const ParentChildCard = ({ student }: { student: BoardStudent }) => {
       ) : data?.summary ? (
         <ChildSummaryCard childName={name} guardianEmail={student.guardianEmail} summary={data.summary} />
       ) : (
-        <p className="rounded-xl border border-border bg-surface-raised p-4 text-sm text-text-muted">
+        <p className="rounded-2xl border border-border bg-surface-raised p-4 text-sm text-text-muted">
           Таны хүүхэд хараахан шалгагдаагүй байна.
         </p>
       )}

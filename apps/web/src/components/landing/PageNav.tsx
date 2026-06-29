@@ -13,12 +13,13 @@ export const PageNav = () => {
 
   useMotionValueEvent(scrollY, 'change', (y) => {
     const hero     = document.getElementById('hero')
+    const team     = document.getElementById('team')
     const stats    = document.getElementById('stats')
     const features = document.getElementById('features')
     const mobile   = document.getElementById('mobile')
     if (!hero) return
     const vh            = window.innerHeight
-    const teamStart     = hero.offsetTop + (hero.offsetHeight - vh) * 0.38
+    const teamStart     = team     ? team.offsetTop     - vh * 0.35 : Infinity
     const statsStart    = stats    ? stats.offsetTop    - vh * 0.35 : Infinity
     const featuresStart = features ? features.offsetTop - vh * 0.35 : Infinity
     const mobileStart   = mobile   ? mobile.offsetTop   - vh * 0.35 : Infinity
@@ -31,11 +32,10 @@ export const PageNav = () => {
 
   const goTo = (index: number) => {
     const lenis = getLenis()
-    const hero  = document.getElementById('hero')
     const scroll   = (top: number) => lenis ? lenis.scrollTo(top) : window.scrollTo({ top, behavior: 'smooth' })
     const scrollId = (id: string)  => lenis ? lenis.scrollTo(`#${id}`) : document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
     if      (index === 0) scroll(0)
-    else if (index === 1 && hero) scroll(hero.offsetTop + (hero.offsetHeight - window.innerHeight) * 0.44)
+    else if (index === 1) scrollId('team')
     else if (index === 2) scrollId('stats')
     else if (index === 3) scrollId('features')
     else if (index === 4) scrollId('mobile')
@@ -56,14 +56,14 @@ export const PageNav = () => {
               onClick={() => goTo(i)}
               aria-label={LABELS[i]}
               className="btn flex shrink-0 items-center justify-center transition-all duration-300"
-              style={{ width: 52, height: 52, borderRadius: 16, background: on ? 'var(--olive)' : hot ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.08)', color: on ? '#0d1e35' : hot ? '#fff' : 'rgba(255,255,255,0.55)', border: `1px solid ${on ? 'var(--olive)' : hot ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.12)'}` }}
+              style={{ width: 52, height: 52, borderRadius: 9999, background: on ? 'var(--olive)' : hot ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.08)', color: on ? '#0d1e35' : hot ? '#fff' : 'rgba(255,255,255,0.55)', border: `1px solid ${on ? 'var(--olive)' : hot ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.12)'}` }}
             >
               <Icon />
             </button>
             <AnimatePresence>
               {hovered === i && (
                 <m.span
-                  className="pointer-events-none whitespace-nowrap rounded-xl px-4 py-1.5 font-black uppercase shadow-(--shadow-card)"
+                  className="pointer-events-none whitespace-nowrap rounded-full px-4 py-1.5 font-black uppercase shadow-(--shadow-card)"
                   style={{ fontSize: 14, letterSpacing: '0.04em', background: 'var(--olive)', color: '#0d1e35', border: '1px solid var(--olive)' }}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}

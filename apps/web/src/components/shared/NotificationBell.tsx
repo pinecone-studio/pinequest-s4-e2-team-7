@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { BellIcon } from '@heroicons/react/24/outline'
+import { BellIcon } from '@heroicons/react/24/solid'
 import { useSchedule, type ScheduleEvent } from '@/hooks/useSchedule'
 import { downloadICS } from '@/lib/calendar'
 
@@ -49,7 +49,7 @@ const NotificationBell = () => {
   return (
     <div ref={ref} className="relative">
       <button onClick={() => setOpen((v) => !v)} aria-label="Мэдэгдэл"
-        className="btn relative flex items-center justify-center rounded-xl border border-border bg-surface p-2 text-text-base transition-all duration-150 hover:border-primary">
+        className="btn relative flex items-center justify-center rounded-full border border-border bg-surface p-2 text-text-base transition-all duration-150 hover:border-primary">
         <BellIcon className="size-5" />
         {unseen > 0 && (
           <span className="absolute -right-1 -top-1 flex min-w-4 items-center justify-center rounded-full bg-triage-red px-1 text-[9px] font-bold leading-4 text-white">{unseen}</span>
@@ -61,7 +61,7 @@ const NotificationBell = () => {
           <div className="flex items-center justify-between px-2 py-1.5">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">Мэдэгдэл</p>
             {unseen > 0 && (
-              <button onClick={markAllSeen} className="btn rounded-lg px-2 py-0.5 text-[11px] font-semibold text-primary hover:bg-primary-subtle">Бүгдийг үзсэн</button>
+              <button onClick={markAllSeen} className="btn rounded-full px-2 py-0.5 text-[11px] font-semibold text-primary hover:bg-primary-subtle">Бүгдийг үзсэн</button>
             )}
           </div>
           {upcoming.length === 0 ? (
@@ -74,7 +74,7 @@ const NotificationBell = () => {
                   <p className="truncate text-[12px] font-medium text-text-base">{e.title}</p>
                   <p className="text-[10px] text-text-muted">{new Date(e.date).toLocaleDateString('mn-MN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
-                <button onClick={() => remind(e)} className="btn shrink-0 rounded-lg px-2 py-1 text-[10px] font-semibold text-primary hover:bg-primary-subtle">Сануулга</button>
+                <button onClick={() => remind(e)} className="btn shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold text-primary hover:bg-primary-subtle">Сануулга</button>
               </div>
             ))
           )}

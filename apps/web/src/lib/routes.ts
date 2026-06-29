@@ -46,8 +46,8 @@ export const HOME_FEATURES: Array<{
   {
     id: 'scan',
     href: ROUTES.scan.root,
-    label: 'Шалгалт',
-    desc: 'Шүдний зураг аваад AI шинжилгээ',
+    label: 'Screening',
+    desc: 'Амны хөндийн зургийг танин, дүгнэлт хийх',
     emoji: '📷',
   },
   {
@@ -60,15 +60,15 @@ export const HOME_FEATURES: Array<{
   {
     id: 'brush',
     href: ROUTES.brush.root,
-    label: 'Угаалга',
-    desc: 'Угаалгын заавар, ухаалаг хяналт',
+    label: 'Шүд угаалт',
+    desc: 'Шүд угаах зөв арга ба ухаалаг хяналт',
     emoji: '🪥',
   },
   {
     id: 'profile',
     href: ROUTES.profile.root,
     label: 'Профайл',
-    desc: 'Түүх, тохиргоо, тайлан',
+    desc: 'Түүх, тохиргоо, динамик',
     emoji: '👤',
   },
 ]

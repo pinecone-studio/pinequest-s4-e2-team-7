@@ -11,34 +11,36 @@ type Props = {
 
 const TABS: { id: GuideTab; label: string }[] = [
   { id: 'guide', label: 'Шүд угаах заавар' },
-  { id: 'history', label: 'Шүд угаасан ханалт' },
+  { id: 'history', label: 'Шүд угаах ханалт' },
 ]
 
 const TAB_PAD = 4
 
 export default function GuideTabs({ active, onChange }: Props) {
   const { colors } = useTheme()
-  const [tabsW, setTabsW] = useState(0)
-  // 0 = guide (left), 1 = history (right) — drives the sliding pill.
+  const [rowW, setRowW] = useState(0)
+  // 0 = guide (left), 1 = history (right) — drives the sliding yellow pill.
   const pill = useRef(new Animated.Value(0)).current
+
+  const activeIndex = TABS.findIndex((t) => t.id === active)
 
   useEffect(() => {
     Animated.spring(pill, {
-      toValue: active === 'guide' ? 0 : 1,
+      toValue: activeIndex,
       useNativeDriver: true,
       friction: 9,
       tension: 90,
     }).start()
-  }, [active, pill])
+  }, [activeIndex, pill])
 
-  const pillW = tabsW ? (tabsW - TAB_PAD * 2) / TABS.length : 0
+  const pillW = rowW ? (rowW - TAB_PAD * 2) / TABS.length : 0
   const pillX = pill.interpolate({ inputRange: [0, 1], outputRange: [0, pillW] })
 
   return (
     <View style={[s.container, { borderBottomColor: colors.border }]}>
       <View
-        style={[s.row, { backgroundColor: colors.surface, borderColor: colors.border }]}
-        onLayout={(e) => setTabsW(e.nativeEvent.layout.width)}
+        style={[s.row, { backgroundColor: colors.surfaceRaised, borderColor: colors.border }]}
+        onLayout={(e) => setRowW(e.nativeEvent.layout.width)}
       >
         {pillW > 0 && (
           <Animated.View
@@ -72,19 +74,32 @@ export default function GuideTabs({ active, onChange }: Props) {
 
 const s = StyleSheet.create({
   container: { paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1 },
-  row: { flexDirection: 'row', borderRadius: 12, padding: TAB_PAD, borderWidth: 1, position: 'relative' },
+  row: {
+    flexDirection: 'row',
+    borderRadius: 9999,
+    padding: TAB_PAD,
+    borderWidth: 1,
+    position: 'relative',
+  },
   pill: {
     position: 'absolute',
     top: TAB_PAD,
     left: TAB_PAD,
     bottom: TAB_PAD,
-    borderRadius: 10,
+    borderRadius: 9999,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
     shadowRadius: 6,
     elevation: 3,
   },
-  tab: { flex: 1, paddingVertical: 9, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center' },
+  tab: {
+    flex: 1,
+    borderRadius: 9999,
+    paddingVertical: 9,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   tabText: { fontSize: 13, fontFamily: 'Inter_600SemiBold' },
 })

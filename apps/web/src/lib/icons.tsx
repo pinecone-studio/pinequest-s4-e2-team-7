@@ -143,6 +143,20 @@ export const Menu = ({ size, strokeWidth, className, ...rest }: IconProps) => (
   </svg>
 )
 
+export const Plus = ({ size, strokeWidth, className, ...rest }: IconProps) => (
+  <svg {...base(size, strokeWidth, className)} {...rest}>
+    <line x1="12" x2="12" y1="5" y2="19" />
+    <line x1="5" x2="19" y1="12" y2="12" />
+  </svg>
+)
+
+export const RotateCcw = ({ size, strokeWidth, className, ...rest }: IconProps) => (
+  <svg {...base(size, strokeWidth, className)} {...rest}>
+    <polyline points="1 4 1 10 7 10" />
+    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+  </svg>
+)
+
 export const Search = ({ size, strokeWidth, className, ...rest }: IconProps) => (
   <svg {...base(size, strokeWidth, className)} {...rest}>
     <circle cx="11" cy="11" r="8" />

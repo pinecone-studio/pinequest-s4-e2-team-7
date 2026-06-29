@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { EnvelopeIcon, PhoneIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
+import { EnvelopeIcon, PhoneIcon, DocumentTextIcon } from '@heroicons/react/24/solid'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import StudentSummaryBody from './StudentSummaryBody'
@@ -14,7 +14,7 @@ import { printChildSummary } from '@/lib/parentPdf'
 import type { BoardStudent } from '@/hooks/useBoard'
 
 type Tab = 'latest' | 'history' | 'chart'
-const TAB_LABELS: Record<Tab, string> = { latest: 'Сүүлийн шалгалт', history: 'Түүх', chart: 'Шүдний зураглал' }
+const TAB_LABELS: Record<Tab, string> = { latest: 'Сүүлийн дүгнэлт', history: 'Өмнөх дүгнэлтүүд', chart: 'Динамик өөрчлөлтүүд' }
 
 const StudentModal = ({ student, onClose }: { student: BoardStudent | null; onClose: () => void }) => {
   const [tab, setTab] = useState<Tab>('latest')
@@ -43,20 +43,20 @@ const StudentModal = ({ student, onClose }: { student: BoardStudent | null; onCl
           <button
             type="button" disabled={!summary}
             onClick={() => summary && printChildSummary(name, summary, detail?.imageRefs ?? [], detail?.hospital)}
-            title="PDF үзэх / хэвлэх"
-            className="btn flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-raised text-text-muted transition-colors hover:border-primary hover:text-text-base disabled:cursor-not-allowed disabled:opacity-40"
+            title="PDF үзэх/хэвлэх"
+            className="btn flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-surface-raised text-text-muted transition-colors hover:border-primary hover:text-text-base disabled:cursor-not-allowed disabled:opacity-40"
           ><DocumentTextIcon className="size-4" /></button>
           <button
             type="button" disabled={!summary || !hasPhone}
             onClick={() => summary && hasPhone && openParentSms(student.guardianPhone!, name, summary)}
             title={hasPhone ? 'SMS илгээх' : 'Утасны дугаар байхгүй'}
-            className="btn flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-raised text-text-muted transition-colors hover:border-primary hover:text-text-base disabled:cursor-not-allowed disabled:opacity-40"
+            className="btn flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-surface-raised text-text-muted transition-colors hover:border-primary hover:text-text-base disabled:cursor-not-allowed disabled:opacity-40"
           ><PhoneIcon className="size-4" /></button>
           <button
             type="button" disabled={!summary || !hasEmail}
             onClick={() => summary && hasEmail && openParentEmail(name, student.guardianEmail, summary, detail?.hospital)}
             title={hasEmail ? 'И-мэйл илгээх' : 'И-мэйл хаяг байхгүй'}
-            className="btn flex size-9 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-raised text-text-muted transition-colors hover:border-primary hover:text-text-base disabled:cursor-not-allowed disabled:opacity-40"
+            className="btn flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-surface-raised text-text-muted transition-colors hover:border-primary hover:text-text-base disabled:cursor-not-allowed disabled:opacity-40"
           ><EnvelopeIcon className="size-4" /></button>
           <span className="flex-1" />
           <Button variant="secondary" onClick={onClose}>Хаах</Button>
@@ -95,7 +95,7 @@ const StudentModal = ({ student, onClose }: { student: BoardStudent | null; onCl
           ? <p className="py-8 text-center text-sm text-text-muted">Уншиж байна…</p>
           : <ChildHistoryTab seasons={history?.seasons ?? []} />
       )}
-      {tab === 'chart' && <p className="py-12 text-center text-sm text-text-muted">Шүдний зураглал тун удахгүй нэмэгдэнэ</p>}
+      {tab === 'chart' && <p className="py-12 text-center text-sm text-text-muted">Динамик өөрчлөлт үүсээгүй байна.</p>}
     </Modal>
   )
 }

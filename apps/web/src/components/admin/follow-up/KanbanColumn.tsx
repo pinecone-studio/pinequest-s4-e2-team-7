@@ -34,7 +34,7 @@ const KanbanColumn = ({ col, cards, limit, pageSize, isOver, draggingKey, onDrag
       onDragOver={(e) => { e.preventDefault(); onDragOver() }}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
-      className={`flex min-w-70 flex-1 flex-col gap-3 rounded-3xl p-2 transition-all duration-150 ${isOver ? 'bg-primary-subtle/60 ring-2 ring-primary/30' : ''}`}
+      className={`flex min-w-70 flex-1 flex-col gap-3 rounded-2xl p-2 transition-all duration-150 ${isOver ? 'bg-primary-subtle/60 ring-2 ring-primary/30' : ''}`}
     >
       <div className={`inline-flex items-center gap-2 self-start rounded-full px-3 py-1.5 text-[12.5px] font-bold ${col.count}`}>
         <span className={`size-2 rounded-full ${col.dot}`} />
@@ -61,12 +61,12 @@ const KanbanColumn = ({ col, cards, limit, pageSize, isOver, draggingKey, onDrag
       </div>
 
       {remaining > 0 && (
-        <button onClick={onShowMore} className="btn mt-0.5 w-full rounded-xl border border-dashed border-border py-2 text-[12px] font-medium text-text-muted transition-all duration-150 hover:border-primary/40 hover:bg-surface hover:text-primary active:scale-[0.98]">
+        <button onClick={onShowMore} className="btn mt-0.5 w-full rounded-full border border-dashed border-border py-2 text-[12px] font-medium text-text-muted transition-all duration-150 hover:border-primary/40 hover:bg-surface hover:text-primary active:scale-[0.98]">
           + {remaining} дараагийн
         </button>
       )}
       {limit > pageSize && remaining === 0 && (
-        <button onClick={onCollapse} className="btn mt-0.5 w-full rounded-xl py-1.5 text-[11px] text-text-muted/60 transition-colors hover:text-text-muted active:scale-[0.98]">
+        <button onClick={onCollapse} className="btn mt-0.5 w-full rounded-full py-1.5 text-[11px] text-text-muted/60 transition-colors hover:text-text-muted active:scale-[0.98]">
           Хураах ↑
         </button>
       )}

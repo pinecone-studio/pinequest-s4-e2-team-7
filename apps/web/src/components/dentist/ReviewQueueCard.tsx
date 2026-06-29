@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { CheckIcon } from '@heroicons/react/24/outline'
+import { CheckIcon } from '@heroicons/react/24/solid'
 import { useSubmitReview, type QueueRow } from '@/hooks/useScreening'
 import Spinner from '@/components/ui/Spinner'
 
@@ -32,13 +32,13 @@ const ReviewQueueCard = ({ row }: { row: QueueRow }) => {
         <button
           onClick={() => submit.mutate({ confirmedLevel: lvl })}
           disabled={submit.isPending || submit.isSuccess}
-          className="btn flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-[12px] font-semibold text-text-on-primary transition-all duration-150 hover:bg-primary-hover disabled:opacity-60"
+          className="btn flex flex-1 items-center justify-center gap-1.5 rounded-full bg-primary px-3 py-2 text-[12px] font-semibold text-text-on-primary transition-all duration-150 hover:bg-primary-hover disabled:opacity-60"
         >
           {submit.isPending ? <Spinner /> : submit.isSuccess ? <><CheckIcon className="size-4" /> Батлагдсан</> : 'Батлах'}
         </button>
         <Link
           href={`/dashboard/dentist/screenings/${row.id}`}
-          className="btn rounded-lg border border-border px-3 py-2 text-[12px] font-medium text-text-muted transition-colors hover:border-primary hover:text-primary"
+          className="btn rounded-full border border-border px-3 py-2 text-[12px] font-medium text-text-muted transition-colors hover:border-primary hover:text-primary"
         >
           Хянах
         </Link>
