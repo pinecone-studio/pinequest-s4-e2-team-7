@@ -17,7 +17,7 @@ const fmt = (n: number) => n.toLocaleString('en-US')
 const Tooltip = ({ a }: { a: Aimag }) => {
   const t = tier(a.clinics)
   return (
-    <div className="pointer-events-none w-60 rounded-xl border border-white/15 bg-[#0c0c0c]/95 p-4 shadow-2xl backdrop-blur">
+    <div className="pointer-events-none w-60 rounded-2xl border border-white/15 bg-[#0c0c0c]/95 p-4 shadow-2xl backdrop-blur">
       <div className="flex items-center justify-between gap-3">
         <span className="text-[15px] font-bold text-white">{a.n}</span>
         <span className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide" style={{ background: TINT[t], color: COLOR[t] }}>

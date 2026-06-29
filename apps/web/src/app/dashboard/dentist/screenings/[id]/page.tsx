@@ -36,7 +36,7 @@ const ScreeningChartPage = () => {
         <span className="font-mono">{s.modelName}</span>
       </p>
 
-      <div className="rounded-lg border border-border bg-surface p-4">
+      <div className="rounded-2xl border border-border bg-surface p-4">
         <h2 className="mb-2 text-sm font-medium text-text-muted">Илрэл ({s.findings.length})</h2>
         <ul className="flex flex-col gap-1 text-sm text-text-base">
           {s.findings.map((f) => (
@@ -49,7 +49,7 @@ const ScreeningChartPage = () => {
         </ul>
       </div>
 
-      <div className="rounded-lg border border-border bg-surface p-4">
+      <div className="rounded-2xl border border-border bg-surface p-4">
         <ReviewForm screeningId={s.id} current={s.review?.confirmedLevel ?? null} />
       </div>
     </section>

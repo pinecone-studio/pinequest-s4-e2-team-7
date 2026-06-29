@@ -66,7 +66,7 @@ export const SkeletonTable = () => (
 )
 
 export const SkeletonKanban = ({ cols = 4 }: { cols?: number }) => (
-  <div className="rounded-3xl border border-border bg-surface p-5 shadow-(--shadow-card)">
+  <div className="rounded-2xl border border-border bg-surface p-5 shadow-(--shadow-card)">
     <div className="flex gap-4 overflow-x-auto pb-1">
       {Array.from({ length: cols }).map((_, i) => (
         <div key={i} className="flex w-[272px] shrink-0 flex-col gap-3 rounded-2xl bg-bg/60 p-3">

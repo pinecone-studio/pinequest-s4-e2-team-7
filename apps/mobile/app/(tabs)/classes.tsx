@@ -106,7 +106,7 @@ const s = StyleSheet.create({
     paddingBottom: 12,
   },
   title: { fontSize: 24, fontFamily: 'Inter_700Bold', letterSpacing: -0.4 },
-  add: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  add: { width: 42, height: 42, borderRadius: 9999, alignItems: 'center', justifyContent: 'center' },
   list: { paddingHorizontal: 20, paddingBottom: 28, gap: 14 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 30 },
   muted: { fontSize: 14, fontFamily: 'Inter_400Regular', textAlign: 'center', lineHeight: 21 },

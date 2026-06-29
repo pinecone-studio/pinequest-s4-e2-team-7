@@ -19,7 +19,7 @@ const BANNED = [
 ]
 
 const allCopy = (s: ReturnType<typeof buildChildSummary>) =>
-  [s.headline, ...s.homeSteps].join(' ').toLowerCase()
+  [s.headline, ...s.conclusion, ...s.homeSteps].join(' ').toLowerCase()
 
 describe('buildChildSummary', () => {
   it('produces no banned clinical words in any level of copy', () => {
@@ -57,6 +57,28 @@ describe('buildChildSummary', () => {
     expect(dentitionStageForAge(4)).toBe('primary')
     expect(dentitionStageForAge(9)).toBe('mixed')
     expect(dentitionStageForAge(15)).toBe('permanent')
+  })
+
+  it('builds a Дүгнэлт that reflects findings + reported symptoms', () => {
+    const s = buildChildSummary({
+      screeningId: 's1', seasonId: '2026-spring', capturedAt: '2026-03-01T00:00:00Z',
+      birthYear: 2017, findings: [f(0.8), f(0.5)], symptoms: { swelling: true, fever: true },
+      aiLevel: 'red', confidentWording: true,
+    })
+    expect(s.conclusion.length).toBeGreaterThanOrEqual(3)
+    const text = s.conclusion.join(' ')
+    expect(text).toContain('2 байршл')      // flagged-areas line (from photo)
+    expect(text).toContain('хавдах')         // mapped symptom (from questionnaire)
+    expect(text).toContain('настай')         // age/stage line
+  })
+
+  it('omits the findings line from the Дүгнэлт when nothing was flagged', () => {
+    const s = buildChildSummary({
+      screeningId: 's1', seasonId: '2026-spring', capturedAt: '2026-03-01T00:00:00Z',
+      birthYear: 2018, findings: [], symptoms: noSymptoms,
+      aiLevel: 'green', confidentWording: false,
+    })
+    expect(s.conclusion.some((l) => l.includes('байршл'))).toBe(false)
   })
 
   it('collects only reported symptom keys', () => {

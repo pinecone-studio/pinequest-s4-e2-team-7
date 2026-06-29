@@ -70,7 +70,7 @@ const s = StyleSheet.create({
   doctorEmoji: { fontSize: 64 },
   doctorName: { fontFamily: 'Inter_700Bold', fontSize: 24, color: '#FFF' },
   doctorRole: { fontFamily: 'Inter_400Regular', fontSize: 14, color: 'rgba(255,255,255,0.7)' },
-  sharedBadge: { backgroundColor: 'rgba(255,255,255,0.12)', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, marginTop: 6 },
+  sharedBadge: { backgroundColor: 'rgba(255,255,255,0.12)', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 9999, marginTop: 6 },
   sharedText: { fontFamily: 'Inter_400Regular', fontSize: 13, color: '#FFF' },
 })
 

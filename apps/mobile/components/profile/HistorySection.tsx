@@ -73,12 +73,12 @@ const HistorySection = ({ userId, role }: Props) => {
 
   return (
     <View>
-      <Text style={[s.sectionTitle, { color: colors.textMuted }]}>ЕРӨНХИЙ ТОЙМ</Text>
+      <Text style={[s.sectionTitle, { color: colors.textMuted }]}>Өмнөх дүгнэлтүүд</Text>
       <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         {loading ? (
           <ActivityIndicator color={colors.primary} style={s.loader} />
         ) : total === 0 ? (
-          <Text style={[s.empty, { color: colors.textDisabled }]}>Түүх байхгүй байна</Text>
+          <Text style={[s.empty, { color: colors.textDisabled }]}>Одоогоор дүгнэлт байхгүй байна</Text>
         ) : (
           <View style={s.summary}>
             <View style={s.totalRow}>

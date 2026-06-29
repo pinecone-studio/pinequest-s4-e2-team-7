@@ -60,7 +60,7 @@ const s = StyleSheet.create({
   info: { flex: 1, gap: 2 },
   name: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
   meta: { fontSize: 11, fontFamily: 'Inter_400Regular' },
-  mail: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  mail: { width: 36, height: 36, borderRadius: 9999, alignItems: 'center', justifyContent: 'center' },
 })
 
 export default RedStudentsSection

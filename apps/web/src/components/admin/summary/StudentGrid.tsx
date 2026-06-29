@@ -13,9 +13,9 @@ type Props = {
   onStatus?: (s: BoardStudent, status: FollowUpStatus) => void
 }
 
-/** Responsive grid of rich, live student cards (color-coded by triage level). */
+/** Vertical column of rich, live student cards (color-coded by triage level). */
 const StudentGrid = ({ students, onSelect, onSend, onEdit, onDelete, onStatus }: Props) => (
-  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+  <div className="flex flex-col gap-3">
     {students.map((s, i) => (
       <div key={s.id} className="list-in" style={{ animationDelay: `${Math.min(i * 30, 300)}ms` }}>
         <StudentCard

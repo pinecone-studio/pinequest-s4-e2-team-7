@@ -17,7 +17,7 @@ const ChildPage = () => {
       {isLoading ? (
         <PageSpinner />
       ) : !students?.length ? (
-        <p className="rounded-xl border border-border bg-surface-raised p-4 text-sm text-text-muted">
+        <p className="rounded-2xl border border-border bg-surface-raised p-4 text-sm text-text-muted">
           Холбогдсон хүүхэд алга. Бүртгэлдээ хүүхдийн кодоо холбоно уу.
         </p>
       ) : (

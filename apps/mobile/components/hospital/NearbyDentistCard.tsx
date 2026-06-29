@@ -60,7 +60,7 @@ const s = StyleSheet.create({
   meta: { fontFamily: 'Inter_400Regular', fontSize: 12, marginTop: 1 },
   area: { fontFamily: 'Inter_400Regular', fontSize: 11, marginTop: 1 },
   actions: { flexDirection: 'row', gap: 8 },
-  iconBtn: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  iconBtn: { width: 36, height: 36, borderRadius: 9999, alignItems: 'center', justifyContent: 'center' },
 })
 
 export default NearbyDentistCard

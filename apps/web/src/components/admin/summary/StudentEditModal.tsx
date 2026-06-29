@@ -14,7 +14,7 @@ const StudentEditModal = ({ student, onClose }: { student: BoardStudent | null; 
   const [guardianEmail, setGuardianEmail] = useState(student?.guardianEmail ?? '')
   if (!student) return null
 
-  const inp = 'rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary'
+  const inp = 'rounded-full border border-border bg-surface px-4 py-2.5 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary'
   const save = () => update.mutate(
     { id: student.id, firstName, lastName, guardianPhone: guardianPhone || undefined, guardianEmail: guardianEmail || undefined },
     { onSuccess: onClose },
@@ -22,7 +22,7 @@ const StudentEditModal = ({ student, onClose }: { student: BoardStudent | null; 
 
   return (
     <Modal
-      open onClose={onClose} title="Сурагч засах" subtitle={`${student.className} · №${student.rosterSlot}`}
+      open onClose={onClose} title="Сурагчийн мэдээлэл засах" subtitle={`${student.className} · №${student.rosterSlot}`}
       footer={
         <>
           <Button variant="secondary" onClick={onClose}>Болих</Button>

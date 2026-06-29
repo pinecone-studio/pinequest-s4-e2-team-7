@@ -139,11 +139,11 @@ export const VolunteerDentistsMap = ({ dentists, selectedId, onSelect, onDistanc
           Байршлын мэдээлэл байхгүй
         </div>
       )}
-      <div ref={mapRef} className="h-full w-full rounded-xl" />
+      <div ref={mapRef} className="h-full w-full rounded-2xl" />
       <button
         onClick={locate}
         disabled={locating}
-        className="absolute bottom-2 right-2 z-[1000] flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1.5 text-[11px] font-semibold text-primary shadow-md hover:bg-surface-raised disabled:opacity-60"
+        className="absolute bottom-2 right-2 z-[1000] flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1.5 text-[11px] font-semibold text-primary shadow-md hover:bg-surface-raised disabled:opacity-60"
       >
         {locating ? '…' : '📍'} {userPos ? 'Байршил тодорхойлогдсон' : 'Байршил тодорхойлох'}
       </button>

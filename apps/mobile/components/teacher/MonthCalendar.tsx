@@ -69,7 +69,7 @@ const s = StyleSheet.create({
   weekday: { flex: 1, textAlign: 'center', fontSize: 11, fontFamily: 'Inter_500Medium' },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
   cell: { width: `${100 / 7}%`, aspectRatio: 1, alignItems: 'center', justifyContent: 'center' },
-  dayPill: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  dayPill: { width: 34, height: 34, borderRadius: 9999, alignItems: 'center', justifyContent: 'center' },
   dayText: { fontSize: 14, fontFamily: 'Inter_500Medium' },
 })
 

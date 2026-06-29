@@ -217,7 +217,7 @@ const MonitorPanel = () => {
                 key={id}
                 type="button"
                 onClick={() => setActiveZone(id)}
-                className={`rounded-2xl border px-3 py-2.5 text-left transition ${
+                className={`rounded-full border px-3 py-2.5 text-left transition ${
                   activeZone === id
                     ? 'border-[#F3B900] bg-[#F3B900]/10'
                     : 'border-[#E8E4DA] bg-white hover:bg-[#FAF8F5]'

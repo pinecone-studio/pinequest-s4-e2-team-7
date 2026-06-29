@@ -9,7 +9,7 @@ import type { SymptomSet } from '@pinequest/types'
 import ResultTriageCard, { TriageLevel } from '@/components/scan/result/ResultTriageCard'
 import ResultPhotoCard from '@/components/scan/result/ResultPhotoCard'
 import ResultDetectionList from '@/components/scan/result/ResultDetectionList'
-import ResultGreenAdvice from '@/components/scan/result/ResultGreenAdvice'
+import ResultSummary from '@/components/scan/result/ResultSummary'
 import ResultYellowAdvice from '@/components/scan/result/ResultYellowAdvice'
 import ResultRedAdvice from '@/components/scan/result/ResultRedAdvice'
 import ResultDisclaimer from '@/components/scan/result/ResultDisclaimer'
@@ -87,8 +87,8 @@ export default function ResultScreen() {
           <ResultPhotoCard key={`${photo.arch}-${i}`} photo={photo} />
         ))}
         <ResultDetectionList detections={allDetections} />
-        {level === 'green' && <ResultGreenAdvice homeSteps={summary?.homeSteps} />}
-        {level === 'yellow' && <ResultYellowAdvice homeSteps={summary?.homeSteps} />}
+        <ResultSummary summary={summary} level={level} />
+        {level === 'yellow' && <ResultYellowAdvice />}
         {level === 'red' && <ResultRedAdvice guardianPhone={params.guardianPhone} />}
         <ResultBottomActions
           screeningId={screeningId}

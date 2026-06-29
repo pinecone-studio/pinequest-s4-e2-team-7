@@ -4,7 +4,9 @@ import { LenisProvider } from './LenisProvider'
 import { Header } from './Header'
 import { HeroWordmark } from './HeroWordmark'
 import { Hero } from './hero/Hero'
+import { TeamSection } from './TeamSection'
 import { StatsSection } from './StatsSection'
+import { VideoSection } from './VideoSection'
 import { ScrollStory } from '../pitch/ScrollStory'
 import { MobileSection } from './MobileSection'
 import { PageNav } from './PageNav'
@@ -26,7 +28,9 @@ export const Landing = () => (
           <Header />
           <HeroWordmark />
           <Hero />
+          <TeamSection />
           <StatsSection />
+          <VideoSection />
           <ScrollStory />
           <MobileSection />
           <Footer />

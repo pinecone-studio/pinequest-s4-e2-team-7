@@ -47,7 +47,7 @@ const s = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: 9999,
   },
   btnText: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
 })

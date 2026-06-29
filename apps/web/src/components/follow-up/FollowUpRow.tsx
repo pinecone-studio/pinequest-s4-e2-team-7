@@ -33,7 +33,7 @@ export const FollowUpRow = ({ row }: { row: Row }) => {
 
   const onSms = () => {
     if (!row.guardianPhone) return
-    const body = encodeURIComponent(`Шүдний шалгалт: хүүхдийнх нь дүн хянагдаж байна. Холбогдоно уу.`)
+    const body = encodeURIComponent(`Амны хөндийн зургийг таньж байна.`)
     window.open(`sms:${row.guardianPhone}?body=${body}`, '_blank')
     notify.mutate({ childKey: row.childKey, channel: 'sms' })
   }
@@ -60,7 +60,7 @@ export const FollowUpRow = ({ row }: { row: Row }) => {
           value={row.status}
           disabled={update.isPending}
           onChange={(e) => update.mutate({ childKey: row.childKey, status: e.target.value as FollowUpStatus, version: row.version })}
-          className="rounded-lg border border-border bg-surface px-2 py-1 text-xs text-text-base focus:outline-none focus:ring-1 focus:ring-primary"
+          className="rounded-xl border border-border bg-surface px-2 py-1 text-xs text-text-base focus:outline-none focus:ring-1 focus:ring-primary"
         >
           {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
         </select>

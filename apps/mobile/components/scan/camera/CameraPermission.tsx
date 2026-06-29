@@ -24,6 +24,6 @@ const s = StyleSheet.create({
   icon: { fontSize: 52 },
   title: { fontSize: 18, fontFamily: 'Inter_700Bold', textAlign: 'center' },
   desc: { fontSize: 14, fontFamily: 'Inter_400Regular', textAlign: 'center', lineHeight: 22 },
-  btn: { borderRadius: 14, paddingHorizontal: 32, paddingVertical: 14, marginTop: 8 },
+  btn: { borderRadius: 9999, paddingHorizontal: 32, paddingVertical: 14, marginTop: 8 },
   btnText: { fontSize: 16, fontFamily: 'Inter_700Bold' },
 })

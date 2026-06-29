@@ -28,17 +28,17 @@ const ResultLongitudinalCard = ({ currentLevel, priorLevel }: Props) => {
 
   return (
     <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <Text style={[s.heading, { color: colors.textMuted }]}>Өмнөх улиралтай харьцуулбал</Text>
+      <Text style={[s.heading, { color: colors.textMuted }]}>Өмнөх улиралын харьцуулалт</Text>
       <View style={s.row}>
         <View style={s.col}>
-          <Text style={[s.colLabel, { color: colors.textMuted }]}>Өнгөрсөн</Text>
+          <Text style={[s.colLabel, { color: colors.textMuted }]}>Өмнөх</Text>
           <View style={[s.badge, { backgroundColor: bgs(priorLevel) }]}>
             <Text style={[s.badgeText, { color: texts(priorLevel) }]}>{LEVEL_LABEL[priorLevel] ?? priorLevel}</Text>
           </View>
         </View>
         <Text style={[s.arrow, { color: delta.color }]}>{delta.icon}</Text>
         <View style={s.col}>
-          <Text style={[s.colLabel, { color: colors.textMuted }]}>Одоо</Text>
+          <Text style={[s.colLabel, { color: colors.textMuted }]}>Одоогийн</Text>
           <View style={[s.badge, { backgroundColor: bgs(currentLevel) }]}>
             <Text style={[s.badgeText, { color: texts(currentLevel) }]}>{LEVEL_LABEL[currentLevel] ?? currentLevel}</Text>
           </View>

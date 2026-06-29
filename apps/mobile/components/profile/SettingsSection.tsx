@@ -63,7 +63,7 @@ const s = StyleSheet.create({
   logoutBtn: {
     marginTop: 16,
     borderWidth: 1,
-    borderRadius: 14,
+    borderRadius: 9999,
     paddingVertical: 14,
     alignItems: 'center',
   },

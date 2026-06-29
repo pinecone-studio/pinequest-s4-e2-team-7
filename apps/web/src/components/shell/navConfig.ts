@@ -7,7 +7,7 @@ import {
   UsersIcon,
   HandRaisedIcon,
   ArrowTrendingUpIcon,
-} from '@heroicons/react/24/outline'
+} from '@heroicons/react/24/solid'
 import { Camera, ToothBrush } from '@/lib/icons'
 import type { ComponentType, SVGProps } from 'react'
 import type { UserRole } from '@pinequest/types'
@@ -22,11 +22,11 @@ export type NavItem = {
 }
 
 const OVERVIEW:   NavItem = { href: '/dashboard',            label: 'Мэдээлэл',     Icon: Squares2X2Icon }
-const SCREENING:  NavItem = { href: '/dashboard/screening',  label: 'Шалгалт',      Icon: Camera as HeroIcon }
+const SCREENING:  NavItem = { href: '/dashboard/screening',  label: 'Screening',      Icon: Camera as HeroIcon }
 const BRUSH_NAV:  NavItem = { href: '/dashboard/brush',      label: 'Ухаалаг сойз', Icon: ToothBrush as HeroIcon }
 const FOLLOWUP:   NavItem = { href: '/dashboard/follow-ups', label: 'Хяналт',       Icon: ClipboardDocumentListIcon, badgeKey: 'followup' }
 const SUMMARY:    NavItem = { href: '/dashboard/summary',    label: 'Дүгнэлт',      Icon: ChartBarIcon }
-const TRENDS:     NavItem = { href: '/dashboard/trends',     label: 'Харьцуулалт',  Icon: ArrowTrendingUpIcon }
+const TRENDS:     NavItem = { href: '/dashboard/trends',     label: 'Динамик',      Icon: ArrowTrendingUpIcon }
 const TEACHERS:   NavItem = { href: '/dashboard/users',      label: 'Хэрэглэгчид',  Icon: UsersIcon }
 
 export const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
@@ -35,7 +35,7 @@ export const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
   teacher:      [OVERVIEW, SCREENING, BRUSH_NAV, FOLLOWUP, SUMMARY, TRENDS],
   parent:       [{ href: '/dashboard/child', label: 'Хүүхэд', Icon: UserIcon }],
   dentist: [
-    { href: '/dashboard/dentist', label: 'Шалгалт', Icon: ClipboardDocumentCheckIcon, badgeKey: 'review' },
+    { href: '/dashboard/dentist', label: 'Хяналт', Icon: ClipboardDocumentCheckIcon, badgeKey: 'review' },
     { href: '/dashboard/dentist/help', label: 'Тусламж', Icon: HandRaisedIcon },
   ],
   follow_up: [{ href: '/dashboard/follow-up', label: 'Хяналтын самбар', Icon: ClipboardDocumentListIcon }],

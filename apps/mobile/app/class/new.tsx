@@ -86,19 +86,19 @@ const NewClassScreen = () => {
         <TextField label="АНГИ (ЗААВАЛ БИШ)" value={grade} onChange={setGrade} placeholder="ж: 3" keyboard="number-pad" />
 
         <View style={s.block}>
-          <Text style={[s.label, { color: colors.textMuted }]}>УЛИРАЛ</Text>
+          <Text style={[s.label, { color: colors.textMuted }]}>Улирал</Text>
           <SeasonPicker value={seasonId} onChange={setSeasonId} year={THIS_YEAR} />
         </View>
 
         <View style={s.block}>
-          <Text style={[s.label, { color: colors.textMuted }]}>ШАЛГАЛТЫН ОГНОО</Text>
+          <Text style={[s.label, { color: colors.textMuted }]}>Хяналт хийх огноо</Text>
           <TouchableOpacity
             style={[s.dateRow, { borderColor: colors.border, backgroundColor: colors.surface }]}
             onPress={() => setShowCal((v) => !v)}
             activeOpacity={0.7}
           >
             <Text style={[s.dateText, { color: date ? colors.textBase : colors.textDisabled }]}>
-              {date ? date.toLocaleDateString('mn-MN', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Огноо товлох (заавал биш)'}
+              {date ? date.toLocaleDateString('mn-MN', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Огноо товлох'}
             </Text>
           </TouchableOpacity>
           {showCal ? <MonthCalendar value={date} onChange={(d) => { setDate(d); setShowCal(false) }} /> : null}
@@ -119,7 +119,7 @@ const s = StyleSheet.create({
   scroll: { padding: 20, gap: 16, paddingBottom: 40 },
   block: { gap: 8 },
   label: { fontSize: 11, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.8 },
-  dateRow: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, height: 52, justifyContent: 'center' },
+  dateRow: { borderWidth: 1, borderRadius: 9999, paddingHorizontal: 14, height: 52, justifyContent: 'center' },
   dateText: { fontSize: 15, fontFamily: 'Inter_400Regular' },
   error: { fontSize: 13, color: '#ef4444' },
 })

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid'
 import type { Child, TriageLevel } from '@pinequest/types'
 
 type Props = { rows: Child[]; levelByKey?: Record<string, TriageLevel> }
@@ -25,7 +25,7 @@ export const RosterTable = ({ rows, levelByKey = {} }: Props) => {
   return (
     <div className="flex flex-col gap-3">
       {/* Search */}
-      <div className="flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 focus-within:ring-2 focus-within:ring-primary">
+      <div className="flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-2 focus-within:ring-2 focus-within:ring-primary">
         <MagnifyingGlassIcon className="size-4 shrink-0 text-text-muted" />
         <input
           value={q}

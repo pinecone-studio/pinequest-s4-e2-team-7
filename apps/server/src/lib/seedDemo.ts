@@ -2,9 +2,10 @@ import { children, screenings, toothFindings, screeningReviews, followUpEpisodes
 import { inChunks } from './chunk.js'
 
 const SCHOOL = 'school-demo', CLS = 'class-demo', SCREENER = 'user-screener'
-const FALL = '2025-fall', WINTER = '2025-winter', SPRING = '2026-spring'
+const FALL = '2025-fall', SPRING = '2026-spring'
 const ago = (days: number) => new Date(Date.now() - days * 86_400_000)
 
+// 3 children per current triage status (red / yellow / green) — kept lean on purpose.
 const KIDS = [
   { slot: 1, key: 'ck-001', fn: 'Болд',     ln: 'Бат' },
   { slot: 2, key: 'ck-002', fn: 'Сараа',    ln: 'Дорж' },
@@ -12,57 +13,57 @@ const KIDS = [
   { slot: 4, key: 'ck-004', fn: 'Нараа',    ln: 'Сүх' },
   { slot: 5, key: 'ck-005', fn: 'Болор',    ln: 'Цог' },
   { slot: 6, key: 'ck-006', fn: 'Анар',     ln: 'Бямба' },
+  { slot: 7, key: 'ck-007', fn: 'Тэнгис',   ln: 'Лхагва' },
+  { slot: 8, key: 'ck-008', fn: 'Уужин',    ln: 'Энх' },
+  { slot: 9, key: 'ck-009', fn: 'Билгүүн',  ln: 'Очир' },
 ]
 
-// Current season — level mix + spread for area chart + some reviewed
+// Current season — exactly 3 red, 3 yellow, 3 green. `d` spread feeds the area chart.
 const SPRING_SCR = [
-  { id: 'scr-1', key: 'ck-001', season: SPRING, level: 'red',    score: 0.92, reason: 'Цооролт сэжиглэгдэж байна', d: 2,   fdi: 36, conf: 0.86, reviewed: false },
-  { id: 'scr-2', key: 'ck-002', season: SPRING, level: 'yellow', score: 0.55, reason: 'Өнгө өөрчлөгдсөн',          d: 4,   fdi: 26, conf: 0.54, reviewed: false },
-  { id: 'scr-3', key: 'ck-003', season: SPRING, level: 'green',  score: 0.08, reason: null,                         d: 9,   fdi: 0,  conf: 0,    reviewed: true  },
-  { id: 'scr-4', key: 'ck-004', season: SPRING, level: 'red',    score: 0.88, reason: 'Буйлны хаван',               d: 13,  fdi: 46, conf: 0.78, reviewed: false },
-  { id: 'scr-5', key: 'ck-005', season: SPRING, level: 'yellow', score: 0.48, reason: 'Бага зэргийн цооролт',       d: 26,  fdi: 75, conf: 0.61, reviewed: true  },
-  { id: 'scr-6', key: 'ck-006', season: SPRING, level: 'green',  score: 0.05, reason: null,                         d: 41,  fdi: 0,  conf: 0,    reviewed: true  },
+  { id: 'scr-1', key: 'ck-001', season: SPRING, level: 'red',    score: 0.91, reason: 'Цооролт сэжиглэгдэж байна', d: 2,  fdi: 36, conf: 0.86, reviewed: false },
+  { id: 'scr-2', key: 'ck-002', season: SPRING, level: 'red',    score: 0.88, reason: 'Буйлны хаван',             d: 5,  fdi: 46, conf: 0.80, reviewed: false },
+  { id: 'scr-3', key: 'ck-003', season: SPRING, level: 'red',    score: 0.84, reason: 'Гүн цооролт',              d: 12, fdi: 26, conf: 0.78, reviewed: true  },
+  { id: 'scr-4', key: 'ck-004', season: SPRING, level: 'yellow', score: 0.55, reason: 'Өнгө өөрчлөгдсөн',         d: 4,  fdi: 26, conf: 0.54, reviewed: false },
+  { id: 'scr-5', key: 'ck-005', season: SPRING, level: 'yellow', score: 0.48, reason: 'Бага зэргийн цооролт',     d: 18, fdi: 75, conf: 0.61, reviewed: true  },
+  { id: 'scr-6', key: 'ck-006', season: SPRING, level: 'yellow', score: 0.50, reason: 'Цагаан толбо ажиглав',     d: 26, fdi: 16, conf: 0.52, reviewed: true  },
+  { id: 'scr-7', key: 'ck-007', season: SPRING, level: 'green',  score: 0.08, reason: null,                       d: 9,  fdi: 0,  conf: 0,    reviewed: true  },
+  { id: 'scr-8', key: 'ck-008', season: SPRING, level: 'green',  score: 0.06, reason: null,                       d: 33, fdi: 0,  conf: 0,    reviewed: true  },
+  { id: 'scr-9', key: 'ck-009', season: SPRING, level: 'green',  score: 0.05, reason: null,                       d: 41, fdi: 0,  conf: 0,    reviewed: true  },
 ]
 
-// 2025-fall: starting state — shows how each child entered the system
-// ck-001: green → yellow (winter) → red (spring) = deteriorating
-// ck-002: red → yellow (spring) = improved
-// ck-003: yellow → green (spring) = improved
-// ck-004: green → yellow (winter) → red (spring) = deteriorating + escalation
-// ck-005: yellow → yellow (spring) = chronic
-// ck-006: green → green (spring) = stable
+// 2025-fall: prior season → gives every child a 2-season trend (worsened / improved / stable).
+// red now:    ck-001 green→red, ck-002 yellow→red, ck-003 red→red (chronic)
+// yellow now: ck-004 green→yellow, ck-005 red→yellow (improved), ck-006 yellow→yellow (chronic)
+// green now:  ck-007 yellow→green, ck-008 red→green (treated), ck-009 green→green (stable)
 const FALL_SCR = [
-  { id: 'scr-f1', key: 'ck-001', season: FALL,   level: 'green',  score: 0.06, reason: null,                   d: 255, fdi: 0,  conf: 0,    reviewed: true },
-  { id: 'scr-f2', key: 'ck-002', season: FALL,   level: 'red',    score: 0.85, reason: 'Цооролт илэрсэн',      d: 250, fdi: 46, conf: 0.82, reviewed: true },
-  { id: 'scr-f3', key: 'ck-003', season: FALL,   level: 'yellow', score: 0.52, reason: 'Цагаан толбо ажиглав', d: 248, fdi: 26, conf: 0.55, reviewed: true },
-  { id: 'scr-f4', key: 'ck-004', season: FALL,   level: 'green',  score: 0.09, reason: null,                   d: 245, fdi: 0,  conf: 0,    reviewed: true },
-  { id: 'scr-f5', key: 'ck-005', season: FALL,   level: 'yellow', score: 0.46, reason: 'Эрт шатны цооролт',    d: 242, fdi: 75, conf: 0.60, reviewed: true },
-  { id: 'scr-f6', key: 'ck-006', season: FALL,   level: 'green',  score: 0.04, reason: null,                   d: 238, fdi: 0,  conf: 0,    reviewed: true },
+  { id: 'scr-f1', key: 'ck-001', season: FALL, level: 'green',  score: 0.06, reason: null,                   d: 250, fdi: 0,  conf: 0,    reviewed: true },
+  { id: 'scr-f2', key: 'ck-002', season: FALL, level: 'yellow', score: 0.50, reason: 'Цагаан толбо',          d: 249, fdi: 26, conf: 0.55, reviewed: true },
+  { id: 'scr-f3', key: 'ck-003', season: FALL, level: 'red',    score: 0.80, reason: 'Цооролт илэрсэн',       d: 248, fdi: 36, conf: 0.80, reviewed: true },
+  { id: 'scr-f4', key: 'ck-004', season: FALL, level: 'green',  score: 0.09, reason: null,                   d: 246, fdi: 0,  conf: 0,    reviewed: true },
+  { id: 'scr-f5', key: 'ck-005', season: FALL, level: 'red',    score: 0.82, reason: 'Цооролт илэрсэн',       d: 244, fdi: 46, conf: 0.82, reviewed: true },
+  { id: 'scr-f6', key: 'ck-006', season: FALL, level: 'yellow', score: 0.46, reason: 'Эрт шатны цооролт',     d: 242, fdi: 75, conf: 0.60, reviewed: true },
+  { id: 'scr-f7', key: 'ck-007', season: FALL, level: 'yellow', score: 0.52, reason: 'Цагаан толбо ажиглав',  d: 240, fdi: 16, conf: 0.52, reviewed: true },
+  { id: 'scr-f8', key: 'ck-008', season: FALL, level: 'red',    score: 0.84, reason: 'Цооролт илэрсэн',       d: 238, fdi: 46, conf: 0.84, reviewed: true },
+  { id: 'scr-f9', key: 'ck-009', season: FALL, level: 'green',  score: 0.04, reason: null,                   d: 236, fdi: 0,  conf: 0,    reviewed: true },
 ]
 
-// 2025-winter: intermediate check for ck-001 and ck-004 (both deteriorating)
-const WINTER_SCR = [
-  { id: 'scr-w1', key: 'ck-001', season: WINTER, level: 'yellow', score: 0.52, reason: 'Өнгө өөрчлөгдөж эхэлсэн', d: 160, fdi: 16, conf: 0.52, reviewed: true },
-  { id: 'scr-w4', key: 'ck-004', season: WINTER, level: 'yellow', score: 0.58, reason: 'Бага зэргийн хаван',        d: 155, fdi: 36, conf: 0.60, reviewed: true },
-]
+const ALL_SCR = [...SPRING_SCR, ...FALL_SCR]
 
-const ALL_SCR = [...SPRING_SCR, ...FALL_SCR, ...WINTER_SCR]
-
-// Prior-season episodes (closed — treatment window passed)
+// Prior-season episodes (closed) — only for children continuing into an open episode.
 const PRIOR_EPISODES = [
-  { id: 'ep-ck001-win25', childKey: 'ck-001', season: WINTER, scrId: 'scr-w1', level: 'yellow', score: 0.52, status: 'contacted',   escalation: false, closedAt: ago(45) },
-  { id: 'ep-ck002-fall25',childKey: 'ck-002', season: FALL,   scrId: 'scr-f2', level: 'red',    score: 0.85, status: 'treatment_done', escalation: false, closedAt: ago(190) },
-  { id: 'ep-ck003-fall25',childKey: 'ck-003', season: FALL,   scrId: 'scr-f3', level: 'yellow', score: 0.52, status: 'treatment_done', escalation: false, closedAt: ago(185) },
-  { id: 'ep-ck004-win25', childKey: 'ck-004', season: WINTER, scrId: 'scr-w4', level: 'yellow', score: 0.58, status: 'flagged',       escalation: false, closedAt: ago(40) },
-  { id: 'ep-ck005-fall25',childKey: 'ck-005', season: FALL,   scrId: 'scr-f5', level: 'yellow', score: 0.46, status: 'treatment_done', escalation: false, closedAt: ago(180) },
+  { id: 'ep-ck003-fall25', childKey: 'ck-003', season: FALL, scrId: 'scr-f3', level: 'red',    score: 0.80, status: 'treatment_done', escalation: false, closedAt: ago(185) },
+  { id: 'ep-ck005-fall25', childKey: 'ck-005', season: FALL, scrId: 'scr-f5', level: 'red',    score: 0.82, status: 'treatment_done', escalation: false, closedAt: ago(180) },
+  { id: 'ep-ck006-fall25', childKey: 'ck-006', season: FALL, scrId: 'scr-f6', level: 'yellow', score: 0.46, status: 'treatment_done', escalation: false, closedAt: ago(178) },
 ]
 
-// Open episodes for current spring season (what the Kanban board shows)
+// Open episodes for current spring (the Kanban board) — 2 per column: Шинэ / Хяналтад / Шийдвэрлэсэн.
 const OPEN_EPISODES = [
-  { id: 'ep-ck001-sp26', childKey: 'ck-001', season: SPRING, scrId: 'scr-1', level: 'red',    score: 0.92, status: 'flagged',   escalation: true,  prevId: 'ep-ck001-win25' },
-  { id: 'ep-ck002-sp26', childKey: 'ck-002', season: SPRING, scrId: 'scr-2', level: 'yellow', score: 0.55, status: 'contacted', escalation: false, prevId: null },
-  { id: 'ep-ck004-sp26', childKey: 'ck-004', season: SPRING, scrId: 'scr-4', level: 'red',    score: 0.88, status: 'flagged',   escalation: true,  prevId: 'ep-ck004-win25' },
-  { id: 'ep-ck005-sp26', childKey: 'ck-005', season: SPRING, scrId: 'scr-5', level: 'yellow', score: 0.48, status: 'contacted', escalation: false, prevId: 'ep-ck005-fall25' },
+  { id: 'ep-ck001-sp26', childKey: 'ck-001', season: SPRING, scrId: 'scr-1', level: 'red',    score: 0.91, status: 'flagged',        escalation: true,  prevId: null },
+  { id: 'ep-ck004-sp26', childKey: 'ck-004', season: SPRING, scrId: 'scr-4', level: 'yellow', score: 0.55, status: 'flagged',        escalation: false, prevId: null },
+  { id: 'ep-ck002-sp26', childKey: 'ck-002', season: SPRING, scrId: 'scr-2', level: 'red',    score: 0.88, status: 'contacted',      escalation: false, prevId: null },
+  { id: 'ep-ck005-sp26', childKey: 'ck-005', season: SPRING, scrId: 'scr-5', level: 'yellow', score: 0.48, status: 'contacted',      escalation: false, prevId: 'ep-ck005-fall25' },
+  { id: 'ep-ck003-sp26', childKey: 'ck-003', season: SPRING, scrId: 'scr-3', level: 'red',    score: 0.84, status: 'treatment_done', escalation: false, prevId: 'ep-ck003-fall25' },
+  { id: 'ep-ck006-sp26', childKey: 'ck-006', season: SPRING, scrId: 'scr-6', level: 'yellow', score: 0.50, status: 'treatment_done', escalation: false, prevId: 'ep-ck006-fall25' },
 ]
 
 export const seedDemo = async (db: DB, adminId: string) => {

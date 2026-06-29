@@ -34,12 +34,12 @@ export const BulkImportForm = ({ classId }: { classId: string }) => {
         onChange={(e) => setText(e.target.value)}
         rows={4}
         placeholder={'1, Бат, Болд, 2017\n2, Сараа, Дорж, 2017, F'}
-        className="rounded-lg border border-border bg-surface p-2 font-mono text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+        className="rounded-xl border border-border bg-surface p-2 font-mono text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
       />
       <button
         onClick={() => bulk.mutate(parseRows(text))}
         disabled={bulk.isPending || !text.trim()}
-        className="self-start rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-hover disabled:opacity-50"
+        className="self-start rounded-full bg-primary px-3 py-1.5 text-sm font-medium text-text-on-primary transition-colors hover:bg-primary-hover disabled:opacity-50"
       >
         Импортлох
       </button>

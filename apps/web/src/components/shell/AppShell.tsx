@@ -34,7 +34,7 @@ const AppShell = ({ children }: { children: ReactNode }) => (
   <ShellHeaderProvider>
     <SeasonProvider>
       <div className="flex h-screen gap-4 overflow-hidden bg-bg p-4">
-        <aside className="relative z-10 flex shrink-0 flex-col rounded-3xl border border-border bg-surface shadow-(--shadow-card)">
+        <aside className="relative z-10 flex shrink-0 flex-col rounded-2xl border border-border bg-surface shadow-(--shadow-card)">
           <Sidebar />
         </aside>
 
