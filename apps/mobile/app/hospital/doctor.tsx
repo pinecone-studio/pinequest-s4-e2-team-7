@@ -11,7 +11,7 @@ const DoctorScreen = () => {
     useLocalSearchParams<{ id: string; name: string; specialty: string; clinic: string; area: string; avatarUrl: string; phone: string }>()
 
   const initials = (name ?? '?').split(' ').map((w) => w[0] ?? '').join('').toUpperCase().slice(0, 2)
-  const badges = [specialty, clinic, area].filter(Boolean)
+  const badges = [clinic, area].filter(Boolean)
 
   const call = () => { if (phone) void Linking.openURL(`tel:${phone}`) }
   const sms = () => { if (phone) void Linking.openURL(`sms:${phone}`) }

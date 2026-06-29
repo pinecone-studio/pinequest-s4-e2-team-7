@@ -5,6 +5,7 @@ import { Text, TextInput, View } from 'react-native'
 import { useFonts } from 'expo-font'
 import { getToken } from '@/lib/auth'
 import { ThemeProvider, useTheme } from '@/lib/ThemeContext'
+import { SessionProvider } from '@/lib/SessionContext'
 
 const applyInterDefaults = () => {
   const base = { fontFamily: 'Inter_400Regular' }
@@ -45,7 +46,9 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <RootStack />
+      <SessionProvider>
+        <RootStack />
+      </SessionProvider>
       <StatusBar style="auto" />
     </ThemeProvider>
   )
@@ -54,7 +57,15 @@ export default function RootLayout() {
 const RootStack = () => {
   const { colors } = useTheme()
   return (
-    <Stack screenOptions={{ contentStyle: { backgroundColor: colors.bg } }}>
+    <Stack
+      screenOptions={{
+        contentStyle: { backgroundColor: colors.bg },
+        headerStyle: { backgroundColor: colors.bg },
+        headerTintColor: colors.textBase,
+        headerTitleStyle: { color: colors.textBase },
+        headerShadowVisible: true,
+      }}
+    >
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="scan" options={{ headerShown: false }} />

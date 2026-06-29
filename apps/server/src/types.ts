@@ -16,6 +16,8 @@ export type AppEnv = {
     INFERENCE_URL?: string
     MODEL_VERSION?: string
     SEED_ENABLED?: string
+    GEMINI_API_KEY?: string
+    GEMINI_MODEL?: string
   }
   Variables: {
     jwtPayload: JwtPayload

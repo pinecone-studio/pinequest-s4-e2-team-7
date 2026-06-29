@@ -25,49 +25,57 @@ const GreetingHeader = ({
 
   return (
     <View style={s.root}>
-      <View style={s.left}>
+      <View style={s.topRow}>
         <Text style={[s.greeting, { color: colors.textBase }]}>{`Сайн уу, ${name || '…'} 👋`}</Text>
-        <View style={s.syncRow}>
-          {syncing ? (
-            <>
-              <ActivityIndicator size="small" color={colors.textMuted} style={{ marginRight: 4 }} />
-              <Text style={[s.syncText, { color: colors.textMuted }]}>Илгээж байна...</Text>
-            </>
-          ) : hasDead ? (
-            <>
-              <Ionicons name="warning-outline" size={14} color="#B83838" />
-              <Text
-                style={[s.syncText, { color: '#B83838' }]}
-              >{`${deadCount}  илгээгдэхгүй байна`}</Text>
-            </>
-          ) : hasPending ? (
-            <>
-              <Ionicons name="cloud-upload-outline" size={14} color={colors.textMuted} />
-              <Text
-                style={[s.syncText, { color: colors.textMuted }]}
-              >{`${pendingCount} хүлээгдэж байна`}</Text>
-            </>
-          ) : null}
-        </View>
+        <Pressable
+          onPress={onPressAvatar}
+          hitSlop={8}
+          style={({ pressed }) => [
+            s.avatar,
+            { backgroundColor: colors.primary, opacity: pressed ? 0.8 : 1 },
+          ]}
+        >
+          <Text style={[s.avatarText, { color: colors.primaryText }]}>{initial}</Text>
+        </Pressable>
       </View>
-      <Pressable
-        onPress={onPressAvatar}
-        hitSlop={8}
-        style={({ pressed }) => [
-          s.avatar,
-          { backgroundColor: colors.primary, opacity: pressed ? 0.8 : 1 },
-        ]}
-      >
-        <Text style={[s.avatarText, { color: colors.primaryText }]}>{initial}</Text>
-      </Pressable>
+      <View style={s.syncRow}>
+        {syncing ? (
+          <>
+            <ActivityIndicator size="small" color={colors.textMuted} style={{ marginRight: 4 }} />
+            <Text style={[s.syncText, { color: colors.textMuted }]}>Илгээж байна...</Text>
+          </>
+        ) : hasDead ? (
+          <>
+            <Ionicons name="warning-outline" size={14} color="#B83838" />
+            <Text
+              style={[s.syncText, { color: '#B83838' }]}
+            >{`${deadCount}  илгээгдэхгүй байна`}</Text>
+          </>
+        ) : hasPending ? (
+          <>
+            <Ionicons name="cloud-upload-outline" size={14} color={colors.textMuted} />
+            <Text
+              style={[s.syncText, { color: colors.textMuted }]}
+            >{`${pendingCount} хүлээгдэж байна`}</Text>
+          </>
+        ) : null}
+      </View>
     </View>
   )
 }
 
 const s = StyleSheet.create({
-  root: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  left: { flex: 1, gap: 4 },
-  greeting: { fontSize: 24, fontFamily: 'Inter_700Bold', letterSpacing: -0.3, lineHeight: 30 },
+  root: { gap: 4 },
+  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  greeting: {
+    flex: 1,
+    fontSize: 24,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: -0.3,
+    lineHeight: 30,
+    includeFontPadding: false,
+    textAlignVertical: 'center',
+  },
   syncRow: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 18 },
   syncText: { fontSize: 13, fontFamily: 'Inter_400Regular' },
   avatar: {

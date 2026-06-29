@@ -1,6 +1,8 @@
 import { Tabs, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/lib/ThemeContext'
+import { useSession } from '@/lib/SessionContext'
+import { roleConfigFor } from '@/lib/roleConfig'
 import CameraTabButton from '@/components/home/CameraTabButton'
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name']
@@ -12,6 +14,8 @@ const TabIcon = ({ name, color }: { name: IoniconsName; color: string }) => (
 const TabLayout = () => {
   const { colors } = useTheme()
   const router = useRouter()
+  const { activeRole } = useSession()
+  const config = roleConfigFor(activeRole)
 
   return (
     <Tabs
@@ -52,17 +56,21 @@ const TabLayout = () => {
       />
       <Tabs.Screen
         name="history"
-        options={{
-          title: '',
-          tabBarButton: (props) => (
-            <CameraTabButton {...props} onPress={() => router.push('/scan')} />
-          ),
-        }}
+        options={
+          config.tabs.camera
+            ? {
+                title: '',
+                tabBarButton: (props) => (
+                  <CameraTabButton {...props} onPress={() => router.push('/scan')} />
+                ),
+              }
+            : { href: null }
+        }
       />
       <Tabs.Screen
         name="hospital"
         options={{
-          title: 'Тусламж',
+          title: config.tabs.hospitalLabel,
           tabBarIcon: ({ color }) => <TabIcon name="medkit-outline" color={color} />,
         }}
       />

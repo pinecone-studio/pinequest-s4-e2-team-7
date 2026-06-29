@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Plus, Trash, RotateCcw, Upload, Video, MapPin, AlertTriangle } from '@/lib/icons'
 import Link from 'next/link'
-import { FilterPill, FlatCard } from '@/components/consumer/warm/WarmUI'
+import { FilterPill, FlatCard, PillButton } from '@/components/consumer/warm/WarmUI'
 import { TriageHeroCard } from '@/components/consumer/MobilePatterns'
 import { ScreeningOverlay } from '@/components/consumer/ScreeningOverlay'
 import { ScanConfidencePanel } from '@/components/consumer/ScanConfidencePanel'
@@ -22,13 +22,40 @@ import { analyzeScanImage, scanErrorText } from '@/lib/scanApi'
 import { ROUTES } from '@/lib/routes'
 import { cn } from '@/lib/utils'
 
-const DETECTION_LABEL: Record<string, string> = {
-  Caries: 'Шүдний цоорол',
-  Cavity: 'Цоорлын том хөндий',
-  Crack: 'Шүдний гэмтэл, цуурал',
+// ── Илрүүлсэн зүйлсийн нэр томьёо ───────────────────────────────────────────
+// Мэргэжлийн нэр + хүн ойлгодог тайлбарыг хоёуланг нь харуулна
+
+interface DetectionMeta {
+  label: string // Дэлгэцэнд харуулах нэр
+  description: string // Энгийн тайлбар
+  emoji: string // Харааны дохио
 }
 
-const formatLabel = (d: ScanDetection) => DETECTION_LABEL[d.label] ?? d.label
+const DETECTION_META: Record<string, DetectionMeta> = {
+  Caries: {
+    label: 'Кариес',
+    description: 'Шүдний цооролт — эхний үе',
+    emoji: '🔴',
+  },
+  Cavity: {
+    label: 'Цооролт',
+    description: 'Шүдэнд нүх үүссэн',
+    emoji: '🔴',
+  },
+  Crack: {
+    label: 'Хагарал',
+    description: 'Шүдний гадаргуу хагарсан',
+    emoji: '🟡',
+  },
+  Healthy: {
+    label: 'Эрүүл',
+    description: 'Асуудал илрэхгүй байна',
+    emoji: '🟢',
+  },
+}
+
+const getMeta = (d: ScanDetection): DetectionMeta =>
+  DETECTION_META[d.label] ?? { label: d.label, description: '', emoji: '⚪' }
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 
@@ -54,6 +81,8 @@ const fileToDataUrl = (file: File, maxEdge = 640): Promise<string> =>
     img.src = url
   })
 
+// ── Зураг дээр detection box харуулах ────────────────────────────────────────
+
 const IntraoralImageView = ({
   imageUrl,
   detections,
@@ -63,15 +92,11 @@ const IntraoralImageView = ({
   detections: ScanDetection[]
   scanning?: boolean
 }) => (
-  <div className="flex min-h-[320px] w-full flex-1 items-center justify-center overflow-hidden rounded-2xl bg-surface-raised">
-    <div className="relative inline-flex max-h-full overflow-hidden rounded-xl">
-      <img
-        src={imageUrl}
-        alt="Шүдний ойрын зураг"
-        className="max-h-full w-auto max-w-full object-contain"
-      />
-      {scanning ? <ScreeningOverlay /> : null}
-      {detections.map((d, i) => (
+  <div className="relative overflow-hidden rounded-2xl bg-surface-raised">
+    <img src={imageUrl} alt="Шүдний ойрын зураг" className="w-full object-contain" />
+    {detections.map((d, i) => {
+      const meta = getMeta(d)
+      return (
         <div
           key={i}
           className="absolute rounded-lg border border-[#F3B900]/70 bg-[#F3B900]/10"
@@ -82,56 +107,107 @@ const IntraoralImageView = ({
             height: `${d.box.h}%`,
           }}
         >
-          <span className="absolute -top-6 left-0 max-w-[160px] truncate rounded-full bg-slate-900/85 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
-            {formatLabel(d)} {(d.confidence * 100).toFixed(0)}%
+          <span className="absolute -top-6 left-0 max-w-[180px] truncate rounded-full bg-slate-900/85 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+            {meta.emoji} {meta.label} · {(d.confidence * 100).toFixed(0)}%
           </span>
         </div>
-      ))}
-    </div>
+      )
+    })}
   </div>
 )
 
+// ── Нэг detection мөр ────────────────────────────────────────────────────────
+
+const DetectionItem = ({ d }: { d: ScanDetection }) => {
+  const meta = getMeta(d)
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-raised px-4 py-3">
+      <div className="flex items-center gap-2.5 min-w-0">
+        <span className="text-base leading-none">{meta.emoji}</span>
+        <div className="min-w-0">
+          <p className="text-[14px] font-semibold text-text-base truncate">{meta.label}</p>
+          {meta.description ? (
+            <p className="text-[12px] text-text-muted truncate">{meta.description}</p>
+          ) : null}
+        </div>
+      </div>
+      <span className="shrink-0 text-[13px] font-bold tabular-nums text-text-base">
+        {(d.confidence * 100).toFixed(1)}%
+      </span>
+    </div>
+  )
+}
+
+// ── Үр дүнгийн самбар ────────────────────────────────────────────────────────
+
 const ResultsPanel = ({ result }: { result: ScanResult }) => {
-  const [scheduleOpen, setScheduleOpen] = useState(false)
-  const urgent =
-    result.urgent || result.triage === 'red' || (result.needsDoctor && result.triage === 'yellow')
   const triageLevel =
     result.triage === 'red' ? 'red' : result.triage === 'yellow' ? 'yellow' : 'green'
   const triageLabel =
     triageLevel === 'red'
       ? 'Яаралтай эмчилгээх хийлгэх'
       : triageLevel === 'yellow'
-        ? 'Эмчилгээ шаардлагатай'
-        : 'Харьцангуй эрүүл, дараагийн хяналтыг хийгээрэй'
-  const triageSummary = urgent
-    ? 'Зургийг таньсны дагуу ойрын хугацаанд мэргэжилтэн эмчид үзүүлэхийг зөвлөж байна.'
-    : result.advice
+        ? 'Анхаарал шаардлагатай'
+        : 'Хэвийн байдалтай'
+
+  // Gemini-ийн зөвлөмжийг үргэлж харуулна — urgent эсэхэд үл хамаарна
+  const triageSummary = result.advice
+
+  // Healthy-ийг тооцохгүйгээр асуудалтай зүйлсийг тоол
+  const problemDetections = result.detections.filter((d) => d.label !== 'Healthy')
+  const healthyDetections = result.detections.filter((d) => d.label === 'Healthy')
 
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h2 className="text-[22px] font-bold tracking-tight text-text-base">Дүгнэлт</h2>
-        <p className="mt-1 text-[13px] text-text-muted">YOLOv8 шүдний цоорол таних модел</p>
+        <h2 className="text-[22px] font-bold tracking-tight text-text-base">Үр дүн</h2>
+        {/* FIX: YOLOv8 биш Gemini AI гэж зөв харуулна */}
+        <p className="mt-1 text-[13px] text-text-muted">
+          Шинжилгээ: Gemini AI Vision (судалгаа / демо)
+        </p>
       </div>
 
       <TriageHeroCard level={triageLevel} label={triageLabel} summary={triageSummary} />
 
-      <FlatCard className="p-6">
-        <p className="text-[12px] font-bold uppercase tracking-wide text-text-muted">Зөвлөмж</p>
-        <p className="mt-4 text-[15px] leading-relaxed text-text-base">{result.advice}</p>
-      </FlatCard>
+      {/* Зөвлөмж — advice давхцахгүйн тулд triageLevel yellow/red үед л тусад нь харуулна */}
+      {triageLevel === 'green' && (
+        <FlatCard className="p-6">
+          <p className="text-[12px] font-bold uppercase tracking-wide text-text-muted">Зөвлөмж</p>
+          <p className="mt-4 text-[15px] leading-relaxed text-text-base">{result.advice}</p>
+        </FlatCard>
+      )}
 
-      <div>
-        <p className="mb-3 text-[12px] font-bold uppercase tracking-wide text-text-muted">
-          Таньсан цооролтой шүд ({result.detections.length})
-        </p>
-        <ScanConfidencePanel
-          items={result.detections.map((d) => ({
-            label: formatLabel(d),
-            confidence: d.confidence,
-          }))}
-        />
-      </div>
+      {/* Илрүүлсэн асуудлууд */}
+      {problemDetections.length > 0 && (
+        <div>
+          <p className="mb-3 text-[12px] font-bold uppercase tracking-wide text-text-muted">
+            Илрүүлсэн асуудал ({problemDetections.length})
+          </p>
+          <div className="space-y-2">
+            {problemDetections.map((d, i) => (
+              <DetectionItem key={`problem-${i}`} d={d} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Эрүүл шүднүүд */}
+      {healthyDetections.length > 0 && (
+        <div>
+          <p className="mb-3 text-[12px] font-bold uppercase tracking-wide text-text-muted">
+            Эрүүл хэсэг ({healthyDetections.length})
+          </p>
+          <div className="space-y-2">
+            {healthyDetections.map((d, i) => (
+              <DetectionItem key={`healthy-${i}`} d={d} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {result.detections.length === 0 && (
+        <p className="text-[14px] text-text-muted">Илрүүлсэн зүйл байхгүй байна.</p>
+      )}
 
       {triageLevel === 'red' && (
         <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface-raised p-3">
@@ -177,6 +253,8 @@ const ResultsPanel = ({ result }: { result: ScanResult }) => {
     </div>
   )
 }
+
+// ── Үндсэн компонент ──────────────────────────────────────────────────────────
 
 export const CariesDetectorDashboard = ({ initialResult = false }: { initialResult?: boolean }) => {
   const fileRef = useRef<HTMLInputElement>(null)
@@ -246,7 +324,6 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
     setAnalyzing(true)
     setAnalysisError(null)
     try {
-      // Persist a self-contained data URL (not the ephemeral blob:) so history survives reload.
       const persistUrl = await fileToDataUrl(file).catch(() => preview)
       const scanResult = await analyzeScanImage(file, persistUrl)
       saveScanResult(scanResult)
@@ -366,12 +443,8 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
             ) : null}
 
             {displayImage ? (
-              <div className="mt-6 flex min-h-0 flex-1 flex-col">
-                <IntraoralImageView
-                  imageUrl={displayImage}
-                  detections={displayDetections}
-                  scanning={analyzing}
-                />
+              <div className="mt-6">
+                <IntraoralImageView imageUrl={displayImage} detections={displayDetections} />
               </div>
             ) : null}
 

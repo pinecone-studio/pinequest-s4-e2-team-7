@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { ScrollView, StyleSheet } from 'react-native'
+import { ScrollView, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTheme } from '@/lib/ThemeContext'
@@ -35,6 +35,7 @@ export default function ResultScreen() {
     birthYear?: string
     symptoms?: string
     capturedAt?: string
+    advice?: string
   }>()
 
   const priorLevel = usePriorLevel(params.childKey ?? '')
@@ -43,6 +44,9 @@ export default function ResultScreen() {
   const screeningId = params.screeningId ?? ''
   const birthYear = parseInt(params.birthYear ?? '0', 10)
   const capturedAt = params.capturedAt ?? new Date().toISOString()
+  // Gemini-generated дүгнэлт (server path). Offline/local fallback үед хоосон —
+  // тэр үед ResultSummary deterministic buildChildSummary рүү буцна.
+  const advice = params.advice?.trim() || null
 
   const photos = useMemo<PhotoAnalysis[]>(() => {
     try {
@@ -78,16 +82,18 @@ export default function ResultScreen() {
   }, [birthYear, allDetections, screeningId, params.seasonId, capturedAt, symptoms, level])
 
   return (
-    <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
+    <SafeAreaView edges={['left', 'right', 'bottom']} style={[s.root, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <ResultTriageCard level={level} score={score} />
         <ResultDisclaimer />
         {priorLevel && <ResultLongitudinalCard currentLevel={level} priorLevel={priorLevel} />}
-        {photos.map((photo, i) => (
-          <ResultPhotoCard key={`${photo.arch}-${i}`} photo={photo} />
-        ))}
+        <View style={s.photoRow}>
+          {photos.map((photo, i) => (
+            <ResultPhotoCard key={`${photo.arch}-${i}`} photo={photo} />
+          ))}
+        </View>
         <ResultDetectionList detections={allDetections} />
-        <ResultSummary summary={summary} level={level} />
+        <ResultSummary summary={summary} level={level} advice={advice} />
         {level === 'yellow' && <ResultYellowAdvice />}
         {level === 'red' && <ResultRedAdvice guardianPhone={params.guardianPhone} childKey={params.childKey} />}
         <ResultBottomActions
@@ -114,4 +120,5 @@ export default function ResultScreen() {
 const s = StyleSheet.create({
   root: { flex: 1 },
   content: { padding: 16, gap: 16, paddingBottom: 40 },
+  photoRow: { flexDirection: 'row', gap: 12 },
 })

@@ -15,13 +15,22 @@ const FALLBACK_STEPS: Record<TriageLevel, string[]> = {
   red: ['Өдөрт 2 удаа фтортой оохойгоор шүдээ угаах.', 'Чихэрлэг хоол, ундааны хэрэглээг багасгах.', 'Өвдөлт, хавдар, эсвэл халуурвал яаралтай эмнэлэгт хандах.'],
 }
 
-type Props = { summary: ChildScreeningSummary | null; level: TriageLevel }
+type Props = { summary: ChildScreeningSummary | null; level: TriageLevel; advice?: string | null }
 
-/** Deterministic "AI summary": Дүгнэлт + Цаашид хэвшүүлэх арга хэмжээ. */
-const ResultSummary = ({ summary, level }: Props) => {
+/**
+ * "AI summary": Дүгнэлт + Цаашид хэвшүүлэх арга хэмжээ.
+ * `advice` ирвэл (server дэх Gemini) түүнийг дүгнэлт болгон харуулна — web-тэй ижил.
+ * Offline/local fallback үед deterministic buildChildSummary руу буцна.
+ */
+const ResultSummary = ({ summary, level, advice }: Props) => {
   const { colors } = useTheme()
   const lvl = summary?.effectiveLevel ?? level
-  const conclusion = summary?.conclusion ?? [FALLBACK_LEAD[lvl]]
+  const rawConclusion = advice ? [advice] : (summary?.conclusion ?? [FALLBACK_LEAD[lvl]])
+  // Урт үргэлжилсэн текстийг өгүүлбэр бүрээр салгаж тус тусдаа мөр болгоно.
+  const conclusion = rawConclusion
+    .flatMap((line) => line.split(/(?<=[.!?])\s+/))
+    .map((line) => line.trim())
+    .filter(Boolean)
   const steps = summary?.homeSteps ?? FALLBACK_STEPS[lvl]
   const bg = lvl === 'green' ? colors.triageGreenBg : lvl === 'yellow' ? colors.triageYellowBg : colors.triageRedBg
   const fg = lvl === 'green' ? colors.triageGreenText : lvl === 'yellow' ? colors.triageYellowText : colors.triageRedText
@@ -31,7 +40,10 @@ const ResultSummary = ({ summary, level }: Props) => {
       <Text style={[s.label, { color: colors.textMuted }]}>ДҮГНЭЛТ</Text>
       <View style={[s.card, { backgroundColor: bg }]}>
         {conclusion.map((line, i) => (
-          <Text key={i} style={[i === 0 ? s.lead : s.line, { color: fg }]}>{line}</Text>
+          <View key={i} style={s.bulletRow}>
+            <Text style={[s.bullet, { color: fg }]}>•</Text>
+            <Text style={[s.line, { color: fg }]}>{line}</Text>
+          </View>
         ))}
       </View>
       <Text style={[s.label, { color: colors.textMuted, marginTop: 6 }]}>ЦААШИД ХЭВШҮҮЛЭХ АРГА ХЭМЖЭЭ</Text>
@@ -51,8 +63,9 @@ const s = StyleSheet.create({
   container: { gap: 8 },
   label: { fontSize: 11, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.8, marginBottom: 2 },
   card: { borderRadius: 16, padding: 16, gap: 8 },
-  lead: { fontSize: 15, fontFamily: 'Inter_700Bold', lineHeight: 22 },
-  line: { fontSize: 14, fontFamily: 'Inter_400Regular', lineHeight: 20 },
+  bulletRow: { flexDirection: 'row', gap: 8 },
+  bullet: { fontSize: 14, lineHeight: 20 },
+  line: { flex: 1, fontSize: 14, fontFamily: 'Inter_400Regular', lineHeight: 20 },
   step: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 14, padding: 14, borderWidth: 1 },
   check: { fontSize: 16, fontFamily: 'Inter_700Bold' },
   stepText: { flex: 1, fontSize: 14, fontFamily: 'Inter_400Regular', lineHeight: 20 },

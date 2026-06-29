@@ -37,45 +37,46 @@ const SegmentTabs = ({ active, onChange }: Props) => {
   const pillX = pill.interpolate({ inputRange: [0, 1], outputRange: [0, pillW] })
 
   return (
-    <View
-      style={[s.row, { backgroundColor: colors.surfaceRaised, borderColor: colors.border }]}
-      onLayout={(e) => setRowW(e.nativeEvent.layout.width)}
-    >
-      {pillW > 0 && (
-        <Animated.View
-          style={[
-            s.pill,
-            { width: pillW, backgroundColor: colors.primary, transform: [{ translateX: pillX }] },
-          ]}
-        />
-      )}
-      {TABS.map(({ value, label }) => {
-        const isActive = active === value
-        return (
-          <TouchableOpacity
-            key={value}
-            style={s.tab}
-            onPress={() => onChange(value)}
-            activeOpacity={0.8}
-          >
-            <Text style={[s.label, { color: isActive ? colors.primaryText : colors.textMuted }]}>
-              {label}
-            </Text>
-          </TouchableOpacity>
-        )
-      })}
+    <View style={[s.container, { borderBottomColor: colors.border }]}>
+      <View
+        style={[s.row, { backgroundColor: colors.surfaceRaised, borderColor: colors.border }]}
+        onLayout={(e) => setRowW(e.nativeEvent.layout.width)}
+      >
+        {pillW > 0 && (
+          <Animated.View
+            style={[
+              s.pill,
+              { width: pillW, backgroundColor: colors.primary, transform: [{ translateX: pillX }] },
+            ]}
+          />
+        )}
+        {TABS.map(({ value, label }) => {
+          const isActive = active === value
+          return (
+            <TouchableOpacity
+              key={value}
+              style={s.tab}
+              onPress={() => onChange(value)}
+              activeOpacity={0.8}
+            >
+              <Text style={[s.label, { color: isActive ? colors.primaryText : colors.textMuted }]}>
+                {label}
+              </Text>
+            </TouchableOpacity>
+          )
+        })}
+      </View>
     </View>
   )
 }
 
 const s = StyleSheet.create({
+  container: { paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1 },
   row: {
     flexDirection: 'row',
-    borderRadius: 10,
+    borderRadius: 9999,
     borderWidth: 1,
     padding: TAB_PAD,
-    marginHorizontal: 16,
-    marginVertical: 12,
     position: 'relative',
   },
   pill: {
