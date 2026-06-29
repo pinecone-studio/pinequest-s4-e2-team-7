@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useTheme } from '@/lib/ThemeContext'
 import GuideTabs, { GuideTab } from '@/components/guide/GuideTabs'
 import BrushingGuide from '@/components/guide/BrushingGuide'
-import ComingSoon from '@/components/guide/ComingSoon'
+import { BrushMonitor } from '@/components/guide/brush/BrushMonitor'
 
 export default function GuideScreen() {
   const { colors } = useTheme()
@@ -14,7 +14,7 @@ export default function GuideScreen() {
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
       <Text style={[s.pageTitle, { color: colors.textBase }]}>Заавар</Text>
       <GuideTabs active={tab} onChange={setTab} />
-      {tab === 'guide' ? <BrushingGuide /> : <ComingSoon />}
+      {tab === 'guide' ? <BrushingGuide /> : <BrushMonitor />}
     </SafeAreaView>
   )
 }
