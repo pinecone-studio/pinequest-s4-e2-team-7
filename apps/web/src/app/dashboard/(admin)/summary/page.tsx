@@ -12,6 +12,8 @@ import StudentEditModal from '@/components/admin/summary/StudentEditModal'
 import SummaryFilterBar from '@/components/admin/summary/SummaryFilterBar'
 import EmptyState from '@/components/ui/EmptyState'
 import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
+import { useSeason } from '@/components/shared/SeasonProvider'
+import { scopeStudentsToSeason } from '@/lib/seasonScope'
 
 const TRIAGE_GROUPS = [
   { level: 'red',    label: 'Яаралтай эмчилгээ шаардлагатай', dot: 'bg-triage-red',    pill: 'bg-triage-red-bg text-triage-red' },
@@ -21,7 +23,8 @@ const TRIAGE_GROUPS = [
 ]
 
 const SummaryBoard = () => {
-  const { data: students, isLoading } = useBoardStudents()
+  const { data: allStudents, isLoading } = useBoardStudents()
+  const { seasonId } = useSeason()
   const send = useSendToParent()
   const del = useDeleteChild()
   const setStatus = useSetFollowUpStatus()
@@ -32,6 +35,10 @@ const SummaryBoard = () => {
   const [q, setQ] = useState('')
   const [classFilter, setClassFilter] = useState('')
   const [trendFilter, setTrendFilter] = useState(false)
+
+  // Scope every child's triage to the selected season; kids not screened that
+  // season fall into the "Шалгаагүй" group. Switching season regroups the board.
+  const students = useMemo(() => scopeStudentsToSeason(allStudents, seasonId), [allStudents, seasonId])
 
   const classes = useMemo(() => {
     const all = students ?? []

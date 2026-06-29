@@ -256,6 +256,8 @@ export type VolunteerDentist = {
   org: string | null
   area: string | null
   avatarUrl: string | null
+  experienceYears: number | null
+  licenseNo: string | null
   lat: number | null
   lng: number | null
   isAvailable: boolean

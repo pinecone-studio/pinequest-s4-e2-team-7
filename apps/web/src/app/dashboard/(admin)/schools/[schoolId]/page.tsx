@@ -7,6 +7,7 @@ import type { SchoolClassRow } from '@pinequest/types'
 import { useCarryForward, useClasses, useCreateClass } from '@/hooks/useClasses'
 import { useSchool } from '@/hooks/useSchools'
 import { useStats } from '@/hooks/useStats'
+import { useSeason } from '@/components/shared/SeasonProvider'
 import Button from '@/components/ui/Button'
 import CoverageBar from '@/components/admin/schools/CoverageBar'
 import ClassListRow from '@/components/admin/schools/ClassListRow'
@@ -25,7 +26,8 @@ const SchoolClassesPage = () => {
   const schoolId = useParams().schoolId as string
   const { data: school } = useSchool(schoolId)
   const { data: classes, isLoading } = useClasses(schoolId)
-  const { data: stats } = useStats({ schoolId })
+  const { seasonId: activeSeason } = useSeason()
+  const { data: stats } = useStats({ schoolId, seasonId: activeSeason })
   const createClass = useCreateClass(schoolId)
   const carryForward = useCarryForward(schoolId)
 

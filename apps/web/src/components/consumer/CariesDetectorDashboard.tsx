@@ -1,12 +1,16 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Plus, RotateCcw, Upload, Stethoscope, MapPin, AlertTriangle } from '@/lib/icons'
+import { Plus, Trash, RotateCcw, Upload, Video, MapPin, AlertTriangle } from '@/lib/icons'
 import Link from 'next/link'
 import { FilterPill, FlatCard, PillButton } from '@/components/consumer/warm/WarmUI'
 import { TriageHeroCard } from '@/components/consumer/MobilePatterns'
+import { ScreeningOverlay } from '@/components/consumer/ScreeningOverlay'
+import { ScanConfidencePanel } from '@/components/consumer/ScanConfidencePanel'
+import { ScheduleAppointmentModal } from '@/components/consumer/ScheduleAppointmentModal'
 import {
   addChildName,
+  removeChildName,
   getChildNames,
   getLastScanResult,
   getQuestionnaire,
@@ -55,7 +59,6 @@ const getMeta = (d: ScanDetection): DetectionMeta =>
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 
-
 const fileToDataUrl = (file: File, maxEdge = 640): Promise<string> =>
   new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file)
@@ -83,9 +86,11 @@ const fileToDataUrl = (file: File, maxEdge = 640): Promise<string> =>
 const IntraoralImageView = ({
   imageUrl,
   detections,
+  scanning = false,
 }: {
   imageUrl: string
   detections: ScanDetection[]
+  scanning?: boolean
 }) => (
   <div className="relative overflow-hidden rounded-2xl bg-surface-raised">
     <img src={imageUrl} alt="Шүдний ойрын зураг" className="w-full object-contain" />
@@ -204,20 +209,41 @@ const ResultsPanel = ({ result }: { result: ScanResult }) => {
         <p className="text-[14px] text-text-muted">Илрүүлсэн зүйл байхгүй байна.</p>
       )}
 
-      <Link href={ROUTES.doctor.chat}>
-        <PillButton variant="primary" className="w-full">
-          <Stethoscope className="size-4" strokeWidth={2} />
-          Бүртгэлтэй шүдний эмчтэй холбогдон зөвөлгөө авах
-        </PillButton>
-      </Link>
+      {triageLevel === 'red' && (
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface-raised p-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+            <Video className="size-5" strokeWidth={2} />
+          </span>
+          <p className="min-w-0 flex-1 text-[13px] font-medium leading-snug text-text-base">
+            Шүдний эмчтэй видео дуудлага хийж зөвөлгөө авах
+          </p>
+          <button
+            type="button"
+            onClick={() => setScheduleOpen(true)}
+            className="btn shrink-0 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-text-on-primary transition hover:bg-primary-hover active:scale-[0.98]"
+          >
+            Цаг авах
+          </button>
+        </div>
+      )}
+
+      <ScheduleAppointmentModal open={scheduleOpen} onClose={() => setScheduleOpen(false)} />
 
       {(triageLevel === 'red' || triageLevel === 'yellow') && (
-        <Link href={ROUTES.doctor.map}>
-          <PillButton variant="secondary" className="w-full">
-            <MapPin className="size-4" strokeWidth={2} />
-            Өөрт хамгийн ойр шүдний эмнэлэг 
-          </PillButton>
-        </Link>
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface-raised p-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface text-text-muted">
+            <MapPin className="size-5" strokeWidth={2} />
+          </span>
+          <p className="min-w-0 flex-1 text-[13px] font-medium leading-snug text-text-base">
+            Санал болгох хамгийн ойр шүдний эмнэлэг
+          </p>
+          <Link
+            href={ROUTES.doctor.map}
+            className="btn shrink-0 rounded-full border border-border bg-surface px-4 py-2 text-[13px] font-semibold text-text-base transition hover:border-primary"
+          >
+            Харах
+          </Link>
+        </div>
       )}
 
       <p className="flex items-start gap-2 text-[12px] leading-relaxed text-text-muted">
@@ -259,6 +285,12 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
     addChildName(trimmed)
     setChildNames((prev) => [...prev, trimmed])
     setActiveFilter(trimmed)
+  }
+
+  const handleRemoveChild = (name: string) => {
+    const next = removeChildName(name)
+    setChildNames(next)
+    if (activeFilter === name) setActiveFilter(next[0] ?? '')
   }
 
   useEffect(() => {
@@ -346,6 +378,17 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
             <Plus className="size-5" strokeWidth={2} />
           </button>
         </form>
+        {activeFilter && (
+          <button
+            type="button"
+            onClick={() => handleRemoveChild(activeFilter)}
+            aria-label={`${activeFilter}-г устгах`}
+            title={`${activeFilter}-г устгах`}
+            className="btn flex items-center justify-center rounded-full border border-border bg-surface p-2 text-text-muted transition-all duration-150 hover:border-triage-red hover:text-triage-red"
+          >
+            <Trash className="size-5" strokeWidth={2} />
+          </button>
+        )}
       </div>
 
       <div className="grid min-h-0 flex-1 gap-8 xl:grid-cols-[1.15fr_0.85fr]">
@@ -396,7 +439,7 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
             ) : null}
 
             {analysisError ? (
-              <p className="mt-4 text-[13px] text-red-600">{analysisError}</p>
+              <p className="mt-4 text-[13px] text-triage-red">{analysisError}</p>
             ) : null}
 
             {displayImage ? (
@@ -406,20 +449,20 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
             ) : null}
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <PillButton
-                variant="primary"
-                className="min-w-[160px]"
+              <button
+                type="button"
                 disabled={!file || !preview || analyzing}
                 onClick={runAnalysis}
+                className="btn inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2 text-[13px] font-semibold text-text-on-primary transition-all duration-150 hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {analyzing ? 'Уншиж байна...' : 'Эхлэх'}
-              </PillButton>
+              </button>
               <button
                 type="button"
                 onClick={clearAll}
                 aria-label="Дахин эхлэх"
                 title="Дахин эхлэх"
-                className="inline-flex size-12 shrink-0 items-center justify-center rounded-full text-text-muted transition-all duration-200 hover:bg-surface-raised hover:text-text-base active:scale-[0.96]"
+                className="btn flex shrink-0 items-center justify-center rounded-full border border-border bg-surface p-2 text-text-base transition-all duration-150 hover:border-primary"
               >
                 <RotateCcw className="size-5" strokeWidth={2} />
               </button>

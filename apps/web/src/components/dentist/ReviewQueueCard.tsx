@@ -1,20 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { CheckIcon } from '@heroicons/react/24/solid'
-import { useSubmitReview, type QueueRow } from '@/hooks/useScreening'
-import Spinner from '@/components/ui/Spinner'
+import type { QueueRow } from '@/hooks/useScreening'
 
 const TINT:  Record<string, string> = { red: 'border-triage-red/30 bg-triage-red-bg', yellow: 'border-triage-yellow/30 bg-triage-yellow-bg', green: 'border-triage-green/30 bg-triage-green-bg' }
 const DOT:   Record<string, string> = { red: 'bg-triage-red', yellow: 'bg-triage-yellow', green: 'bg-triage-green' }
 const TXT:   Record<string, string> = { red: 'text-triage-red', yellow: 'text-triage-yellow', green: 'text-triage-green' }
 const LABEL: Record<string, string> = { red: 'Яаралтай', yellow: 'Эмчилгээ', green: 'Дараагийн хяналт' }
 
-// Review-queue item with IN-PLACE confirm. "Батлах" confirms the AI triage
-// level (audited review event) → item leaves the queue. "Хянах" opens the full
-// detail for an override + note.
+// Review-queue item. "Холбогдох" opens the full screening detail where the
+// dentist confirms or overrides the AI triage level (audited review event).
 const ReviewQueueCard = ({ row }: { row: QueueRow }) => {
-  const submit = useSubmitReview(row.id)
   const lvl = row.triageLevel
 
   return (
@@ -29,18 +25,11 @@ const ReviewQueueCard = ({ row }: { row: QueueRow }) => {
       <span className="font-mono text-[12px] text-text-muted">{row.childKey.slice(0, 16)}…</span>
 
       <div className="mt-1 flex items-center gap-2">
-        <button
-          onClick={() => submit.mutate({ confirmedLevel: lvl })}
-          disabled={submit.isPending || submit.isSuccess}
-          className="btn flex flex-1 items-center justify-center gap-1.5 rounded-full bg-primary px-3 py-2 text-[12px] font-semibold text-text-on-primary transition-all duration-150 hover:bg-primary-hover disabled:opacity-60"
-        >
-          {submit.isPending ? <Spinner /> : submit.isSuccess ? <><CheckIcon className="size-4" /> Батлагдсан</> : 'Батлах'}
-        </button>
         <Link
           href={`/dashboard/dentist/screenings/${row.id}`}
           className="btn rounded-full border border-border px-3 py-2 text-[12px] font-medium text-text-muted transition-colors hover:border-primary hover:text-primary"
         >
-          Хянах
+          Холбогдох
         </Link>
       </div>
     </div>
