@@ -17,7 +17,7 @@ const VolunteerDentistPanel = ({ student }: Props) => {
   return (
     <aside className="flex flex-col gap-3 rounded-2xl border border-border bg-surface-raised p-4">
       <div>
-        <h3 className="text-[15px] font-semibold tracking-tight text-text-base">Сайн дурын эмч</h3>
+        <h3 className="text-[15px] font-semibold tracking-tight text-text-base">Танд туслах шүдний эмч</h3>
         <p className="mt-0.5 text-[12px] text-text-muted">
           {student ? `${student.name} — эмч сонгож видео дуудлага товлоно уу` : 'Зүүн талаас хүүхэд сонгоно уу'}
         </p>
@@ -38,7 +38,7 @@ const VolunteerDentistPanel = ({ student }: Props) => {
         </div>
       ) : (
         <p className="rounded-xl border border-dashed border-border px-3 py-6 text-center text-[12px] text-text-muted">
-          Бүртгэлтэй сайн дурын эмч алга.
+          Боломжтой шүдний эмч алга.
         </p>
       )}
 

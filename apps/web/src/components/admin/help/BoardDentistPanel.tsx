@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { UserIcon } from '@heroicons/react/24/solid'
 import type { BoardStudent } from '@/hooks/useBoard'
 import { useAllVolunteerDentists, type VolunteerDentist } from '@/hooks/useHelp'
 import { DentistRosterCard } from './DentistRosterCard'
 import ScheduleDentistModal from './ScheduleDentistModal'
+import Dropdown, { type DropdownOption } from '@/components/ui/Dropdown'
 import { PageSpinner } from '@/components/ui/Spinner'
 
 type Props = { students: BoardStudent[] }
@@ -19,28 +21,31 @@ const BoardDentistPanel = ({ students }: Props) => {
   // Volunteer-dentist calls are for RED (emergency) students only.
   const redStudents = students.filter((s) => s.latestLevel === 'red')
   const selected = redStudents.find((s) => s.childKey === childKey) ?? null
-  const availableCount = dentists.filter((d) => d.isAvailable).length
   const student = selected ? { childKey: selected.childKey, name: `${selected.lastName} ${selected.firstName}` } : null
 
+  // Same shared Dropdown every other admin picker uses → consistent look.
+  const studentOptions: DropdownOption[] = [
+    { value: '', label: 'Сурагчийн нэрс сонгох', Icon: UserIcon },
+    ...redStudents.map((s) => ({ value: s.childKey, label: `${s.lastName} ${s.firstName} · ${s.className}`, Icon: UserIcon })),
+  ]
+
   return (
-    <aside className="flex w-full shrink-0 flex-col gap-3 self-start rounded-2xl border border-border bg-surface-raised p-4 lg:w-[340px]">
+    <aside className="flex w-full shrink-0 flex-col gap-3 self-start rounded-2xl border border-border bg-surface-raised p-4 lg:w-[440px]">
       <div>
-        <h3 className="text-[15px] font-semibold tracking-tight text-text-base">
-          Холбогдох боломжтой шүдний эмч <span className="text-text-muted">({availableCount})</span>
+        <h3 className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-text-base">
+          Танд туслах боломжтой шүдний эмч
+          <span className="rounded-full border border-border bg-surface px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-text-muted">{dentists.length}</span>
         </h3>
-        <p className="mt-0.5 text-[12px] text-text-muted">Эмч сонгоод шууд дуудах эсвэл цаг товлоно уу</p>
+        <p className="mt-0.5 text-[12px] text-text-muted">Эмчийг сонгоно уу.</p>
       </div>
 
-      <select
+      <Dropdown
         value={childKey}
-        onChange={(e) => setChildKey(e.target.value)}
-        className="rounded-xl border border-border bg-surface px-3 py-2 text-[13px] text-text-base focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/30"
-      >
-        <option value="">Улаан сурагч сонгох…</option>
-        {redStudents.map((s) => (
-          <option key={s.childKey} value={s.childKey}>{s.lastName} {s.firstName} · {s.className}</option>
-        ))}
-      </select>
+        options={studentOptions}
+        onChange={setChildKey}
+        ariaLabel="Сурагчийн нэрс сонгох"
+        className="w-full"
+      />
 
       {isLoading ? (
         <PageSpinner />
@@ -52,12 +57,12 @@ const BoardDentistPanel = ({ students }: Props) => {
         </div>
       ) : (
         <p className="rounded-xl border border-dashed border-border px-3 py-6 text-center text-[12px] text-text-muted">
-          Бүртгэлтэй сайн дурын эмч алга.
+          Дуудлага хийх боломжтой эмч алга байна.
         </p>
       )}
 
       {!student && dentists.length > 0 && (
-        <p className="text-[11px] text-text-muted">Шууд дуудахад сурагч шаардлагагүй. Цаг товлоход зүүн талаас сурагч сонгоно уу.</p>
+        <p className="text-[11px] text-text-muted">Дуудлага хийх товлосон цагийг асран хамгаалагчид мэдэгдэнэ үү.</p>
       )}
 
       {picked && (

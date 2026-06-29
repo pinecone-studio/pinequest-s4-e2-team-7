@@ -17,13 +17,13 @@ export const DentistRosterCard = ({ dentist, onPick, disabled }: Props) => {
       type="button"
       onClick={onPick}
       disabled={!clickable}
-      className={`flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition ${
+      className={`group flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition ${
         clickable ? 'border-border bg-surface hover:border-primary hover:shadow-(--shadow-card)' : 'cursor-not-allowed border-border bg-surface opacity-55'
       }`}
     >
       <div className="relative size-11 shrink-0">
         {dentist.avatarUrl ? (
-          <img src={dentist.avatarUrl} alt={dentist.displayName} className="size-11 rounded-full object-cover" />
+          <img src={dentist.avatarUrl} alt={dentist.displayName} className="size-11 rounded-full object-cover ring-1 ring-border" />
         ) : (
           <div className="flex size-11 items-center justify-center rounded-full bg-primary-subtle text-[13px] font-bold text-primary">{initials}</div>
         )}
@@ -32,18 +32,17 @@ export const DentistRosterCard = ({ dentist, onPick, disabled }: Props) => {
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-[14px] font-semibold text-text-base">{dentist.displayName}</p>
-        {dentist.specialty && (
-          <span className="mt-0.5 inline-block max-w-full truncate rounded-full bg-surface-raised px-2 py-0.5 text-[11px] font-medium text-text-muted">{dentist.specialty}</span>
-        )}
-        <div className="mt-1 flex items-center gap-1 text-[11px] text-text-muted">
-          <ClockIcon className="size-3" />
-          <span>{dentist.experienceYears != null ? `${dentist.experienceYears} жил` : 'Сайн дурын'}</span>
-          <span className={available ? 'text-triage-green' : 'text-text-muted'}>· {available ? 'Боломжтой' : 'Завгүй'}</span>
+        {dentist.specialty && <p className="mt-0.5 truncate text-[11.5px] text-text-muted">{dentist.specialty}</p>}
+        <div className="mt-1 flex items-center gap-1.5 text-[11px] text-text-muted">
+          <ClockIcon className="size-3 shrink-0" />
+          <span className="truncate">{dentist.experienceYears != null ? `${dentist.experienceYears} жил` : 'Бүртгэлтэй'}</span>
+          <span aria-hidden className="opacity-40">·</span>
+          <span className={available ? 'font-medium text-triage-green' : ''}>{available ? 'Боломжтой' : 'Боломжгүй'}</span>
         </div>
       </div>
 
       {available && (
-        <span className="flex shrink-0 items-center gap-1 rounded-full bg-triage-red px-3 py-1.5 text-[12px] font-semibold text-white">
+        <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-triage-red px-3.5 py-2 text-[12px] font-semibold text-white transition group-hover:brightness-110">
           <VideoCameraIcon className="size-3.5" /> Холбогдох
         </span>
       )}

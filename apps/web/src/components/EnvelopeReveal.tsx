@@ -173,7 +173,6 @@ export default function EnvelopeReveal({
           }}
         />
         {/* brand stamp on the envelope front */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logoBlack.png"
           alt="ToothLings"

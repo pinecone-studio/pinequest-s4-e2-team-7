@@ -17,7 +17,7 @@ export const seedDentists = async (db: DB, passwordHash: string) => {
       userId: d.uid,
       displayName: d.name,
       specialty: d.specialty,
-      org: 'Сайн дурын эмч',
+      org: 'Бүртгэлтэй шүдний эмч',
       area: 'Улаанбаатар',
       avatarUrl: d.avatar,
       experienceYears: d.experienceYears,

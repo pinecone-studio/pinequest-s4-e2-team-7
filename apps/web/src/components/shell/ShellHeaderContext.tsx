@@ -18,10 +18,11 @@ export const useSetPageHeader = ({ title, subtitle, actions }: PageHeader) => {
   const actionsRef = useRef(actions)
   actionsRef.current = actions
 
+  // actions is read through a ref so changing it doesn't re-run this effect;
+  // only title/subtitle should re-push the header.
   useEffect(() => {
     setHeader({ title, subtitle, actions: actionsRef.current })
     return () => setHeader({ title: '' })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, subtitle])
 }
 

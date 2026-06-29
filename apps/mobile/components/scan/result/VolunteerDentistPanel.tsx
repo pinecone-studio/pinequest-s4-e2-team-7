@@ -36,7 +36,7 @@ const VolunteerDentistPanel = ({ childKey }: Props) => {
         />
       ) : (
         <Text style={[s.empty, { color: colors.textMuted, borderColor: colors.border }]}>
-          Сайн дурын эмч одоогоор холбогдох боломжгүй (офлайн).
+          Танд туслах эмч одоогоор холбогдох боломжгүй (офлайн).
         </Text>
       )}
 
