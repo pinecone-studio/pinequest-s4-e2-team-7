@@ -1,11 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { BrushArchMonitor } from '@/components/consumer/BrushArchMonitor'
 import { BrushOrientation3D } from '@/components/consumer/BrushOrientation3D'
 import { BrushZoneCoverage } from '@/components/consumer/BrushZoneCoverage'
 import Button from '@/components/ui/Button'
 import { useEsp32Imu } from '@/hooks/useEsp32Imu'
 import { useBrushRecognizer } from '@/hooks/useBrushRecognizer'
+import { useBrushMl } from '@/hooks/useBrushMl'
 import { DEFAULT_ESP32_WS_URL, isValidEsp32WsUrl } from '@/lib/esp32Imu'
 import {
   overallProgress,
@@ -34,6 +36,7 @@ export const BrushMonitor = () => {
   )
 
   const { coverage, currentZone, modelStatus, livePred } = recognizer
+  const { mlState, reset: resetMl } = useBrushMl(currentZone, running)
 
   useEffect(() => {
     const savedUrl = localStorage.getItem(WS_URL_STORAGE_KEY)?.trim()
@@ -60,6 +63,7 @@ export const BrushMonitor = () => {
 
   const start = () => {
     recognizer.resetCoverage()
+    resetMl()
     recognizer.setRunning(true)
     setRunning(true)
   }
@@ -106,18 +110,6 @@ export const BrushMonitor = () => {
           livePred={livePred}
         />
         <BrushArchMonitor mlState={mlState} running={running} />
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-(--shadow-card)">
-          <p className="mb-3 text-[12px] font-semibold uppercase tracking-wide text-text-muted">Бүс сонгох</p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {ZONES.map(({ id, label }) => (
-              <button key={id} type="button" onClick={() => setActiveZone(id)}
-                className={`rounded-full border px-3 py-2.5 text-left transition ${activeZone === id ? 'border-primary bg-primary/10' : 'border-border bg-surface hover:bg-surface-raised'}`}>
-                <p className="text-[11px] font-semibold text-text-muted">{label}</p>
-                <p className="font-mono text-[18px] font-bold text-text-base">{seconds[id]}s</p>
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
 
       <aside className="space-y-4">

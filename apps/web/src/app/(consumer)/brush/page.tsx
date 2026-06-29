@@ -9,6 +9,8 @@ import { BrushZoneCoverage } from '@/components/consumer/BrushZoneCoverage'
 import { ToothModel } from '@/components/consumer/ToothModel'
 import { useEsp32Imu } from '@/hooks/useEsp32Imu'
 import { useBrushRecognizer } from '@/hooks/useBrushRecognizer'
+import { useBrushMl } from '@/hooks/useBrushMl'
+import { BrushArchMonitor } from '@/components/consumer/BrushArchMonitor'
 import { FilterPill } from '@/components/consumer/warm/WarmUI'
 import Button from '@/components/ui/Button'
 import { DEFAULT_ESP32_WS_URL, isValidEsp32WsUrl } from '@/lib/esp32Imu'
@@ -102,6 +104,7 @@ const MonitorPanel = () => {
   )
 
   const { coverage, currentZone, modelStatus, livePred } = recognizer
+  const { mlState, reset: resetMl } = useBrushMl(currentZone, running)
 
   useEffect(() => {
     const savedUrl = localStorage.getItem(WS_URL_STORAGE_KEY)?.trim()
@@ -128,6 +131,7 @@ const MonitorPanel = () => {
 
   const start = () => {
     recognizer.resetCoverage()
+    resetMl()
     recognizer.setRunning(true)
     setRunning(true)
   }
@@ -173,32 +177,6 @@ const MonitorPanel = () => {
           livePred={livePred}
         />
         <BrushArchMonitor mlState={mlState} running={running} />
-
-        <div className="warm-card p-4">
-          <p className="mb-3 text-[12px] font-semibold uppercase tracking-wide text-slate-500">
-            Бүсийн хугацаа · {status === 'connected' ? 'ESP32 IMU' : 'Симуляци'}
-          </p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {ZONES.map(({ id, label }) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setActiveZone(id)}
-                className={`rounded-full border px-3 py-2.5 text-left transition ${
-                  activeZone === id
-                    ? 'border-[#F3B900] bg-[#F3B900]/10'
-                    : 'border-[#E8E4DA] bg-white hover:bg-[#FAF8F5]'
-                }`}
-              >
-                <p className="text-[11px] font-semibold text-slate-600">{label}</p>
-                <p className="font-mono text-[18px] font-bold text-slate-900">{seconds[id]}s</p>
-              </button>
-            ))}
-          </div>
-          <p className="mt-3 text-[12px] text-slate-500">
-            ESP32 холбогдсон үед yaw/pitch/roll-оор бүс автоматаар сонгогдож, шүдний хамралт шинэчлэгдэнэ.
-          </p>
-        </div>
       </div>
 
       <aside className="space-y-4">
