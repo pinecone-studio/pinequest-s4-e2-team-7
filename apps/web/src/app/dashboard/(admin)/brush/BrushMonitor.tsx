@@ -105,6 +105,19 @@ export const BrushMonitor = () => {
           modelStatus={modelStatus}
           livePred={livePred}
         />
+        <BrushArchMonitor mlState={mlState} running={running} />
+        <div className="rounded-2xl border border-border bg-surface p-4 shadow-(--shadow-card)">
+          <p className="mb-3 text-[12px] font-semibold uppercase tracking-wide text-text-muted">Бүс сонгох</p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {ZONES.map(({ id, label }) => (
+              <button key={id} type="button" onClick={() => setActiveZone(id)}
+                className={`rounded-full border px-3 py-2.5 text-left transition ${activeZone === id ? 'border-primary bg-primary/10' : 'border-border bg-surface hover:bg-surface-raised'}`}>
+                <p className="text-[11px] font-semibold text-text-muted">{label}</p>
+                <p className="font-mono text-[18px] font-bold text-text-base">{seconds[id]}s</p>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <aside className="space-y-4">

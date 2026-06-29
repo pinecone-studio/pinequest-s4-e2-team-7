@@ -65,9 +65,9 @@ const s = StyleSheet.create({
   docTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 15 },
   docMeta: { fontFamily: 'Inter_400Regular', fontSize: 12 },
   btns: { flexDirection: 'row', gap: 10 },
-  outlineBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 11, borderRadius: 10, borderWidth: 1.5 },
+  outlineBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 11, borderRadius: 9999, borderWidth: 1.5 },
   outlineBtnText: { fontFamily: 'Inter_600SemiBold', fontSize: 14 },
-  solidBtn: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 11, borderRadius: 10 },
+  solidBtn: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 11, borderRadius: 9999 },
   solidBtnText: { fontFamily: 'Inter_600SemiBold', fontSize: 14 },
 })
 

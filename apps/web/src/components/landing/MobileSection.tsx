@@ -4,7 +4,7 @@ import Image from 'next/image'
 const QRCard = ({ size }: { size: number }) => (
   <div className="overflow-hidden rounded-2xl" style={{ border: '1px solid rgba(255,255,255,0.12)' }}>
     <div className="relative flex flex-col items-center justify-center gap-4 px-5 py-3" style={{ background: '#0d0d0d' }}>
-      <Image src="/images/qr.png" alt="QR код" width={size} height={size} className="rounded-lg" />
+      <Image src="/images/qr.png" alt="QR код" width={size} height={size} className="rounded-2xl" />
     </div>
     <div className="px-6 py-5" style={{ background: '#111' }}>
       <p className="mb-1 font-black text-white" style={{ fontSize: 'clamp(15px,1.6vw,20px)' }}>ToothLings — Гар утасны апп</p>

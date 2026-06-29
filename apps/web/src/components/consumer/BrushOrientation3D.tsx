@@ -177,7 +177,7 @@ export const BrushOrientation3D = ({
             <button
               type="button"
               onClick={onCalibrate}
-              className="rounded-xl border border-[#E8E4DA] bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-900 transition hover:bg-[#FAF8F5]"
+              className="rounded-full border border-[#E8E4DA] bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-900 transition hover:bg-[#FAF8F5]"
             >
               Тэгшлэх (0°)
             </button>
@@ -218,7 +218,7 @@ export const BrushOrientation3D = ({
                 <summary className="cursor-pointer text-[11px] font-semibold text-amber-700">
                   Илүү сайн дагах — ESP32 код (DMP + gyro/accel)
                 </summary>
-                <pre className="mt-2 max-h-48 overflow-auto rounded-lg bg-slate-900 p-2 text-[9px] leading-relaxed text-emerald-300">
+                <pre className="mt-2 max-h-48 overflow-auto rounded-2xl bg-slate-900 p-2 text-[9px] leading-relaxed text-emerald-300">
                   {ESP32_QUATERNION_SNIPPET}
                 </pre>
               </details>
@@ -242,7 +242,7 @@ export const BrushOrientation3D = ({
             <button
               type="button"
               onClick={onReconnect}
-              className="w-full rounded-xl border border-[#E8E4DA] bg-white py-2 text-[12px] font-semibold text-slate-900 transition hover:bg-[#FAF8F5]"
+              className="w-full rounded-full border border-[#E8E4DA] bg-white py-2 text-[12px] font-semibold text-slate-900 transition hover:bg-[#FAF8F5]"
             >
               Дахин холбох
             </button>

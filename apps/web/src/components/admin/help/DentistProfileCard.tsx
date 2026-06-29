@@ -55,7 +55,7 @@ export const DentistProfileCard = ({ dentist, onConnect, connecting, active }: P
         <button
           onClick={onConnect}
           disabled={connecting}
-          className="shrink-0 rounded-xl bg-triage-red px-3 py-2 text-[12px] font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+          className="shrink-0 rounded-full bg-triage-red px-3 py-2 text-[12px] font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
         >
           📹 Холбогдох
         </button>

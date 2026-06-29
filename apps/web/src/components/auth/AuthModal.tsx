@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Image from 'next/image'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon } from '@heroicons/react/24/solid'
 import LoginForm from './LoginForm'
 import RegisterForm from './RegisterForm'
 
@@ -73,7 +73,7 @@ const AuthModal = ({ open, onClose, initialMode = 'login' }: Props) => {
               key={m}
               type="button"
               onClick={() => setMode(m)}
-              className={`btn flex-1 rounded-lg px-3 py-2 text-[13px] font-semibold transition-all duration-150 ${
+              className={`btn flex-1 rounded-full px-3 py-2 text-[13px] font-semibold transition-all duration-150 ${
                 mode === m
                   ? 'bg-surface text-text-base shadow-(--shadow-card)'
                   : 'text-text-muted hover:text-text-base'

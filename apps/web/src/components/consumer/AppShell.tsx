@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid'
 
 type PageHeaderProps = {
   title: string

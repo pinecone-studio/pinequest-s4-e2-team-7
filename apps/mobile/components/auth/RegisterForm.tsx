@@ -228,7 +228,7 @@ const s = StyleSheet.create({
   instChip: {
     flex: 1,
     paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: 9999,
     borderWidth: 1,
     alignItems: 'center',
   },

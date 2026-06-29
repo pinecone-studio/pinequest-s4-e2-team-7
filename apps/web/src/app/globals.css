@@ -81,9 +81,9 @@
   --shadow-glow-lime: 0 12px 30px -8px rgba(151,191,13,0.40), 0 4px 10px rgba(0,0,0,0.06);
   --shadow-glow-dark: 0 14px 34px -10px rgba(42,36,24,0.55), 0 4px 10px rgba(0,0,0,0.08);
 
-  /* playful radii scale — squircle card language */
-  --radius-blob: 28px;
-  --radius-blob-lg: 34px;
+  /* unified card radius — matches Tailwind rounded-2xl (16px) */
+  --radius-blob: 1rem;
+  --radius-blob-lg: 1rem;
 }
 
 .dark {
@@ -309,7 +309,7 @@ button:disabled,
 }
 
 .consumer-card {
-  border-radius: 1.5rem;
+  border-radius: 1rem;
   background: var(--color-surface);
   box-shadow: var(--shadow-card);
   border: 1px solid var(--color-border-muted);
@@ -321,7 +321,7 @@ button:disabled,
 
 .consumer-input {
   width: 100%;
-  border-radius: 9999px;
+  border-radius: 0.75rem;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   padding: 12px 16px;
@@ -347,7 +347,7 @@ button:disabled,
 }
 
 .warm-card {
-  border-radius: 1.5rem;
+  border-radius: 1rem;
   background: var(--color-surface);
   border: 1px solid var(--color-border-muted);
   box-shadow: var(--shadow-card);

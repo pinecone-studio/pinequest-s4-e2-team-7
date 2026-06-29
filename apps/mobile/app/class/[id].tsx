@@ -117,7 +117,7 @@ const ClassDetailScreen = () => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
         >
           <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <CoverageBar screened={screened} enrolled={roster?.length ?? 0} label="Шалгалтын хамрагдалт" />
+            <CoverageBar screened={screened} enrolled={roster?.length ?? 0} label="Хяналтын хамрагдалт" />
             <View style={s.stats}>
               <Stat label="Улаан" value={redCount} tone={colors.triageRedText} colors={colors} />
               <Stat label="Шар" value={yellowCount} tone={colors.triageYellowText} colors={colors} />

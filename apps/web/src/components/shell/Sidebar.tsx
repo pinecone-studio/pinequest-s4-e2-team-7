@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
+import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/solid'
 import { useSession } from '@/components/providers'
 import { useReviewQueue } from '@/hooks/useScreening'
 import { useFollowUps } from '@/hooks/useFollowUps'
@@ -48,12 +48,11 @@ const Sidebar = () => {
               className="group flex w-full flex-col items-center gap-1"
             >
               <span className={cn(
-                'tap relative flex size-12 items-center justify-center rounded-2xl transition-all duration-200',
+                'tap relative flex size-12 items-center justify-center rounded-full transition-all duration-200',
                 active
-                  ? 'bg-primary text-text-on-primary shadow-(--shadow-glow-gold)'
+                  ? 'text-primary'
                   : 'text-text-muted group-hover:-translate-y-0.5 group-hover:bg-surface-raised group-hover:text-text-base',
               )}>
-                {active && <span className="absolute -left-3 h-6 w-1 rounded-full bg-primary" />}
                 <item.Icon className={cn('size-5 transition-transform duration-200', !active && 'group-hover:scale-110')} />
                 {badge > 0 && (
                   <span className="absolute -right-0.5 -top-0.5 flex size-2.5">
@@ -71,7 +70,7 @@ const Sidebar = () => {
       </nav>
 
       <div className="mt-2 flex flex-col items-center gap-2 border-t border-border-muted pt-3">
-        <button onClick={onLogout} aria-label="Гарах" className="tap flex size-10 items-center justify-center rounded-2xl text-text-muted transition-all duration-150 hover:-translate-y-0.5 hover:bg-triage-red-bg hover:text-triage-red">
+        <button onClick={onLogout} aria-label="Гарах" className="tap flex size-10 items-center justify-center rounded-full text-text-muted transition-all duration-150 hover:-translate-y-0.5 hover:bg-triage-red-bg hover:text-triage-red">
           <ArrowRightOnRectangleIcon className="size-5" />
         </button>
       </div>

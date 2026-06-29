@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { CalendarDaysIcon, UsersIcon } from '@heroicons/react/24/outline'
+import { CalendarDaysIcon, UsersIcon } from '@heroicons/react/24/solid'
 import type { SchoolClassRow } from '@pinequest/types'
 import Button from '@/components/ui/Button'
 

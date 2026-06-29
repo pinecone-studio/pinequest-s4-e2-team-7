@@ -94,7 +94,7 @@ const s = StyleSheet.create({
   badge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20 },
   badgeText: { fontFamily: 'Inter_500Medium', fontSize: 12 },
   actions: { flexDirection: 'row', gap: 12 },
-  btn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 14, borderWidth: 1 },
+  btn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 9999, borderWidth: 1 },
   btnText: { fontFamily: 'Inter_600SemiBold', fontSize: 15 },
   noPhone: { textAlign: 'center', fontSize: 13, fontFamily: 'Inter_400Regular' },
 })

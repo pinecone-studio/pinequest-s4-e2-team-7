@@ -6,7 +6,7 @@ import Spinner from './Spinner'
 // Primary = Honey Gold w/ near-black text (never white on yellow). Focus ring
 // + press-scale come from the global `.btn` rules in globals.css.
 const button = cva(
-  'btn inline-flex items-center justify-center gap-1.5 rounded-xl font-semibold transition-all duration-150 disabled:pointer-events-none disabled:opacity-50',
+  'btn inline-flex items-center justify-center gap-1.5 rounded-full font-semibold transition-all duration-150 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {

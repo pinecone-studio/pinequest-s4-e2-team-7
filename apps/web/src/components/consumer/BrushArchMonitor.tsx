@@ -75,7 +75,7 @@ export const BrushArchMonitor = ({
   const partial = mlState.teeth.filter((t) => toothVisualState(t.coverage) === 'partial').length
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#7DD3FC] via-[#BAE6FD] to-[#E0F2FE] px-4 py-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] sm:px-8">
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#7DD3FC] via-[#BAE6FD] to-[#E0F2FE] px-4 py-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] sm:px-8">
       <p className="text-center text-[13px] font-medium tracking-wide text-white/95 drop-shadow-sm">
         {mlState.zoneLabel}
       </p>

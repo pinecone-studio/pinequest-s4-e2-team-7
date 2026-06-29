@@ -1,6 +1,6 @@
 'use client'
 
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid'
 
 type ClassInfo = { name: string; count: number }
 
@@ -14,7 +14,7 @@ type Props = {
 }
 
 const chip = (active: boolean, danger = false) =>
-  `btn rounded-xl px-3 py-1.5 text-[12px] font-semibold transition-all ${
+  `btn rounded-full px-3 py-1.5 text-[12px] font-semibold transition-all ${
     active
       ? danger ? 'bg-triage-red text-white' : 'bg-primary text-text-on-primary'
       : danger
@@ -31,12 +31,12 @@ const SummaryFilterBar = ({ q, onQ, classFilter, onClass, trendFilter, onTrend, 
         onChange={(e) => onQ(e.target.value)}
         placeholder="Нэр, ангиар хайх…"
         aria-label="Сурагч хайх"
-        className="w-52 rounded-xl border border-border bg-surface py-1.5 pl-9 pr-3 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+        className="w-52 rounded-full border border-border bg-surface py-1.5 pl-9 pr-3 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
       />
     </div>
 
     <button onClick={() => onTrend(!trendFilter)} className={chip(trendFilter, true)}>
-      ↓ Хүнддэж байгаа
+      Хүндрэх эрслэлтэй
     </button>
 
     {!isLoading && classes.length > 1 && (

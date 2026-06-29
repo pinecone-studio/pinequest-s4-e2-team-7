@@ -10,7 +10,7 @@ import { DentistProfileCard } from './DentistProfileCard'
 
 const VolunteerDentistsMap = dynamic(
   () => import('./VolunteerDentistsMap').then((m) => m.VolunteerDentistsMap),
-  { ssr: false, loading: () => <div className="h-full w-full animate-pulse rounded-xl bg-surface-raised" /> }
+  { ssr: false, loading: () => <div className="h-full w-full animate-pulse rounded-2xl bg-surface-raised" /> }
 )
 
 type Props = {
@@ -62,13 +62,13 @@ export const VolunteerDentistSection = ({ student, detail }: Props) => {
       </div>
 
       {headline && (
-        <div className="rounded-xl bg-white/70 px-3 py-2.5">
+        <div className="rounded-2xl bg-white/70 px-3 py-2.5">
           <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-text-muted">Хүүхдийн хяналтын тойм</p>
           <p className="text-[13px] leading-relaxed text-text-base">{headline}</p>
         </div>
       )}
 
-      <div className="h-52 overflow-hidden rounded-xl border border-border">
+      <div className="h-52 overflow-hidden rounded-2xl border border-border">
         <VolunteerDentistsMap
           dentists={dentists}
           selectedId={selectedId}
@@ -117,7 +117,7 @@ export const VolunteerDentistSection = ({ student, detail }: Props) => {
       </div>
 
       {requested && (
-        <p className="rounded-xl bg-green-50 px-3 py-2 text-[12px] text-green-700">
+        <p className="rounded-2xl bg-green-50 px-3 py-2 text-[12px] text-green-700">
           Хүсэлт илгээгдлээ. Эмч нэвтэрсний дараа холбоо барих болно.
         </p>
       )}

@@ -17,7 +17,7 @@ const TONE_CLASS: Record<Tone, string> = {
 }
 
 const StatChip = ({ label, value, tone = 'neutral', href }: StatChipProps) => {
-  const className = `inline-flex flex-col items-center gap-0.5 rounded-xl border px-4 py-2 transition-opacity ${TONE_CLASS[tone]} ${href ? 'hover:opacity-80 cursor-pointer' : ''}`
+  const className = `inline-flex flex-col items-center gap-0.5 rounded-2xl border px-4 py-2 transition-opacity ${TONE_CLASS[tone]} ${href ? 'hover:opacity-80 cursor-pointer' : ''}`
 
   const inner = (
     <>

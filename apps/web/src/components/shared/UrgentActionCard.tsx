@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
+import { ExclamationCircleIcon } from '@heroicons/react/24/solid'
 
 type UrgentActionCardProps = {
   tone: 'red' | 'yellow'
@@ -13,7 +13,7 @@ const UrgentActionCard = ({ tone, title, body, ctaLabel, ctaHref }: UrgentAction
   const isRed = tone === 'red'
   return (
     <div
-      className={`flex items-start gap-4 rounded-xl border p-4
+      className={`flex items-start gap-4 rounded-2xl border p-4
         ${isRed ? 'border-triage-red bg-triage-red-bg' : 'border-triage-yellow bg-triage-yellow-bg'}`}
     >
       <ExclamationCircleIcon
@@ -25,7 +25,7 @@ const UrgentActionCard = ({ tone, title, body, ctaLabel, ctaHref }: UrgentAction
       </div>
       <Link
         href={ctaHref}
-        className={`shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-80
+        className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-80
           ${isRed ? 'bg-triage-red' : 'bg-triage-yellow'}`}
       >
         {ctaLabel}

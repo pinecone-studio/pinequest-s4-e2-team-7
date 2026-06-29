@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { EnvelopeIcon } from '@heroicons/react/24/outline'
+import { EnvelopeIcon } from '@heroicons/react/24/solid'
 import type { FollowUpStatus } from '@pinequest/types'
 import type { BoardStudent, FollowUpUpdateVars } from '@/hooks/useBoard'
 import { useChildSummary } from '@/hooks/useChildSummary'
@@ -98,7 +98,7 @@ const FollowUpEditModal = ({ student, onClose }: Props) => {
                 type="date"
                 value={appointmentDate}
                 onChange={(e) => setAppointmentDate(e.target.value)}
-                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text"
+                className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text"
               />
             </div>
             <div>
@@ -126,7 +126,7 @@ const FollowUpEditModal = ({ student, onClose }: Props) => {
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
                 placeholder="Тэмдэглэл..."
-                className="w-full resize-none rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text"
+                className="w-full resize-none rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text"
               />
             </div>
           </div>

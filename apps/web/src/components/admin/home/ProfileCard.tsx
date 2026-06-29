@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowUpRightIcon } from '@heroicons/react/24/outline'
+import { ArrowUpRightIcon } from '@heroicons/react/24/solid'
 import { useMe } from '@/hooks/useMe'
 import { useStats } from '@/hooks/useStats'
 import { useSeason } from '@/components/shared/SeasonProvider'

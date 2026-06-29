@@ -19,7 +19,7 @@ export const FlatCard = ({
 }) => (
   <div
     className={cn(
-      'rounded-3xl border border-border-muted bg-surface shadow-[var(--shadow-card)]',
+      'rounded-2xl border border-border-muted bg-surface shadow-[var(--shadow-card)]',
       glass && 'border-border/50 bg-surface/90 backdrop-blur-xl dark:bg-surface/75',
       className,
     )}

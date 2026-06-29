@@ -34,7 +34,7 @@ export default function ConsentScreen() {
         <Ionicons name="document-text-outline" size={48} color={colors.primary} style={s.icon} />
         <Text style={[s.title, { color: colors.textBase }]}>Зөвшөөрөл</Text>
         <Text style={[s.subtitle, { color: colors.textMuted }]}>
-          Шалгалт эхлэхийн өмнө дараах мэдээллийг анхааралтай уншина уу
+          Амны хөндийн хяналт эхлэхийн өмнө дараах мэдээллийг анхааралтай уншина уу
         </Text>
 
         <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -47,8 +47,8 @@ export default function ConsentScreen() {
         </View>
 
         <Text style={[s.legal, { color: colors.textMuted }]}>
-          «Зөвшөөрч байна» товч дарснаар та эдгээр нөхцлийг зөвшөөрч байна гэж үзнэ.
-          Хүүхдийн эцэг эх/асран хамгаалагчийн зөвшөөрлийг урьдчилан авсан байх ёстой.
+          "Зөвшөөрч байна" товч дарснаар та эдгээр нөхцлийг зөвшөөрч байна гэж үзнэ.
+          Хүүхдийн эцэг эх/асран хамгаалагчийн зөвшөөрлийг урьдчилан авав.
         </Text>
 
         <TouchableOpacity
@@ -78,7 +78,7 @@ const s = StyleSheet.create({
   rowIcon: { marginTop: 1, flexShrink: 0 },
   rowText: { flex: 1, fontSize: 15, fontFamily: 'Inter_400Regular', lineHeight: 22 },
   legal: { fontSize: 13, fontFamily: 'Inter_400Regular', lineHeight: 20, textAlign: 'center' },
-  agreeBtn: { borderRadius: 16, padding: 18, alignItems: 'center', marginTop: 8 },
+  agreeBtn: { borderRadius: 9999, padding: 18, alignItems: 'center', marginTop: 8 },
   agreeBtnText: { fontFamily: 'Inter_700Bold', fontSize: 17 },
   cancelBtn: { alignItems: 'center', padding: 12 },
   cancelText: { fontSize: 15, fontFamily: 'Inter_400Regular' },

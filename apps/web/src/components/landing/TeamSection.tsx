@@ -2,237 +2,171 @@
 
 import {
   AnimatePresence,
+  animate,
   m,
+  useAnimationFrame,
   useMotionValue,
   useMotionValueEvent,
   useReducedMotion,
+  useTransform,
   type MotionValue,
-  type Variants,
 } from 'framer-motion'
-import { useEffect, useState } from 'react'
-import { getLenis } from './LenisProvider'
+import { useEffect, useState, type CSSProperties } from 'react'
 
-export type Member = {
-  id: string
-  name: string
-  role: string
-  contribution: string
-  photo: string
-  link?: { label: string; href: string }
-}
-
-// One shared ease-out curve drives all four motion layers so it reads as a single move.
-const EASE = [0.22, 1, 0.36, 1] as const
+type Member = { name: string; role: string; description: string; image: string }
 
 const MEMBERS: Member[] = [
-  {
-    id: 'm1',
-    name: 'Норовсүрэн',
-    role: 'Frontend / Motion',
-    photo: '/images/team1.JPG',
-    contribution:
-      'Буух хуудас болон гүйлгээ удирдсан hero хэсгийг бүтээсэн. Хөдөлгөөний систем болон нийтлэг ease муруйг хариуцдаг.',
-    link: { label: 'Ажлыг нь үзэх', href: '#' },
-  },
-  {
-    id: 'm2',
-    name: 'Ганхөлөг',
-    role: 'Mobile / Capture',
-    photo: '/images/team2.JPG',
-    contribution:
-      'Expo дээр офлайн-нэн тэргүүн зураг авах урсгалыг бичиж, төхөөрөмж дээрх inference-г үр дүнгийн дэлгэцтэй холбосон.',
-    link: { label: 'Ажлыг нь үзэх', href: '#' },
-  },
-  {
-    id: 'm3',
-    name: 'Ариунзул',
-    role: 'Backend / Sync',
-    photo: '/images/team3.JPG',
-    contribution:
-      'Өөрчлөгдөшгүй event log болон нэг чиглэлийн sync үйлчилгээг зохион бүтээсэн. Fastify ingest, aggregation цэгүүдийг хийсэн.',
-    link: { label: 'Ажлыг нь үзэх', href: '#' },
-  },
-  {
-    id: 'm4',
-    name: 'Мөнхжин',
-    role: 'ML / Inference',
-    photo: '/images/team4.JPG',
-    contribution:
-      'YOLOv8 цоорхой илрүүлэгчийг сургаж, ONNX хувилбарыг багцалсан. Inference гэрээ болон triage логикийг хариуцдаг.',
-    link: { label: 'Ажлыг нь үзэх', href: '#' },
-  },
-  {
-    id: 'm5',
-    name: 'Чингүүн',
-    role: 'Design / Content',
-    photo: '/images/team5.png',
-    contribution:
-      '«Скрининг — онош биш» өнгө аяс болон эмчийн баталсан контентыг бүрдүүлсэн. Board worklist, follow-up мөчлөгийг зохион бүтээсэн.',
-    link: { label: 'Ажлыг нь үзэх', href: '#' },
-  },
+  { name: 'Норовсүрэн', role: 'Frontend / Motion', description: 'Буух хуудас болон hero хэсгийг бүтээж, нийтлэг хөдөлгөөний системийг хариуцсан.', image: '/images/team1.JPG' },
+  { name: 'Ганхөлөг', role: 'Mobile / Capture', description: 'Офлайн-нэн тэргүүн зураг авах урсгал, төхөөрөмж дээрх inference-г үр дүнтэй холбосон.', image: '/images/team2.JPG' },
+  { name: 'Ариунзул', role: 'Backend / Sync', description: 'Өөрчлөгдөшгүй event log, нэг чиглэлийн sync болон Fastify ingest цэгүүдийг зохион бүтээсэн.', image: '/images/team3.JPG' },
+  { name: 'Мөнхжин', role: 'ML / Inference', description: 'YOLOv8 цоорхой илрүүлэгчийг сургаж, ONNX хувилбар болон triage логикийг хариуцсан.', image: '/images/team4.JPG' },
+  { name: 'Чингүүн', role: 'Design / Content', description: '«Скрининг — онош биш» өнгө аяс ба эмчийн баталсан контентыг бүрдүүлсэн.', image: '/images/team5.png' },
 ]
 
-const Preview = ({ member, reduce }: { member: Member; reduce: boolean }) => (
-  <div className="relative mx-auto aspect-[4/5] max-h-[60vh] w-full overflow-hidden rounded-2xl bg-white/5">
-    <AnimatePresence>
-      {/* Layer 3 — photo crossfade keyed by member, a touch slower so it "catches up". */}
-      <m.img
-        key={member.id}
-        src={member.photo}
-        alt={member.name}
-        className="absolute inset-0 h-full w-full object-cover object-top"
-        initial={reduce ? { opacity: 1 } : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: reduce ? 0 : 0.4, ease: EASE }}
-      />
-    </AnimatePresence>
+// --- THEME (named so a dark theme can be swapped back in trivially) ---
+const SECTION_BG = '#0a0a0a' // near-black, consistent with the other landing sections
+const GIANT_TEXT = 'rgba(255,255,255,0.06)' // faint giant backdrop word-mark on black
+const GIANT_OLIVE = 'rgba(242,183,5,0.1)' // faint olive for the "Lings" half of the backdrop
+const LABEL_TEXT = 'var(--olive)' // yellow accent for the small section label
+const ACCENT = 'var(--olive)' // yellow accent (#F2B705); focus rings + role label
+const CARD_GRADIENT = 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 55%, rgba(0,0,0,0) 100%)'
+
+const SPRING = { type: 'spring', stiffness: 220, damping: 26 } as const
+const RING: CSSProperties = { '--tw-ring-color': ACCENT } as CSSProperties
+const SPEED = 0.32 // members advanced per second => one full turn every ~16s
+
+// Deterministic per-card scatter seeded by INDEX (no Math.random / Date.now -> no hydration drift).
+const fract = (n: number) => n - Math.floor(n)
+const scatter = (i: number) => {
+  const k = (i + 1) * 12.9898
+  return {
+    rotate: (fract(Math.sin(k) * 43758.5453) * 2 - 1) * 6, // small in-plane scatter
+    tiltX: (fract(Math.sin(k * 0.7) * 43758.5453) * 2 - 1) * 6, // 3D forward/back tilt
+    dy: (fract(Math.sin(k * 1.7) * 43758.5453) * 2 - 1) * 22, // scattered vertical offset
+    dur: 4 + fract(Math.sin(k * 2.3) * 43758.5453) * 3, // 4s..7s float
+  }
+}
+
+const CardFace = ({ member }: { member: Member }) => (
+  <div className="relative h-full w-full overflow-hidden rounded-2xl bg-[#171412]">
+    <img src={member.image} alt={member.name} className="h-full w-full object-cover object-top" draggable={false} />
+    <div className="absolute inset-0" style={{ background: CARD_GRADIENT }} />
+    <p className="absolute inset-x-0 bottom-0 p-3 text-left font-black leading-none text-white/95" style={{ fontSize: 'clamp(0.85rem, 1.2vw, 1.15rem)', textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}>
+      {member.name}
+    </p>
   </div>
 )
 
-const TeamRow = ({
-  member,
-  index,
-  active,
-  setActive,
-  reduce,
-}: {
-  member: Member
-  index: number
-  active: boolean
-  setActive: (i: number) => void
-  reduce: boolean
-}) => {
-  const container: Variants = {
-    show: { transition: { delayChildren: reduce ? 0 : 0.12, staggerChildren: reduce ? 0 : 0.08 } },
-  }
-  // Layer 4 — text fades up first, pill lags by one stagger step (~80ms).
-  const item: Variants = {
-    hidden: reduce ? { opacity: 0 } : { opacity: 0, y: 16 },
-    show: { opacity: 1, y: 0, transition: { duration: reduce ? 0 : 0.4, ease: EASE } },
-  }
+// One card on the continuous coverflow. Its position is derived live from `phase`
+// (members scrolled past) via motion values, so it animates at 60fps with no re-render.
+const CarouselCard = ({ member, index, count, phase, onPin }: { member: Member; index: number; count: number; phase: MotionValue<number>; onPin: () => void }) => {
+  const s = scatter(index)
+  // Signed distance of this card from the front of the carousel, continuous + wrapping.
+  const dist = useTransform(phase, (p) => {
+    const raw = (((index - p) % count) + count) % count
+    return raw > count / 2 ? raw - count : raw
+  })
+  const x = useTransform(dist, (v) => v * 200)
+  const z = useTransform(dist, (v) => -Math.abs(v) * 120)
+  const rotateY = useTransform(dist, (v) => v * -20)
+  const scale = useTransform(dist, (v) => Math.max(1.12 - Math.abs(v) * 0.16, 0.74))
+  const opacity = useTransform(dist, (v) => Math.max(1 - Math.abs(v) * 0.16, 0.45))
+  const filter = useTransform(dist, (v) => `brightness(${Math.max(0.45, 1 - Math.abs(v) * 0.18)})`)
+  const zIndex = useTransform(dist, (v) => Math.round(100 - Math.abs(v) * 10))
   return (
-    <li className="border-b border-white/10">
-      {/* Layer 1 — colour + weight tween between grey and white. */}
-      <m.button
-        type="button"
-        aria-expanded={active}
-        onFocus={() => setActive(index)}
-        onClick={() => setActive(index)}
-        className="block w-full py-2 text-left leading-[0.95] tracking-[-0.02em] outline-none focus-visible:underline"
-        style={{ fontSize: 'clamp(2.2rem, 5.2vw, 4.8rem)' }}
-        animate={{
-          color: active ? '#ffffff' : 'rgba(255,255,255,0.22)',
-          fontWeight: active ? 600 : 500,
-        }}
-        transition={{ duration: reduce ? 0 : 0.28, ease: EASE }}
-      >
-        {member.name}
-      </m.button>
-      {/* Layer 2 — accordion: the closing row collapses on the SAME transition the new one opens; siblings reflow in flow. */}
-      <AnimatePresence initial={false}>
-        {active && (
-          <m.div
-            className="overflow-hidden"
-            initial={reduce ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: reduce ? 0 : 0.45, ease: EASE }}
-          >
-            <m.div variants={container} initial="hidden" animate="show" className="max-w-xl pb-6">
-              <m.p
-                variants={item}
-                className="mb-1 text-xs font-semibold uppercase tracking-[0.2em]"
-                style={{ color: 'var(--olive)' }}
-              >
-                {member.role}
-              </m.p>
-              <m.p variants={item} className="text-sm leading-relaxed text-white/60">
-                {member.contribution}
-              </m.p>
-            </m.div>
-          </m.div>
-        )}
-      </AnimatePresence>
-    </li>
+    <m.button
+      type="button"
+      onClick={onPin}
+      aria-label={member.name}
+      className="absolute left-1/2 top-1/2 -ml-24 -mt-34 h-68 w-48 cursor-pointer rounded-2xl outline-none focus-visible:ring-2 md:-ml-28 md:-mt-44 md:h-88 md:w-56"
+      style={{ x, z, rotateY, scale, opacity, zIndex, y: s.dy, rotate: s.rotate, rotateX: s.tiltX, transformStyle: 'preserve-3d', ...RING }}
+    >
+      {/* Perpetual organic float layered on top of the carousel rotation. */}
+      <m.div className="h-full w-full" style={{ filter }} animate={{ y: [0, -10, 0, 8, 0] }} transition={{ duration: s.dur, repeat: Infinity, ease: 'easeInOut', delay: index * 0.25 }}>
+        <CardFace member={member} />
+      </m.div>
+    </m.button>
   )
 }
 
-type TeamSectionProps = {
-  members?: Member[]
-  // Hero scroll progress (0–1). When supplied, scrolling steps through members one by one.
-  progress?: MotionValue<number>
-  // Sub-range of `progress` mapped across the members (after the clip-reveal finishes).
-  range?: [number, number]
-  // id of the scroll-driving section (the hero) so a name click can scroll to that member.
-  scrollTargetId?: string
-}
-
-export const TeamSection = ({
-  members = MEMBERS,
-  progress,
-  range = [0.36, 0.8],
-  scrollTargetId,
-}: TeamSectionProps) => {
-  const [active, setActive] = useState(0)
+export const TeamSection = ({ members = MEMBERS }: { members?: Member[] }) => {
   const reduce = !!useReducedMotion()
   const count = members.length
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
+  // The carousel feeds live motion values into `style`; framer serialises those differently
+  // during SSR, so render it client-only (after mount) to avoid a hydration mismatch.
+  const [mounted, setMounted] = useState(false)
+  const phase = useMotionValue(0)
 
-  // useMotionValueEvent needs a MotionValue even when no progress is supplied (hover/click-only mode).
-  const fallback = useMotionValue(0)
-  const indexFromProgress = (v: number) => {
-    const [start, end] = range
-    const t = (v - start) / (end - start)
-    return Math.max(0, Math.min(count - 1, Math.floor(t * count)))
-  }
-  useMotionValueEvent(progress ?? fallback, 'change', (v) => {
-    if (progress) setActive(indexFromProgress(v))
+  // Continuously rotate the carousel; pause on hover or reduced motion.
+  useAnimationFrame((_, delta) => {
+    if (reduce || isPaused) return
+    const next = phase.get() + (delta / 1000) * SPEED
+    phase.set(((next % count) + count) % count)
   })
-  // Sync once on mount in case the panel is revealed mid-scroll.
-  useEffect(() => {
-    if (progress) setActive(indexFromProgress(progress.get()))
-  }, [])
+  // The front card (nearest phase) drives the role/description panel.
+  useMotionValueEvent(phase, 'change', (p) => {
+    const idx = ((Math.round(p) % count) + count) % count
+    setActiveIndex((prev) => (prev === idx ? prev : idx))
+  })
+  useEffect(() => setMounted(true), [])
 
-  // Scroll is the source of truth, so a click must move the scroll to that member —
-  // otherwise the next scroll frame would immediately override a plain setState.
-  const select = (i: number) => {
-    setActive(i)
-    const lenis = getLenis()
-    const el = scrollTargetId ? document.getElementById(scrollTargetId) : null
-    if (!progress || !lenis || !el) return
-    const [start, end] = range
-    const pI = start + ((i + 0.5) / count) * (end - start)
-    const top = window.scrollY + el.getBoundingClientRect().top
-    lenis.scrollTo(top + pI * (el.offsetHeight - window.innerHeight))
+  // Click a card: spring it to the front (shortest way round) and pin.
+  const pin = (index: number) => {
+    setIsPaused(true)
+    const cur = phase.get()
+    let target = index
+    while (target - cur > count / 2) target -= count
+    while (target - cur < -count / 2) target += count
+    animate(phase, target, { type: 'spring', stiffness: 120, damping: 20, onComplete: () => phase.set(((target % count) + count) % count) })
   }
+  const active = members[activeIndex]
 
   return (
-    <section
-      id="team"
-      className="flex h-full min-h-dvh w-full items-center bg-[#0a0a0a] text-white"
-    >
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-6 py-12 md:grid-cols-[minmax(0,460px)_1fr] md:gap-20">
-        <div className="md:self-center">
-          <h2
-            className="mb-5 font-black uppercase"
-            style={{ fontSize: 'clamp(1.3rem, 2.4vw, 2rem)', letterSpacing: '-0.02em', color: 'var(--olive)' }}
-          >
-            Багийн танилцуулга
-          </h2>
-          <Preview member={members[active]} reduce={reduce} />
-        </div>
-        <ul className="flex flex-col md:self-center">
-          {members.map((mem, i) => (
-            <TeamRow
-              key={mem.id}
-              member={mem}
-              index={i}
-              active={i === active}
-              setActive={select}
-              reduce={reduce}
-            />
+    <section id="team" className="relative flex min-h-dvh w-full flex-col overflow-hidden px-6 py-16 md:px-12" style={{ background: SECTION_BG }}>
+      <h2 className="relative z-30 font-black uppercase tracking-[0.04em]" style={{ fontSize: 'clamp(0.85rem, 1.4vw, 1.1rem)', color: LABEL_TEXT }}>
+        Багийн танилцуулга
+      </h2>
+
+      {/* GIANT brand word-mark, BEHIND all cards (lower z). */}
+      <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center">
+        <span className="block whitespace-nowrap text-center font-black" style={{ fontSize: 'clamp(3.5rem, 16vw, 18rem)', lineHeight: 0.82, letterSpacing: '-0.04em' }}>
+          <span style={{ color: GIANT_TEXT }}>Tooth</span><span style={{ color: GIANT_OLIVE }}>Lings</span>
+        </span>
+      </div>
+
+      {/* Card stage. */}
+      {reduce || !mounted ? (
+        <div className="relative z-10 flex flex-1 flex-wrap items-center justify-center gap-4">
+          {members.map((member, i) => (
+            <button key={member.name} type="button" onMouseEnter={() => setActiveIndex(i)} onFocus={() => setActiveIndex(i)} onClick={() => setActiveIndex(i)} aria-current={i === activeIndex} className="h-80 w-56 rounded-2xl outline-none focus-visible:ring-2" style={{ opacity: i === activeIndex ? 1 : 0.78, ...RING }}>
+              <CardFace member={member} />
+            </button>
           ))}
-        </ul>
+        </div>
+      ) : (
+        <div className="relative z-10 flex flex-1 items-center justify-center">
+          <div className="relative h-104 w-full md:h-128" style={{ perspective: '1400px' }} onMouseEnter={() => setIsPaused(true)} onMouseLeave={() => setIsPaused(false)}>
+            {members.map((member, i) => (
+              <CarouselCard key={member.name} member={member} index={i} count={count} phase={phase} onPin={() => pin(i)} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Active member's role + description (crossfades, reserved height = no layout shift). */}
+      <div className="relative z-30 min-h-22 max-w-xl">
+        <AnimatePresence>
+          <m.div key={activeIndex} className="absolute inset-x-0" initial={reduce ? { opacity: 0 } : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={reduce ? { opacity: 0 } : { opacity: 0, y: -12 }} transition={reduce ? { duration: 0.25 } : SPRING}>
+            <p className="mb-1 text-xs font-bold uppercase tracking-[0.2em]" style={{ color: ACCENT }}>
+              {active.role}
+            </p>
+            <p className="text-sm leading-relaxed md:text-base" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              {active.description}
+            </p>
+          </m.div>
+        </AnimatePresence>
       </div>
     </section>
   )

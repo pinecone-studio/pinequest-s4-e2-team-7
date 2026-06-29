@@ -66,7 +66,7 @@ const s = StyleSheet.create({
   btn: {
     width: 42,
     height: 42,
-    borderRadius: 21,
+    borderRadius: 9999,
     alignItems: 'center',
     justifyContent: 'center',
   },

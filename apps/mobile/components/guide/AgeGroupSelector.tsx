@@ -28,15 +28,15 @@ export default function AgeGroupSelector({ selected, onSelect }: Props) {
             style={[
               s.btn,
               {
-                backgroundColor: active ? colors.primary : colors.surface,
+                backgroundColor: active ? colors.primarySoft : colors.surface,
                 borderColor: active ? colors.primary : colors.border,
               },
             ]}
             onPress={() => onSelect(id)}
             activeOpacity={0.8}
           >
-            <Text style={[s.label, { color: active ? colors.primaryText : colors.textBase }]}>{label}</Text>
-            <Text style={[s.sub, { color: active ? 'rgba(26,20,7,0.6)' : colors.textMuted }]}>
+            <Text style={[s.label, { color: colors.textBase }]}>{label}</Text>
+            <Text style={[s.sub, { color: colors.textMuted }]}>
               {subtitle}
             </Text>
           </TouchableOpacity>
@@ -48,7 +48,7 @@ export default function AgeGroupSelector({ selected, onSelect }: Props) {
 
 const s = StyleSheet.create({
   row: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, paddingTop: 16 },
-  btn: { flex: 1, borderRadius: 14, padding: 14, borderWidth: 1, gap: 3 },
+  btn: { flex: 1, borderRadius: 9999, padding: 14, borderWidth: 1, gap: 3 },
   label: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
   sub: { fontSize: 12, fontFamily: 'Inter_400Regular' },
 })

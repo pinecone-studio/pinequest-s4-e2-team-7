@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { CameraIcon, PencilIcon, ArrowsRightLeftIcon } from '@heroicons/react/24/outline'
+import { CameraIcon, PencilIcon, ArrowsRightLeftIcon } from '@heroicons/react/24/solid'
 import Modal from '@/components/ui/Modal'
 import { useMe, useUpdateMe, useSwitchRole } from '@/hooks/useMe'
 import { useBoardStudents } from '@/hooks/useBoard'
@@ -17,7 +17,7 @@ const initials = (name?: string) =>
   (name ?? '').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || '?'
 
 const Field = ({ label, value }: { label: string; value: string | null | undefined }) => (
-  <div className="rounded-xl border border-border bg-surface-raised px-4 py-3">
+  <div className="rounded-2xl border border-border bg-surface-raised px-4 py-3">
     <p className="text-[10px] uppercase tracking-wider text-text-muted">{label}</p>
     <p className="mt-0.5 truncate text-[14px] text-text-base">{value || '—'}</p>
   </div>
@@ -87,14 +87,14 @@ const ProfileModal = ({ open, onClose }: Props) => {
             <Field label="Нэр" value={me?.name} />
             <Field label="И-мэйл" value={me?.email} />
             {me?.phone && <Field label="Утас" value={me.phone} />}
-            <div className="rounded-xl border border-border bg-surface-raised px-4 py-3">
+            <div className="rounded-2xl border border-border bg-surface-raised px-4 py-3">
               <p className="text-[10px] uppercase tracking-wider text-text-muted">Эрх</p>
               <div className="mt-0.5 flex items-center justify-between">
                 <p className="text-[14px] text-text-base">{role ? ROLE_LABEL[role] : '—'}</p>
                 {(role === 'parent' || role === 'teacher') && (
                   <button
                     onClick={() => switchRole.mutate(role === 'parent' ? 'teacher' : 'parent')}
-                    className="flex items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-text-muted transition-colors hover:bg-border hover:text-text-base"
+                    className="flex items-center gap-1 rounded-full px-2 py-1 text-[12px] text-text-muted transition-colors hover:bg-border hover:text-text-base"
                     title={role === 'parent' ? 'Багш болгох' : 'Эцэг эх болгох'}
                   >
                     <ArrowsRightLeftIcon className="size-3.5" />
@@ -104,7 +104,7 @@ const ProfileModal = ({ open, onClose }: Props) => {
               </div>
             </div>
             {child && (
-              <div className="rounded-xl border border-primary/30 bg-primary-subtle px-4 py-3">
+              <div className="rounded-2xl border border-primary/30 bg-primary-subtle px-4 py-3">
                 <p className="text-[10px] uppercase tracking-wider text-text-muted">Хүүхэд</p>
                 <p className="mt-0.5 text-[14px] font-semibold text-text-base">
                   {child.lastName} {child.firstName}
@@ -114,7 +114,7 @@ const ProfileModal = ({ open, onClose }: Props) => {
             )}
             <button
               onClick={openEdit}
-              className="btn mt-1 flex w-full items-center justify-center gap-1.5 rounded-xl bg-btn-fill px-4 py-2.5 text-[13px] font-semibold text-text-base hover:bg-btn-fill-hover"
+              className="btn mt-1 flex w-full items-center justify-center gap-1.5 rounded-full bg-btn-fill px-4 py-2.5 text-[13px] font-semibold text-text-base hover:bg-btn-fill-hover"
             >
               <PencilIcon className="size-4" /> Засах
             </button>
