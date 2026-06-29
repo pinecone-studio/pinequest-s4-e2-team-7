@@ -40,26 +40,22 @@ export default function ResultTriageCard({ level, score, confidentWording = fals
 
   return (
     <View style={[s.card, { backgroundColor: bg }]}>
-      <Ionicons name={icon} size={52} color={iconColor} />
-      <Text style={[s.label, { color: textColor }]}>{label}</Text>
+      <Ionicons name={icon} size={38} color={iconColor} />
+      <Text style={[s.label, { color: textColor }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{label}</Text>
       <Text style={[s.subtitle, { color: textColor }]}>{subtitle}</Text>
       {pct > 0 && confidentWording && (
         <View style={s.badge}>
           <Text style={[s.badgeText, { color: textColor }]}>Шинжилгээний итгэмжлэл {pct}%</Text>
         </View>
       )}
-      <Text style={[s.disclaimer, { color: textColor }]}>
-        Энэ нь анхан шатны чиглүүлэг — шүдний эмч батална
-      </Text>
     </View>
   )
 }
 
 const s = StyleSheet.create({
-  card: { borderRadius: 20, padding: 28, alignItems: 'center', gap: 10 },
-  label: { fontSize: 22, fontFamily: 'Inter_700Bold', textAlign: 'center' },
-  subtitle: { fontSize: 14, fontFamily: 'Inter_400Regular', textAlign: 'center' },
+  card: { borderRadius: 18, padding: 20, alignItems: 'center', gap: 7 },
+  label: { fontSize: 18, fontFamily: 'Inter_700Bold', textAlign: 'center' },
+  subtitle: { fontSize: 13, fontFamily: 'Inter_400Regular', textAlign: 'center' },
   badge: { backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6 },
-  badgeText: { fontSize: 13, fontFamily: 'Inter_600SemiBold' },
-  disclaimer: { fontSize: 12, fontFamily: 'Inter_400Regular', textAlign: 'center', opacity: 0.75, marginTop: 4 },
+  badgeText: { fontSize: 12, fontFamily: 'Inter_600SemiBold' },
 })
