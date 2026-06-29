@@ -1,6 +1,6 @@
-import type { ChildScreeningSummary, InferenceDetection, SymptomSet } from '@pinequest/types'
+import type { ChildScreeningSummary, InferenceDetection, SymptomSet, UserRole, FollowUpStatus } from '@pinequest/types'
 import { normalizeInference, detectionsToFindings, triage } from '@pinequest/core'
-import { getToken } from './auth'
+import { getToken, type AuthUser } from './auth'
 import { runLocalInference, isModelCached } from './localInference'
 
 const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'https://screener-api.ariunzul.workers.dev'
@@ -73,11 +73,56 @@ export type CreateClassPayload = {
   students: RosterStudentInput[]
 }
 
-export type ProfilePatch = { name?: string; phone?: string }
-export type ProfileResult = { id: string; name: string; role: string; phone: string | null; schoolId: string | null }
-export type MeResult = { id: string; email: string; name: string; role: string; phone: string | null; schoolId: string | null; isActive: boolean }
+export type ProfilePatch = { name?: string; phone?: string; email?: string }
+export type ProfileResult = { id: string; name: string; email: string; role: string; phone: string | null; schoolId: string | null }
+export type MeResult = {
+  id: string
+  email: string
+  name: string
+  role: string
+  phone: string | null
+  schoolId: string | null
+  isActive: boolean
+  /** The JWT's CURRENT (possibly switched) role — drives which UI to render. */
+  activeRole?: UserRole
+  /** True when this user also has a linked child → role-switcher is offered. */
+  hasParentLink?: boolean
+}
 
 export const getMe = () => apiFetch<MeResult>('/api/auth/me')
+
+/** Re-scope a dual-role user (e.g. a teacher who linked their own child) to
+ *  `parent` and back. Returns a fresh token + user the caller must persist. */
+export const switchRole = (role: 'parent' | 'self') =>
+  apiFetch<{ token: string; user: AuthUser }>('/api/auth/switch-role', {
+    method: 'POST',
+    body: JSON.stringify({ role }),
+  })
+
+/** Scope-aware roster + each child's latest triage — the shared worklist source
+ *  for every role: parent→own child, teacher→their classes, doctor→whole school. */
+export type BoardStudent = {
+  id: string
+  childKey: string
+  firstName: string
+  lastName: string
+  rosterSlot: number
+  birthYear: number
+  classId: string
+  schoolId: string
+  className: string
+  seasonId: string
+  guardianEmail: string | null
+  guardianPhone: string | null
+  latestLevel: TriageLevel | null
+  latestScreeningId: string | null
+  screenedAt: string | null
+  followUpStatus: FollowUpStatus | null
+  escalationFlag: boolean
+  seasonCount: number
+}
+
+export const getBoardStudents = () => apiFetch<BoardStudent[]>('/api/board/students')
 
 export type ChildSummaryPayload = {
   child: { id: string; firstName: string; lastName: string; guardianPhone: string | null; guardianEmail: string | null }
@@ -219,6 +264,26 @@ export type VolunteerDentist = {
 
 export const getVolunteerDentists = () =>
   apiFetch<VolunteerDentist[]>('/api/help/volunteers')
+
+/** Help requests, role-scoped server-side: a dentist sees open + assigned ones,
+ *  a school doctor their school's, a parent/teacher their own. */
+export type HelpRequestRow = {
+  id: string
+  childKey: string
+  schoolId: string
+  level: 'red' | 'yellow'
+  note: string | null
+  status: 'open' | 'connected' | 'closed'
+  createdAt: string
+  child: { firstName: string; lastName: string; guardianPhone: string | null; guardianEmail: string | null } | null
+  dentist: { id: string; displayName: string; org: string | null } | null
+}
+
+export const getHelpRequests = () => apiFetch<HelpRequestRow[]>('/api/help/requests')
+
+/** A dentist volunteer connects to (claims) an open help request. */
+export const connectHelpRequest = (id: string) =>
+  apiFetch<HelpRequest>(`/api/help/requests/${id}/connect`, { method: 'POST' })
 
 export type AnalyzeMeta = {
   childKey: string

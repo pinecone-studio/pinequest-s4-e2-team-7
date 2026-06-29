@@ -1,8 +1,17 @@
 import { Stack } from 'expo-router'
+import { useTheme } from '@/lib/ThemeContext'
 
 export default function ScanLayout() {
+  const { colors } = useTheme()
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.bg },
+        headerTintColor: colors.textBase,
+        headerTitleStyle: { color: colors.textBase },
+        headerShadowVisible: true,
+      }}
+    >
       <Stack.Screen
         name="index"
         options={{ title: 'Шалгуулагчийн мэдээлэл', headerBackTitle: 'Буцах' }}

@@ -1,22 +1,17 @@
-import { ScrollView, View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native'
+import { ScrollView, View, Text, Pressable, ActivityIndicator, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useRouter, useFocusEffect } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { getUser, saveUser } from '@/lib/auth'
-import { getMe, updateMe, apiFetch, type MeResult, type TriageLevel } from '@/lib/api'
+import { getMe, apiFetch, type MeResult, type TriageLevel } from '@/lib/api'
 import { useTheme } from '@/lib/ThemeContext'
-import { toMongolian } from '@/lib/errorMessages'
-import TextField from '@/components/auth/TextField'
-import PrimaryButton from '@/components/auth/PrimaryButton'
-import OutlineButton from '@/components/auth/OutlineButton'
 import SettingsSection from '@/components/profile/SettingsSection'
+import RoleSwitchButton from '@/components/profile/RoleSwitchButton'
+import EditProfileSheet, { realEmail } from '@/components/profile/EditProfileSheet'
 import LastScreeningCard from '@/components/home/LastScreeningCard'
-
-const ROLE_LABEL: Record<string, string> = {
-  screener: 'Хэрэглэгч', teacher: 'Багш', parent: 'Эцэг эх',
-  school_doctor: 'Сургуулийн эмч', dentist: 'Шүдний эмч', follow_up: 'Дагах ажилтан', admin: 'Администратор',
-}
+import { useSession } from '@/lib/SessionContext'
+import { ROLE_LABEL } from '@/lib/roleConfig'
 
 // SCREENING-not-diagnosis wording: green never says "healthy", no clinical words.
 const TRIAGE_SUMMARY: Record<TriageLevel, string> = {
@@ -35,38 +30,34 @@ type LatestScreening = {
 const ProfileScreen = () => {
   const { colors } = useTheme()
   const router = useRouter()
+  const { activeRole, refresh } = useSession()
   const [me, setMe] = useState<MeResult | null>(null)
-  const [editing, setEditing] = useState(false)
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
   const [latest, setLatest] = useState<LatestScreening | null>(null)
 
-  useEffect(() => {
+  const loadMe = useCallback(() => {
     getMe()
-      .then((m) => { setMe(m); setName(m.name); setPhone(m.phone ?? '') })
+      .then(setMe)
       .catch(async () => {
         const u = await getUser()
-        if (u) { setMe({ id: u.id, name: u.name, role: u.role, email: '', phone: null, schoolId: u.schoolId ?? null, isActive: true }); setName(u.name) }
+        if (u) setMe({ id: u.id, name: u.name, role: u.role, email: '', phone: null, schoolId: u.schoolId ?? null, isActive: true })
       })
   }, [])
 
+  // Re-pull on every focus so a newly-enrolled child (which the server links on
+  // /auth/me) flips hasParentLink → the role switcher appears without a re-login.
   useFocusEffect(useCallback(() => {
+    void refresh()
+    loadMe()
     apiFetch<LatestScreening[]>('/api/screenings')
       .then((rows) => setLatest(rows[0] ?? null))
       .catch(() => {})
-  }, []))
+  }, [refresh, loadMe]))
 
-  const save = async () => {
-    setSaving(true); setError(null)
-    try {
-      const updated = await updateMe({ name, phone })
-      setMe((prev) => (prev ? { ...prev, name: updated.name, phone: updated.phone } : prev))
-      const u = await getUser()
-      if (u) await saveUser({ ...u, name: updated.name })
-      setEditing(false)
-    } catch (err) { setError(toMongolian(err)) } finally { setSaving(false) }
+  const onSaved = async (updated: { name: string; email: string; phone: string | null }) => {
+    setMe((prev) => (prev ? { ...prev, name: updated.name, email: updated.email, phone: updated.phone } : prev))
+    const u = await getUser()
+    if (u) await saveUser({ ...u, name: updated.name })
   }
 
   if (!me) {
@@ -76,9 +67,21 @@ const ProfileScreen = () => {
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
       <View style={s.header}>
-        <View style={[s.avatar, { backgroundColor: colors.primary }]}><Text style={[s.avatarText, { color: colors.primaryText }]}>{me.name.charAt(0).toUpperCase()}</Text></View>
-        <Text style={[s.name, { color: colors.textBase }]}>{me.name}</Text>
-        <Text style={[s.role, { color: colors.textMuted }]}>{ROLE_LABEL[me.role] ?? me.role}</Text>
+        <Pressable
+          style={({ pressed }) => [s.headerTap, { opacity: pressed ? 0.7 : 1 }]}
+          onPress={() => setEditOpen(true)}
+          hitSlop={8}
+        >
+          <View style={[s.avatar, { backgroundColor: colors.primary }]}><Text style={[s.avatarText, { color: colors.primaryText }]}>{me.name.charAt(0).toUpperCase()}</Text></View>
+          <View style={s.nameRow}>
+            <Text style={[s.name, { color: colors.textBase }]}>{me.name}</Text>
+            <Ionicons name="create-outline" size={16} color={colors.textMuted} />
+          </View>
+        </Pressable>
+        <View style={s.roleRow}>
+          <Text style={[s.role, { color: colors.textMuted }]}>{ROLE_LABEL[activeRole ?? me.role] ?? me.role}</Text>
+          <RoleSwitchButton />
+        </View>
       </View>
 
       <ScrollView
@@ -86,24 +89,10 @@ const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {editing ? (
-          <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <TextField label="НЭР" value={name} onChange={setName} placeholder="Нэр" />
-            <TextField label="УТАС" value={phone} onChange={setPhone} placeholder="Утас" keyboard="phone-pad" />
-            {error ? <Text style={s.error}>{error}</Text> : null}
-            <PrimaryButton label="Хадгалах" onPress={save} loading={saving} disabled={!name.trim()} />
-            <OutlineButton label="Болих" onPress={() => { setEditing(false); setName(me.name); setPhone(me.phone ?? ''); setError(null) }} />
-          </View>
-        ) : (
-          <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Row label="И-мэйл" value={me.email || '—'} muted={colors.textMuted} base={colors.textBase} />
-            <Row label="Утас" value={me.phone || '—'} muted={colors.textMuted} base={colors.textBase} />
-            <TouchableOpacity style={[s.editBtn, { borderColor: colors.primary }]} onPress={() => setEditing(true)} activeOpacity={0.7}>
-              <Ionicons name="create-outline" size={18} color={colors.primary} />
-              <Text style={[s.editText, { color: colors.primary }]}>Засах</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+        <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Row label="И-мэйл" value={realEmail(me.email) || '—'} muted={colors.textMuted} base={colors.textBase} />
+          <Row label="Утас" value={me.phone || '—'} muted={colors.textMuted} base={colors.textBase} />
+        </View>
 
         {latest && (() => {
           const level = latest.review?.confirmedLevel ?? latest.triageLevel
@@ -118,6 +107,13 @@ const ProfileScreen = () => {
         })()}
         <SettingsSection />
       </ScrollView>
+
+      <EditProfileSheet
+        visible={editOpen}
+        initial={{ name: me.name, phone: me.phone, email: me.email }}
+        onClose={() => setEditOpen(false)}
+        onSaved={onSaved}
+      />
     </SafeAreaView>
   )
 }
@@ -133,18 +129,18 @@ const s = StyleSheet.create({
   root: { flex: 1 },
   loader: { marginTop: 48 },
   scroll: { padding: 20, gap: 18, paddingBottom: 96 },
-  header: { alignItems: 'center', gap: 6, paddingVertical: 12 },
+  header: { alignItems: 'center', gap: 8, paddingVertical: 12 },
+  headerTap: { alignItems: 'center', gap: 6 },
   avatar: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' },
   avatarText: { fontSize: 30, fontFamily: 'Inter_700Bold' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   name: { fontSize: 20, fontFamily: 'Inter_700Bold' },
+  roleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   role: { fontSize: 14, fontFamily: 'Inter_400Regular' },
   card: { borderRadius: 16, borderWidth: 1, padding: 16, gap: 12 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
   rowLabel: { fontSize: 13, fontFamily: 'Inter_500Medium' },
   rowValue: { fontSize: 14, fontFamily: 'Inter_500Medium', flexShrink: 1 },
-  editBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1, borderRadius: 9999, paddingVertical: 12 },
-  editText: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
-  error: { fontSize: 13, color: '#ef4444' },
 })
 
 export default ProfileScreen

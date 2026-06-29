@@ -1,50 +1,63 @@
-import { View, StyleSheet } from 'react-native'
+import { ScrollView, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter, useFocusEffect } from 'expo-router'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback } from 'react'
 import { useTheme } from '@/lib/ThemeContext'
-import { getUser, type AuthUser } from '@/lib/auth'
+import { useSession } from '@/lib/SessionContext'
+import { roleConfigFor, type HomeSection } from '@/lib/roleConfig'
 import { useOutboxSync } from '@/lib/useOutboxSync'
 import GreetingHeader from '@/components/home/GreetingHeader'
-
 import ScanHeroCard from '@/components/home/ScanHeroCard'
 import HistorySection from '@/components/profile/HistorySection'
+import ChildResultSection from '@/components/home/ChildResultSection'
+import SchoolOverviewSection from '@/components/home/SchoolOverviewSection'
+import RedStudentsBoardSection from '@/components/home/RedStudentsBoardSection'
+import HelpRequestsSection from '@/components/dentist/HelpRequestsSection'
 import QuickActionGrid from '@/components/home/QuickActionGrid'
-
-const QUICK_ACTIONS = [
-  { id: 'classes',  icon: 'school-outline' as const,      label: 'Анги' },
-  { id: 'stats',    icon: 'stats-chart-outline' as const, label: 'Статистик' },
-  { id: 'calendar', icon: 'calendar-outline' as const,    label: 'Хуанли' },
-  { id: 'history',  icon: 'list-outline' as const,        label: 'Түүх' },
-]
 
 const HomeScreen = () => {
   const { colors } = useTheme()
   const router = useRouter()
+  const { user, activeRole } = useSession()
   const { sync, syncing, pendingCount, deadCount } = useOutboxSync()
-  const [user, setUser] = useState<AuthUser | null>(null)
-
-  useEffect(() => { getUser().then(setUser) }, [])
 
   useFocusEffect(useCallback(() => {
     void sync()
   }, [sync]))
 
-  const handleScan = () => router.push('/scan')
+  const config = roleConfigFor(activeRole)
 
-  const actions = QUICK_ACTIONS.map((a) => ({
+  const actions = config.quickActions.map((a) => ({
     ...a,
-    onPress: () => {
-      if (a.id === 'classes') router.push('/(tabs)/classes' as never)
-      else if (a.id === 'stats') router.push('/stats' as never)
-      else if (a.id === 'calendar') router.push('/(tabs)/calendar' as never)
-      else if (a.id === 'history') router.push('/(tabs)/history' as never)
-    },
+    onPress: () => router.push(a.route as never),
   }))
+
+  const renderSection = (section: HomeSection) => {
+    switch (section) {
+      case 'history':
+        return user ? <HistorySection key={section} userId={user.id} role={activeRole ?? undefined} /> : null
+      case 'childResult':
+        return <ChildResultSection key={section} />
+      case 'schoolOverview':
+        return <SchoolOverviewSection key={section} />
+      case 'redStudents':
+        return <RedStudentsBoardSection key={section} />
+      case 'helpRequests':
+        return (
+          <HelpRequestsSection
+            key={section}
+            limit={4}
+            onSeeMore={() => router.push('/(tabs)/hospital' as never)}
+          />
+        )
+      default:
+        return null
+    }
+  }
 
   return (
     <SafeAreaView style={[s.safe, { backgroundColor: colors.bg }]}>
-      <View style={s.scroll}>
+      <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         <GreetingHeader
           name={user?.name ?? '...'}
           onPressAvatar={() => router.push('/(tabs)/profile' as never)}
@@ -52,17 +65,17 @@ const HomeScreen = () => {
           pendingCount={pendingCount}
           deadCount={deadCount}
         />
-        <ScanHeroCard onScan={handleScan} />
-        {user && <HistorySection userId={user.id} role={user.role} />}
+        {config.showScanHero && <ScanHeroCard onScan={() => router.push('/scan')} />}
+        {config.sections.map(renderSection)}
         <QuickActionGrid actions={actions} />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   )
 }
 
 const s = StyleSheet.create({
   safe: { flex: 1 },
-  scroll: { flex: 1, padding: 20, gap: 18, paddingBottom: 20 },
+  scroll: { flexGrow: 1, padding: 20, gap: 18, paddingBottom: 32 },
 })
 
 export default HomeScreen
