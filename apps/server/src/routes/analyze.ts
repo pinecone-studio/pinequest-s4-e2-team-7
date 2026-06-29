@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { detectionsToFindings, normalizeInference, symptomSetSchema, triage, type RawInference } from '@pinequest/core'
 import type { SymptomSet } from '@pinequest/types'
 import { persistScreening } from '../lib/persistScreening.js'
+import { fallbackAdvice, runGeminiAdvice } from '../lib/geminiAdvice.js'
 import { authenticate } from '../middleware/auth.js'
 import { hasChildAccess } from '../lib/scopeFilter.js'
 import type { AppEnv } from '../types.js'
@@ -77,6 +78,22 @@ analyzeRoutes.post('/analyze', authenticate, async (c) => {
   const triageResult = triage(findings, symptoms)
   const screeningId = crypto.randomUUID()
 
+  // Gemini зөвхөн эцэг эхэд зориулсан зөвлөмжийн текст гаргана (web-тэй ижил seam).
+  // triage/detection нь TS core-ийн албан ёсны үр дүн — Gemini үүнийг өөрчлөхгүй.
+  // Тохиргоо/сүлжээ алдаа гарвал triage түвшинд тохирсон энгийн зөвлөмж рүү шилжинэ.
+  const geminiKey = c.env.GEMINI_API_KEY
+  const advice =
+    (geminiKey
+      ? await runGeminiAdvice({
+          apiKey: geminiKey,
+          model: c.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
+          triageLevel: triageResult.level,
+          detections: allDetections,
+          symptoms,
+          image: shots[0]?.image,
+        })
+      : null) ?? fallbackAdvice(triageResult.level, allDetections.length)
+
   const imageCount = photos.length
   await persistScreening(
     c.get('db'),
@@ -99,6 +116,7 @@ analyzeRoutes.post('/analyze', authenticate, async (c) => {
       triageScore: triageResult.score,
       detections: allDetections,
       photos,
+      advice,
       modelVersion: c.env.MODEL_VERSION ?? 'yolov8-server',
     },
   }, 201)
