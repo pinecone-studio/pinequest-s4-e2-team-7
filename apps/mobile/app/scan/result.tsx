@@ -35,6 +35,7 @@ export default function ResultScreen() {
     birthYear?: string
     symptoms?: string
     capturedAt?: string
+    advice?: string
   }>()
 
   const priorLevel = usePriorLevel(params.childKey ?? '')
@@ -43,6 +44,9 @@ export default function ResultScreen() {
   const screeningId = params.screeningId ?? ''
   const birthYear = parseInt(params.birthYear ?? '0', 10)
   const capturedAt = params.capturedAt ?? new Date().toISOString()
+  // Gemini-generated дүгнэлт (server path). Offline/local fallback үед хоосон —
+  // тэр үед ResultSummary deterministic buildChildSummary рүү буцна.
+  const advice = params.advice?.trim() || null
 
   const photos = useMemo<PhotoAnalysis[]>(() => {
     try {
@@ -87,7 +91,7 @@ export default function ResultScreen() {
           <ResultPhotoCard key={`${photo.arch}-${i}`} photo={photo} />
         ))}
         <ResultDetectionList detections={allDetections} />
-        <ResultSummary summary={summary} level={level} />
+        <ResultSummary summary={summary} level={level} advice={advice} />
         {level === 'yellow' && <ResultYellowAdvice />}
         {level === 'red' && <ResultRedAdvice guardianPhone={params.guardianPhone} />}
         <ResultBottomActions

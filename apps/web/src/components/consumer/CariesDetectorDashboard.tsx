@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Plus, RotateCcw, Upload, Stethoscope, MapPin, AlertTriangle } from '@/lib/icons'
 import Link from 'next/link'
-import { DetectedRow, FilterPill, FlatCard, PillButton } from '@/components/consumer/warm/WarmUI'
+import { FilterPill, FlatCard, PillButton } from '@/components/consumer/warm/WarmUI'
 import { TriageHeroCard } from '@/components/consumer/MobilePatterns'
 import {
   addChildName,
@@ -48,10 +48,6 @@ const DETECTION_META: Record<string, DetectionMeta> = {
     description: 'Асуудал илрэхгүй байна',
     emoji: '🟢',
   },
-const DETECTION_LABEL: Record<string, string> = {
-  Caries: 'Шүдний цоорол',
-  Cavity: 'Цоорлын том хөндий',
-  Crack: 'Шүдний гэмтэл, цуурал',
 }
 
 const getMeta = (d: ScanDetection): DetectionMeta =>
@@ -142,11 +138,6 @@ const DetectionItem = ({ d }: { d: ScanDetection }) => {
 const ResultsPanel = ({ result }: { result: ScanResult }) => {
   const triageLevel =
     result.triage === 'red' ? 'red' : result.triage === 'yellow' ? 'yellow' : 'green'
-
-  const urgent =
-    result.urgent || result.triage === 'red' || (result.needsDoctor && result.triage === 'yellow')
-  const triageLevel =
-    result.triage === 'red' ? 'red' : result.triage === 'yellow' ? 'yellow' : 'green'
   const triageLabel =
     triageLevel === 'red'
       ? 'Яаралтай эмчилгээх хийлгэх'
@@ -160,11 +151,6 @@ const ResultsPanel = ({ result }: { result: ScanResult }) => {
   // Healthy-ийг тооцохгүйгээр асуудалтай зүйлсийг тоол
   const problemDetections = result.detections.filter((d) => d.label !== 'Healthy')
   const healthyDetections = result.detections.filter((d) => d.label === 'Healthy')
-        ? 'Эмчилгээ шаардлагатай'
-        : 'Харьцангуй эрүүл, дараагийн хяналтыг хийгээрэй'
-  const triageSummary = urgent
-    ? 'Зургийг таньсны дагуу ойрын хугацаанд мэргэжилтэн эмчид үзүүлэхийг зөвлөж байна.'
-    : result.advice
 
   return (
     <div className="flex flex-col gap-5">
@@ -173,9 +159,6 @@ const ResultsPanel = ({ result }: { result: ScanResult }) => {
         {/* FIX: YOLOv8 биш Gemini AI гэж зөв харуулна */}
         <p className="mt-1 text-[13px] text-text-muted">
           Шинжилгээ: Gemini AI Vision (судалгаа / демо)
-        <h2 className="text-[22px] font-bold tracking-tight text-text-base">Дүгнэлт</h2>
-        <p className="mt-1 text-[13px] text-text-muted">
-        YOLOv8 шүдний цоорол таних модел
         </p>
       </div>
 
@@ -200,18 +183,6 @@ const ResultsPanel = ({ result }: { result: ScanResult }) => {
               <DetectionItem key={`problem-${i}`} d={d} />
             ))}
           </div>
-      <div>
-        <p className="mb-3 text-[12px] font-bold uppercase tracking-wide text-text-muted">
-          Таньсан цооролтой шүд ({result.detections.length})
-        </p>
-        <div className="space-y-2">
-          {result.detections.map((d) => (
-            <DetectedRow
-              key={d.label + d.confidence}
-              label={formatLabel(d)}
-              value={`${(d.confidence * 100).toFixed(1)}%`}
-            />
-          ))}
         </div>
       )}
 
@@ -316,27 +287,6 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
     setAnalysisError(null)
   }
 
-  const capturePhoto = () => {
-    const video = videoRef.current
-    const canvas = canvasRef.current
-    if (!video || !canvas) return
-    canvas.width = video.videoWidth || 640
-    canvas.height = video.videoHeight || 480
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    ctx.drawImage(video, 0, 0)
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return
-        setFile(new File([blob], `intraoral-${Date.now()}.jpg`, { type: 'image/jpeg' }))
-        setPreview(URL.createObjectURL(blob))
-        stopCamera()
-      },
-      'image/jpeg',
-      0.92,
-    )
-  }
-
   const runAnalysis = async () => {
     if (!preview || !file) return
     setAnalyzing(true)
@@ -367,15 +317,9 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
   const displayDetections = result?.detections ?? []
 
   return (
-    <div className="space-y-8">
-      {/* Filter pills */}
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-2 text-[13px] font-medium text-text-muted">Хүүхэд:</span>
-        {filterOptions.map((name) => (
     <div className="flex h-full flex-col gap-8">
       {/* Child selector — add a child by name */}
       <div className="flex flex-wrap items-center gap-2">
-       
         {childNames.map((name) => (
           <FilterPill
             key={name}
@@ -400,32 +344,10 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
             className="btn flex items-center justify-center rounded-full border border-border bg-surface p-2 text-text-base transition-all duration-150 hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Plus className="size-5" strokeWidth={2} />
-          
           </button>
         </form>
       </div>
 
-      <div className="grid gap-8 xl:grid-cols-[1.15fr_0.85fr]">
-        {/* Зүүн баганa */}
-        <div className="flex flex-col gap-6">
-          <FlatCard className="p-8">
-            <div className="flex flex-wrap gap-3">
-              <PillButton variant="secondary" onClick={() => fileRef.current?.click()}>
-                <Upload className="size-4" strokeWidth={2} />
-                Файл оруулах
-              </PillButton>
-              <PillButton variant="secondary" onClick={cameraOn ? stopCamera : startCamera}>
-                <Camera className="size-4" strokeWidth={2} />
-                Камер
-              </PillButton>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => onFile(e.target.files?.[0] ?? null)}
-              />
-            </div>
       <div className="grid min-h-0 flex-1 gap-8 xl:grid-cols-[1.15fr_0.85fr]">
         {/* Left column */}
         <div className="flex min-h-0 flex-col gap-6">
@@ -437,7 +359,6 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
               className="hidden"
               onChange={(e) => onFile(e.target.files?.[0] ?? null)}
             />
-          
 
             {!displayImage ? (
               <button
@@ -465,7 +386,6 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
                 </span>
                 <div>
                   <p className="text-[16px] font-semibold text-text-base">
-                    Шүдний ойрын зураг оруулна уу
                     Амны хөндийн ойрын зураг оруулна уу.
                   </p>
                   <p className="mt-2 max-w-sm text-[13px] text-text-muted">
@@ -475,26 +395,6 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
               </button>
             ) : null}
 
-            {cameraOn && !preview ? (
-              <div className="relative mt-6 overflow-hidden rounded-2xl bg-slate-900">
-                <video
-                  ref={videoRef}
-                  className="aspect-[4/3] w-full object-cover"
-                  playsInline
-                  muted
-                />
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-10">
-                  <div className="aspect-[3/2] w-full max-w-md rounded-2xl border-2 border-dashed border-white/40" />
-                </div>
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-                  <PillButton variant="primary" onClick={capturePhoto}>
-                    Зураг авах
-                  </PillButton>
-                </div>
-              </div>
-            ) : null}
-
-            {cameraError ? <p className="mt-4 text-[13px] text-red-600">{cameraError}</p> : null}
             {analysisError ? (
               <p className="mt-4 text-[13px] text-red-600">{analysisError}</p>
             ) : null}
@@ -505,31 +405,9 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
               </div>
             ) : null}
 
-            <canvas ref={canvasRef} className="hidden" />
-            {analysisError ? (
-              <p className="mt-4 text-[13px] text-red-600">{analysisError}</p>
-            ) : null}
-
-            {displayImage ? (
-              <div className="mt-6">
-                {displayImage && (
-                  <IntraoralImageView imageUrl={displayImage} detections={displayDetections} />
-                )}
-              </div>
-            ) : null}
-
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <PillButton
                 variant="primary"
-                disabled={!file || !preview || analyzing}
-                onClick={runAnalysis}
-              >
-                <Sparkles className={cn('size-4', analyzing && 'animate-pulse')} strokeWidth={2} />
-                {analyzing ? 'Шинжилж байна…' : 'AI шинжилгээ хийх'}
-              </PillButton>
-              <PillButton variant="ghost" onClick={clearAll}>
-                <Eraser className="size-4" strokeWidth={2} />
-                Цэвэрлэх
                 className="min-w-[160px]"
                 disabled={!file || !preview || analyzing}
                 onClick={runAnalysis}
@@ -549,8 +427,6 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
           </FlatCard>
         </div>
 
-        {/* Баруун багана */}
-        <div className="xl:sticky xl:top-28 xl:self-start">
         {/* Right column — glass accent panel */}
         <div className="min-h-0 xl:sticky xl:top-28">
           {result ? (
@@ -560,18 +436,8 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
           ) : (
             <FlatCard
               glass
-              className="flex min-h-[420px] flex-col items-center justify-center p-10 text-center"
-            >
-              <span className="flex size-16 items-center justify-center rounded-full bg-[#F3B900]/15">
-                <Sparkles className="size-8 text-[#F3B900]" strokeWidth={1.5} />
-              </span>
-              <p className="mt-5 text-[17px] font-bold text-text-base">Үр дүн энд харагдана</p>
-              <p className="mt-2 max-w-xs text-[14px] leading-relaxed text-text-muted">
-                Зураг оруулсны дараа «AI шинжилгээ хийх» дарж ангилал, зөвлөмж, илрүүлсэн зүйлсийг
-                хараарай.
               className="flex h-full min-h-[420px] flex-col items-center justify-center p-10 text-center"
             >
-              
               <p className="mt-5 text-[17px] font-bold text-text-base">Дүгнэлт энд харагдана</p>
               <p className="mt-2 max-w-xs text-[14px] leading-relaxed text-text-muted">
                 Зураг оруулсны дараа эхлэх товчийг дарна уу.

@@ -98,6 +98,7 @@ export const useCameraCapture = (params: Params) => {
           triageScore: String(result.triageScore),
           detectionsCount: String(result.detections.length),
           photos: JSON.stringify(result.photos ?? []),
+          advice: result.advice ?? '',
           guardianPhone: params.guardianPhone ?? '',
           childKey: params.childKey, classId: params.classId,
           schoolId: params.schoolId, seasonId: params.seasonId,

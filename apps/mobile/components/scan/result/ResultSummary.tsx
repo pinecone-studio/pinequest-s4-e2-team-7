@@ -15,13 +15,17 @@ const FALLBACK_STEPS: Record<TriageLevel, string[]> = {
   red: ['Өдөрт 2 удаа фтортой оохойгоор шүдээ угаах.', 'Чихэрлэг хоол, ундааны хэрэглээг багасгах.', 'Өвдөлт, хавдар, эсвэл халуурвал яаралтай эмнэлэгт хандах.'],
 }
 
-type Props = { summary: ChildScreeningSummary | null; level: TriageLevel }
+type Props = { summary: ChildScreeningSummary | null; level: TriageLevel; advice?: string | null }
 
-/** Deterministic "AI summary": Дүгнэлт + Цаашид хэвшүүлэх арга хэмжээ. */
-const ResultSummary = ({ summary, level }: Props) => {
+/**
+ * "AI summary": Дүгнэлт + Цаашид хэвшүүлэх арга хэмжээ.
+ * `advice` ирвэл (server дэх Gemini) түүнийг дүгнэлт болгон харуулна — web-тэй ижил.
+ * Offline/local fallback үед deterministic buildChildSummary руу буцна.
+ */
+const ResultSummary = ({ summary, level, advice }: Props) => {
   const { colors } = useTheme()
   const lvl = summary?.effectiveLevel ?? level
-  const conclusion = summary?.conclusion ?? [FALLBACK_LEAD[lvl]]
+  const conclusion = advice ? [advice] : (summary?.conclusion ?? [FALLBACK_LEAD[lvl]])
   const steps = summary?.homeSteps ?? FALLBACK_STEPS[lvl]
   const bg = lvl === 'green' ? colors.triageGreenBg : lvl === 'yellow' ? colors.triageYellowBg : colors.triageRedBg
   const fg = lvl === 'green' ? colors.triageGreenText : lvl === 'yellow' ? colors.triageYellowText : colors.triageRedText
@@ -31,7 +35,7 @@ const ResultSummary = ({ summary, level }: Props) => {
       <Text style={[s.label, { color: colors.textMuted }]}>ДҮГНЭЛТ</Text>
       <View style={[s.card, { backgroundColor: bg }]}>
         {conclusion.map((line, i) => (
-          <Text key={i} style={[i === 0 ? s.lead : s.line, { color: fg }]}>{line}</Text>
+          <Text key={i} style={[!advice && i === 0 ? s.lead : s.line, { color: fg }]}>{line}</Text>
         ))}
       </View>
       <Text style={[s.label, { color: colors.textMuted, marginTop: 6 }]}>ЦААШИД ХЭВШҮҮЛЭХ АРГА ХЭМЖЭЭ</Text>

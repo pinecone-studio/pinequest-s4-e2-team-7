@@ -245,6 +245,8 @@ export type AnalyzeResult = {
   detections: InferenceDetection[]
   /** Per-photo breakdown (present from analyzeImages), used to draw boxes on each image. */
   photos?: PhotoAnalysis[]
+  /** Gemini-generated parent advice (server path only; absent on offline/local fallback). */
+  advice?: string
   modelVersion?: string
 }
 

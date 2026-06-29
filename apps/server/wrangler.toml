@@ -13,6 +13,11 @@ database_name = "screener-db"
 database_id = "cf904595-e46a-4ef2-ba00-df2e7736935e"
 migrations_dir = "../../packages/db/drizzle"
 
-# Secrets (set with `npx wrangler secret put JWT_SECRET`) — NOT committed.
+# Secrets (set with `npx wrangler secret put <NAME>`) — NOT committed:
+#   JWT_SECRET       — auth signing key
+#   GEMINI_API_KEY   — enables Gemini parent-advice on /analyze (web-тэй ижил seam).
+#                      Тохируулаагүй бол triage түвшний deterministic зөвлөмж буцна.
 [vars]
 CORS_ORIGIN = "*"
+# Optional — defaults to gemini-2.5-flash in code if unset.
+GEMINI_MODEL = "gemini-2.5-flash"
