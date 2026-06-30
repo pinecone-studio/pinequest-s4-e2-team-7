@@ -1,64 +1,101 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { LinearGradient } from 'expo-linear-gradient'
+import { BlurView } from 'expo-blur'
 import { useTheme } from '@/lib/ThemeContext'
 
 type Props = { onScan: () => void }
 
+// Three steps, each its own blurred gradient chip in one of the 3 colors.
+const SUB_CHIPS = [
+  { word: 'Асуумж', rgb:  '130,192,204' }, // #00b2ca
+  { word: 'Үнэлгээ', rgb: '0,178,202'  }, // #1d4e89
+  { word: 'Дүгнэлт', rgb: '29,78,137' }, // #82c0cc
+]
+
+// Glassy teal hero: a real expo-blur frost behind a semi-transparent teal
+// gradient (built around the brand #0E9594) + a white sheen, with white text
+// and a frosted action button.
 const ScanHeroCard = ({ onScan }: Props) => {
-  const { colors, dark } = useTheme()
+  const { dark } = useTheme()
 
-  // Dark mode wears the monochrome-glass skin: a translucent dark card with a
-  // hairline edge and an outlined action, instead of the honey-gold fill.
   return (
-    <View
-      style={[
-        s.card,
-        dark
-          ? { backgroundColor: colors.surfaceRaised, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border }
-          : { backgroundColor: colors.primary },
-      ]}
-    >
-      <View style={s.textCol}>
-        <Text style={[s.title, { color: dark ? colors.textBase : colors.primaryText }]}>
-          Амны хөндийн байдал
-        </Text>
-        <Text style={[s.sub, { color: dark ? colors.textSecondary : colors.primaryText }]}>
-          Асуумж ・ Үнэлгээ ・ Дүгнэлт
-        </Text>
-      </View>
+    <View style={s.shadow}>
+      <View style={s.card}>
+        {/* real frosted-glass blur of whatever is behind the card */}
+        <BlurView intensity={50} tint={dark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+        {/* teal tint — semi-transparent so the blurred background shows through */}
+        <LinearGradient
+          colors={['rgba(21,184,171,0.74)', 'rgba(14,149,148,0.74)', 'rgba(10,111,110,0.74)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        {/* glass sheen */}
+        <LinearGradient
+          colors={['rgba(255,255,255,0.22)', 'rgba(255,255,255,0)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
 
-      <TouchableOpacity
-        style={[
-          s.btn,
-          dark
-            ? { backgroundColor: 'transparent', borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border }
-            : { backgroundColor: colors.primaryText },
-        ]}
-        onPress={onScan}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="camera-outline" size={18} color={dark ? colors.textBase : colors.primary} />
-      </TouchableOpacity>
+        <View style={s.content}>
+          <View style={s.textCol}>
+            <Text style={s.title}>Амны хөндийн байдал</Text>
+            <View style={s.subRow}>
+              {SUB_CHIPS.map((c) => (
+                <View key={c.word} style={s.chip}>
+                  {/* blurred, single-color gradient chip behind each word */}
+                  <BlurView intensity={30} tint={dark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
+                  <LinearGradient
+                    colors={[`rgba(${c.rgb},0.9)`, `rgba(${c.rgb},0.6)`]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                    style={StyleSheet.absoluteFill}
+                  />
+                  <Text style={s.sub}>{c.word}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          <TouchableOpacity style={s.btn} onPress={onScan} activeOpacity={0.8}>
+            <Ionicons name="camera-outline" size={18} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   )
 }
 
 const s = StyleSheet.create({
-  card: {
+  // shadow lives on an un-clipped wrapper (the inner card uses overflow:hidden)
+  shadow: {
     borderRadius: 20,
-    padding: 22,
+    shadowColor: '#0A6F6E',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.28,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  card: { borderRadius: 20, overflow: 'hidden' },
+  content: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
-    elevation: 5,
+    padding: 22,
   },
-  textCol: { gap: 4 },
-  title: { fontSize: 18, fontFamily: 'Inter_700Bold', letterSpacing: -0.3 },
-  sub: { fontSize: 14, fontFamily: 'Inter_400Regular', opacity: 0.75 },
+  textCol: { gap: 6, alignItems: 'flex-start' },
+  title: { fontSize: 18, fontFamily: 'Inter_700Bold', letterSpacing: -0.3, color: '#FFFFFF' },
+  subRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  chip: {
+    borderRadius: 8,
+    overflow: 'hidden',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+  },
+  sub: { fontSize: 13, fontFamily: 'Inter_500Medium', color: '#FFFFFF' },
   btn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -66,8 +103,10 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 9999,
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.45)',
   },
-  btnText: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
 })
 
 export default ScanHeroCard
