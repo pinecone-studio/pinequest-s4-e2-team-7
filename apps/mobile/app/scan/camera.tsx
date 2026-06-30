@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams } from 'expo-router'
 import { QUADRANTS, QUADRANT_LABEL_MN, isUpperQuadrant } from '@pinequest/core'
 import { isModelCached, downloadModel } from '@/lib/localInference'
+import { MODEL_URL } from '@/lib/config'
 import { useCameraCapture } from '@/lib/useCameraCapture'
 import { usePriorLevel } from '@/lib/usePriorLevel'
 import { useHistoryPrefetch } from '@/lib/useHistoryPrefetch'
@@ -35,11 +36,14 @@ export default function CameraScreen() {
     return () => clearTimeout(t)
   }, [])
 
+  // The model is normally warmed at the authenticated shell (useModelPrefetch);
+  // this is a backstop so the camera still triggers the download if the user
+  // reached it before that ran. downloadModel() no-ops when already cached.
   useEffect(() => {
-    const modelUrl = process.env.EXPO_PUBLIC_MODEL_URL
-    if (!modelUrl) return
+    const url = MODEL_URL
+    if (!url) return
     isModelCached().then((cached) => {
-      if (!cached) downloadModel(modelUrl).catch(() => {})
+      if (!cached) downloadModel(url).catch(() => {})
     })
   }, [])
 

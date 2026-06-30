@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import * as FileSystem from 'expo-file-system/legacy'
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 import { useRouter } from 'expo-router'
 import type { CameraView } from 'expo-camera'
@@ -68,12 +69,20 @@ export const useCameraCapture = (params: Params) => {
       if (result.screeningId.startsWith('local-')) {
         const user = await getUser()
         let fi = 0
+        // Carry the actual JPEG bytes (base64) so the photos reach R2 when this
+        // offline screening syncs up — local file:// URIs are meaningless server-side.
+        const imageData = await Promise.all(
+          QUADRANTS.map(q =>
+            FileSystem.readAsStringAsync(ready[q], { encoding: FileSystem.EncodingType.Base64 }),
+          ),
+        )
         await outbox.add({
           id: result.screeningId,
           childKey: params.childKey, classId: params.classId,
           schoolId: params.schoolId, seasonId: params.seasonId,
           screenedById: user?.id ?? 'anonymous',
           imageRefs: QUADRANTS.map(q => ready[q]),
+          imageData,
           findings: detectionsToFindings(result.detections, () => `${result.screeningId}-f${fi++}`),
           symptoms: symptomsObj,
           rawAnswers,

@@ -1,11 +1,10 @@
 import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTheme } from '@/lib/ThemeContext'
-import VolunteerDentistPanel from './VolunteerDentistPanel'
 
 type Props = { guardianPhone?: string; childKey?: string }
 
-export default function ResultRedAdvice({ guardianPhone, childKey }: Props) {
+export default function ResultRedAdvice({ guardianPhone }: Props) {
   const { colors } = useTheme()
   const router = useRouter()
 

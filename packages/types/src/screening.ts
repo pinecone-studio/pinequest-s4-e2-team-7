@@ -147,7 +147,15 @@ export interface Screening {
 }
 
 /** Payload a device sends to persist a screening (no PII — childKey only). */
-export type ScreeningCreate = Omit<Screening, 'syncedAt'>
+export type ScreeningCreate = Omit<Screening, 'syncedAt'> & {
+  /**
+   * Base64-encoded JPEGs of the captured photos, carried ONLY by the offline
+   * outbox so the image bytes reach R2 when the screening syncs up. The online
+   * capture path uploads the files via multipart instead and omits this. When
+   * present the server stores these to R2 and ignores `imageRefs`.
+   */
+  imageData?: string[]
+}
 
 /** Expected dentition stage, derived from age (educational — NOT a per-tooth claim). */
 export type DentitionStage = 'primary' | 'mixed' | 'permanent'

@@ -5,7 +5,7 @@ import { Upload, RotateCcw } from '@/lib/icons'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import { FlatCard } from '@/components/consumer/warm/WarmUI'
 import { cn } from '@/lib/utils'
-import { getMeta, LOTTIE_SRC, MAX_UPLOAD_BYTES } from './types'
+import { getMeta, LOTTIE_SRC } from './types'
 import type { ScanDetection } from '@/lib/consumerState'
 
 // ── Зураг дээрх detection boxes ──────────────────────────────────────────────
