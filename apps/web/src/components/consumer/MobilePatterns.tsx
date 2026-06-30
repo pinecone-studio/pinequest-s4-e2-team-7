@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { HandRaisedIcon, CameraIcon, StarIcon, ClockIcon, PhoneIcon, ArrowUpRightIcon, ChevronRightIcon } from '@heroicons/react/24/solid'
+import { CameraIcon, StarIcon, ClockIcon, PhoneIcon, ArrowUpRightIcon, ChevronRightIcon } from '@heroicons/react/24/solid'
 import { FilterPill } from '@/components/consumer/warm/WarmUI'
 import { cn } from '@/lib/utils'
 

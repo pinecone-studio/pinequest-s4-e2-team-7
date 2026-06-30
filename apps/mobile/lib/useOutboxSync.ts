@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { AppState, type AppStateStatus } from 'react-native'
+import NetInfo from '@react-native-community/netinfo'
 import { Outbox } from '@pinequest/sync'
 import { SQLiteStore } from './sqliteStore'
 import { getToken } from './auth'
-
-const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:4000'
+import { API_BASE as BASE } from './config'
 
 const store = new SQLiteStore()
 export const outbox = new Outbox(store)
@@ -56,6 +56,21 @@ export const useOutboxSync = () => {
       appStateRef.current = next
     })
     return () => sub.remove()
+  }, [sync])
+
+  // Re-sync the moment connectivity is restored. This is the key path for
+  // no-signal areas: screenings captured offline flush automatically as soon as
+  // the phone regains a reachable network, without waiting for a manual refresh
+  // or an app foreground cycle. We fire only on the offline→online TRANSITION so
+  // a stable connection doesn't re-trigger sync on every NetInfo change event.
+  const wasConnectedRef = useRef(true)
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      const online = !!state.isConnected && state.isInternetReachable !== false
+      if (online && !wasConnectedRef.current) void sync()
+      wasConnectedRef.current = online
+    })
+    return () => unsubscribe()
   }, [sync])
 
   const retryStuck = useCallback(async (id: string) => {

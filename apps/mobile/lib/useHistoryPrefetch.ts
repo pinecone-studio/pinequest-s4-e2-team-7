@@ -2,8 +2,7 @@ import { useEffect } from 'react'
 import type { HistoryCacheEntry } from '@pinequest/sync'
 import { historyCache } from './sqliteHistoryCache'
 import { getToken } from './auth'
-
-const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:4000'
+import { API_BASE as BASE } from './config'
 
 /** Silently refreshes the history cache for a class on every mount. No-op when offline. */
 export const useHistoryPrefetch = (classId: string, currentSeasonId: string) => {

@@ -2,8 +2,7 @@ import type { ChildScreeningSummary, InferenceDetection, ScreeningGuidance, Quad
 import { normalizeInference, detectionsToFindings, triage } from '@pinequest/core'
 import { getToken, type AuthUser } from './auth'
 import { runLocalInference, isModelCached } from './localInference'
-
-const BASE = process.env.EXPO_PUBLIC_API_URL ?? 'https://screener-api.ariunzul.workers.dev'
+import { API_BASE as BASE } from './config'
 
 const authHeader = async (): Promise<Record<string, string>> => {
   const token = await getToken()

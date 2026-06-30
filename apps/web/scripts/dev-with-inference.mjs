@@ -4,16 +4,12 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const webRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const modelDir = path.resolve(webRoot, '../model')
-const inferencePort = process.env.INFERENCE_PORT ?? '8765'
 const nextBin = path.join(
   webRoot,
   'node_modules',
   '.bin',
   process.platform === 'win32' ? 'next.cmd' : 'next',
 )
-const pythonBin = process.platform === 'win32' ? 'py' : 'python3'
-const pythonArgs = process.platform === 'win32' ? ['-3', 'server.py'] : ['server.py']
 
 const children = []
 

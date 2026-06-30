@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '@/lib/ThemeContext'
 import { useSession } from '@/lib/SessionContext'
+import { useModelPrefetch } from '@/lib/useModelPrefetch'
 import { roleConfigFor } from '@/lib/roleConfig'
 import CameraTabButton from '@/components/home/CameraTabButton'
 import GlassTabBarBackground from '@/components/home/GlassTabBarBackground'
@@ -20,6 +21,10 @@ const TabLayout = () => {
   const { activeRole } = useSession()
   const config = roleConfigFor(activeRole)
   const insets = useSafeAreaInsets()
+
+  // Warm the on-device model into cache the moment a signed-in user is in the app,
+  // so a first scan can still run if they later lose signal (no-signal soum).
+  useModelPrefetch()
 
   const barFloat = (insets.bottom || 12) + 6 // gap between the bar and the screen bottom
 
