@@ -30,7 +30,7 @@ export const buildParentEmailBody = (childName: string, s: ChildScreeningSummary
 
   if (s.symptoms.length) {
     lines.push(`── АЖИГЛАГДСАН ШИНЖ ТЭМДЭГ ─────────────────────`)
-    for (const sym of s.symptoms) lines.push(`  ⚠ ${SYMPTOM_MN[sym] ?? sym}`)
+    for (const sym of s.symptoms) lines.push(`  – ${SYMPTOM_MN[sym] ?? sym}`)
     lines.push(``)
   }
 

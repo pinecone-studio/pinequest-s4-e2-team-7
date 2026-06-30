@@ -99,6 +99,20 @@ export const symptomSetSchema = z.object({
   trauma: z.boolean().optional(),
 })
 
+/** AI-generated, age-aware parent guidance (persisted alongside a screening). */
+export const screeningGuidanceSchema = z.object({
+  homeCare: z.string(),
+  brushing: z.string(),
+  diet: z.string(),
+  prevention: z.string(),
+  nextStep: z.string(),
+})
+
+export const screeningSummarySchema = z.object({
+  advice: z.string(),
+  guidance: screeningGuidanceSchema.optional(),
+})
+
 /** Validates the device's screening-create payload (the trust boundary). */
 export const screeningCreateSchema = z.object({
   id: z.string(),
@@ -118,10 +132,16 @@ export const screeningCreateSchema = z.object({
   }),
   modelName: z.string(),
   modelVersion: z.string().optional(),
-  contentVersionId: z.string(),
+  // Optional + defaulted so offline mobile screenings (outbox sync) — which don't
+  // pin a content version — validate instead of 400-ing forever.
+  contentVersionId: z.string().optional().default('default'),
   capturedAt: z.string(),
   deviceId: z.string().optional(),
   consentAt: z.string().optional(),
   consentVersion: z.string().optional(),
+  // Optional captured image bytes (base64) — persisted so the photo lives in the DB.
+  imageData: z.array(z.string()).optional(),
+  // Optional AI summary (dentist-voice advice + age-aware guidance) to persist.
+  summary: screeningSummarySchema.optional(),
 })
 export type ScreeningCreateInput = z.infer<typeof screeningCreateSchema>

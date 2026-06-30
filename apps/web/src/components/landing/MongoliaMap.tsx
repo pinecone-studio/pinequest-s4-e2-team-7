@@ -5,12 +5,12 @@ import { AIMAGS, type Aimag } from './mongoliaAimags'
 
 // Three-tier encoding by dental-clinic count:
 // yellow = 5+ clinics, amber = 1-4 (limited — referral target), orange = none.
-const HAS = '#F2B705'
+const HAS = '#52A075'
 const FEW = '#E89B2C'
 const NONE = '#E2620E'
 const tier = (c: number): 'has' | 'few' | 'none' => (c >= 5 ? 'has' : c > 0 ? 'few' : 'none')
 const COLOR = { has: HAS, few: FEW, none: NONE }
-const TINT = { has: 'rgba(242,183,5,0.18)', few: 'rgba(232,155,44,0.18)', none: 'rgba(226,98,14,0.18)' }
+const TINT = { has: 'rgba(82, 160, 117,0.18)', few: 'rgba(232,155,44,0.18)', none: 'rgba(226,98,14,0.18)' }
 const BADGE = { has: 'Хангалттай', few: 'Хязгаарлагдмал', none: 'Эмнэлэггүй' }
 const fmt = (n: number) => n.toLocaleString('en-US')
 

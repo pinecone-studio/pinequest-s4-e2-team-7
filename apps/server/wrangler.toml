@@ -13,6 +13,12 @@ database_name = "screener-db"
 database_id = "cf904595-e46a-4ef2-ba00-df2e7736935e"
 migrations_dir = "../../packages/db/drizzle"
 
+# R2 object storage for captured screening images. Private bucket — bytes are
+# served only through the auth-scoped /api/screenings/:id/image route.
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "screener-images"
+
 # Secrets (set with `npx wrangler secret put <NAME>`) — NOT committed:
 #   JWT_SECRET       — auth signing key
 #   GEMINI_API_KEY   — enables Gemini parent-advice on /analyze (web-тэй ижил seam).

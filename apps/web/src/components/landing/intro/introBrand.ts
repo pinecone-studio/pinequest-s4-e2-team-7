@@ -7,7 +7,7 @@
 // added, copy this file verbatim into apps/mobile and consume the same values.
 //
 // Palette intentionally stays on the shipping ToothLings system: honey-gold
-// (#F2B705) accent on a deep warm-ink field — NOT a new orange/mint scale.
+// (#52A075) accent on a deep warm-ink field — NOT a new orange/mint scale.
 // ─────────────────────────────────────────────────────────────────────────
 
 /** Closed-mouth field + glow + wordmark colors (mirror of the gold brand). */
@@ -18,12 +18,12 @@ export const INTRO = {
   base2: '#1B1712',
   base3: '#241E14',
   // honey-gold inner-lip glow (the deliberate accent — rim only, never a flood).
-  glow: '#F2B705',
-  glowHi: '#FFD24D',
-  glowSoft: 'rgba(242, 183, 5, 0.55)',
+  glow: '#52A075',
+  glowHi: '#62D094',
+  glowSoft: 'rgba(82, 160, 117, 0.55)',
   // revealed wordmark
   tooth: '#FFFFFF',
-  lings: '#F2B705',
+  lings: '#52A075',
   // next-screen surface — the landing field is already black, so the hand-off is seamless.
   next: '#000000',
 } as const

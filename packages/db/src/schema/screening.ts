@@ -48,8 +48,25 @@ export const screeningImages = sqliteTable('ScreeningImage', {
   id: uuid(),
   screeningId: text('screeningId').notNull(),
   ref: text('ref').notNull(),
+  // Base64-encoded (downscaled) JPEG bytes. Nullable: legacy rows store only a ref.
+  data: text('data'),
   order: integer('order').notNull().default(0),
 }, (t) => [index('ScreeningImage_screeningId_idx').on(t.screeningId)])
+
+// AI-generated parent-facing summary for a screening (dentist-voice advice + the
+// age-aware guidance). 1:1 side table, never PII. Nullable guidance fields tolerate
+// partial Gemini output. Stored so the summary is reviewable later, not just at capture.
+export const screeningSummaries = sqliteTable('ScreeningSummary', {
+  id: uuid(),
+  screeningId: text('screeningId').notNull().unique(),
+  advice: text('advice').notNull(),
+  homeCare: text('homeCare'),
+  brushing: text('brushing'),
+  diet: text('diet'),
+  prevention: text('prevention'),
+  nextStep: text('nextStep'),
+  generatedAt: ts('generatedAt').notNull().$defaultFn(() => new Date()),
+})
 
 export const toothFindings = sqliteTable('ToothFinding', {
   id: text('id').primaryKey(), // client-generated

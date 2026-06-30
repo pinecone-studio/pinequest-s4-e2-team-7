@@ -18,6 +18,8 @@ export const schoolClasses = sqliteTable('SchoolClass', {
   name: text('name').notNull(),
   seasonId: text('seasonId').notNull(),
   gradeLevel: integer('gradeLevel'),
+  /** Planned class size set at creation — denominator for screened-vs-remaining coverage. */
+  expectedTotal: integer('expectedTotal'),
   sourceClassId: text('sourceClassId'),
   scheduledAt: ts('scheduledAt'),
   reminderPhone: text('reminderPhone'),

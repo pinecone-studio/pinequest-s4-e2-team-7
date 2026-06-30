@@ -2,6 +2,7 @@
 
 import 'leaflet/dist/leaflet.css'
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { MapPinIcon } from '@heroicons/react/24/solid'
 import type { VolunteerDentist } from '@/hooks/useHelp'
 import { SPECIALTY_LABEL } from './DentistProfileCard'
 
@@ -145,7 +146,7 @@ export const VolunteerDentistsMap = ({ dentists, selectedId, onSelect, onDistanc
         disabled={locating}
         className="absolute bottom-2 right-2 z-[1000] flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1.5 text-[11px] font-semibold text-primary shadow-md hover:bg-surface-raised disabled:opacity-60"
       >
-        {locating ? '…' : '📍'} {userPos ? 'Байршил тодорхойлогдсон' : 'Байршил тодорхойлох'}
+        {locating ? '…' : <MapPinIcon className="size-3.5" />} {userPos ? 'Байршил тодорхойлогдсон' : 'Байршил тодорхойлох'}
       </button>
     </div>
   )

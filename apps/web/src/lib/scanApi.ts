@@ -1,7 +1,9 @@
+import type { ToothFinding } from '@pinequest/types'
 import {
   getQuestionnaire,
   questionnaireSymptoms,
   type ScanDetection,
+  type ScanGuidance,
   type ScanResult,
 } from '@/lib/consumerState'
 
@@ -11,6 +13,10 @@ type AnalyzePayload = {
   needsDoctor: boolean
   detections: ScanDetection[]
   advice: string
+  guidance?: ScanGuidance
+  findings?: ToothFinding[]
+  triageScore?: number
+  confidentWording?: boolean
 }
 
 type AnalyzeErrorPayload = {
@@ -60,6 +66,10 @@ export const analyzeScanImage = async (file: File, imageUrl: string): Promise<Sc
     needsDoctor: data.needsDoctor,
     detections: data.detections,
     advice: data.advice,
+    guidance: data.guidance,
+    findings: data.findings,
+    triageScore: data.triageScore,
+    confidentWording: data.confidentWording,
     createdAt: new Date().toISOString(),
   }
 }

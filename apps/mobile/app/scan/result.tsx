@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTheme } from '@/lib/ThemeContext'
 import type { PhotoAnalysis } from '@/lib/api'
 import { buildChildSummary, detectionsToFindings } from '@pinequest/core'
-import type { SymptomSet } from '@pinequest/types'
+import type { ScreeningGuidance, SymptomSet } from '@pinequest/types'
 import ResultTriageCard, { TriageLevel } from '@/components/scan/result/ResultTriageCard'
 import ResultPhotoCard from '@/components/scan/result/ResultPhotoCard'
 import ResultDetectionList from '@/components/scan/result/ResultDetectionList'
@@ -36,6 +36,7 @@ export default function ResultScreen() {
     symptoms?: string
     capturedAt?: string
     advice?: string
+    guidance?: string
   }>()
 
   const priorLevel = usePriorLevel(params.childKey ?? '')
@@ -47,6 +48,15 @@ export default function ResultScreen() {
   // Gemini-generated дүгнэлт (server path). Offline/local fallback үед хоосон —
   // тэр үед ResultSummary deterministic buildChildSummary рүү буцна.
   const advice = params.advice?.trim() || null
+
+  // Server дэх Gemini-ийн нас тохирсон дэлгэрэнгүй зөвлөмж. Offline үед хоосон.
+  const guidance = useMemo<ScreeningGuidance | null>(() => {
+    try {
+      return params.guidance ? (JSON.parse(params.guidance) as ScreeningGuidance) : null
+    } catch {
+      return null
+    }
+  }, [params.guidance])
 
   const photos = useMemo<PhotoAnalysis[]>(() => {
     try {
@@ -95,7 +105,7 @@ export default function ResultScreen() {
           ))}
         </View>
         <ResultDetectionList detections={allDetections} />
-        <ResultSummary summary={summary} level={level} advice={advice} />
+        <ResultSummary summary={summary} level={level} advice={advice} guidance={guidance} />
         {level === 'yellow' && <ResultYellowAdvice />}
         {level === 'red' && <ResultRedAdvice guardianPhone={params.guardianPhone} childKey={params.childKey} />}
         <ResultBottomActions

@@ -32,7 +32,7 @@ export const FeaturesSection = () => {
                     <ul className="flex flex-col gap-4">
                       {step.bullets.map((b, j) => (
                         <li key={j} className="flex items-start gap-3">
-                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: '#F2B705' }} />
+                          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: '#52A075' }} />
                           <span className="text-[16px] leading-snug" style={{ color: 'rgba(255,255,255,0.8)' }}>{b}</span>
                         </li>
                       ))}
@@ -73,7 +73,7 @@ export const FeaturesSection = () => {
               <ul className="flex flex-col gap-5">
                 {step.bullets.map((b, j) => (
                   <li key={j} className="flex items-start gap-4">
-                    <span className="mt-2.5 h-2 w-2 shrink-0 rounded-full" style={{ background: '#F2B705' }} />
+                    <span className="mt-2.5 h-2 w-2 shrink-0 rounded-full" style={{ background: '#52A075' }} />
                     <span style={{ fontSize: 'clamp(15px,1.4vw,19px)', lineHeight: 1.5, color: 'rgba(255,255,255,0.8)' }}>{b}</span>
                   </li>
                 ))}

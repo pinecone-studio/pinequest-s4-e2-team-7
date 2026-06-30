@@ -47,7 +47,7 @@ export const IncomingCallProvider = ({ children }: { children: ReactNode }) => {
       setIncoming((cur) => {
         if (cur || !fresh) return cur
         stopRing.current = startRingtone()
-        if (typeof document !== 'undefined') document.title = `📞 ${fresh.fromName}…`
+        if (typeof document !== 'undefined') document.title = `${fresh.fromName} дуудаж байна…`
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted') new Notification(`${fresh.fromName} дуудаж байна`)
         bc.current?.postMessage({ type: 'ringing', id: fresh.id })
         return fresh

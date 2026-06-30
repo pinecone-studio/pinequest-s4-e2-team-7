@@ -57,7 +57,7 @@ export const useCameraCapture = (params: Params) => {
       const result = await analyzeImages(shots, {
         childKey: params.childKey, classId: params.classId,
         schoolId: params.schoolId, seasonId: params.seasonId,
-        symptoms: symptomsJson,
+        symptoms: symptomsJson, age: ageStr,
       })
 
       if (result.screeningId.startsWith('local-')) {
@@ -89,6 +89,7 @@ export const useCameraCapture = (params: Params) => {
           detectionsCount: String(result.detections.length),
           photos: JSON.stringify(result.photos ?? []),
           advice: result.advice ?? '',
+          guidance: result.guidance ? JSON.stringify(result.guidance) : '',
           guardianPhone: params.guardianPhone ?? '',
           childKey: params.childKey, classId: params.classId,
           schoolId: params.schoolId, seasonId: params.seasonId,

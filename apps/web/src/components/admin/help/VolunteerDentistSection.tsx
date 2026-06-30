@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useState, useCallback, useMemo } from 'react'
+import { MapPinIcon } from '@heroicons/react/24/solid'
 import type { BoardStudent } from '@/hooks/useBoard'
 import type { ChildSummaryPayload } from '@/hooks/useChildSummary'
 import { useVolunteerDentists, useRequestHelp } from '@/hooks/useHelp'
@@ -107,7 +108,7 @@ export const VolunteerDentistSection = ({ student, detail }: Props) => {
                     }}
                   />
                   {dist != null && (
-                    <p className="ml-3 mt-0.5 text-[10px] text-primary font-medium">📍 {dist.toFixed(0)} км</p>
+                    <p className="ml-3 mt-0.5 flex items-center gap-1 text-[10px] text-primary font-medium"><MapPinIcon className="size-3" /> {dist.toFixed(0)} км</p>
                   )}
                 </div>
               )

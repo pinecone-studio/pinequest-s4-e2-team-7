@@ -21,8 +21,10 @@ export const useStats = (opts: { seasonId?: string; schoolId?: string } = {}) =>
   ).toString()
   return useQuery({
     queryKey: ['stats', opts],
-    queryFn: () => apiStatFetch<DashStats>(`/api/stats${qs ? `?${qs}` : ''}`, { token, revalidate: 120 }),
+    // no-store + polling: mobile синк хийсний дараа триаж тоо/хамрагдалт шинэчлэгдэнэ.
+    queryFn: () => apiStatFetch<DashStats>(`/api/stats${qs ? `?${qs}` : ''}`, { token }),
     enabled: !!token,
+    refetchInterval: 10_000,
   })
 }
 
@@ -32,7 +34,8 @@ export const useTimeseries = (range: string, seasonId?: string) => {
   const qs = new URLSearchParams({ range, ...(seasonId ? { seasonId } : {}) }).toString()
   return useQuery({
     queryKey: ['timeseries', range, seasonId ?? 'all'],
-    queryFn: () => apiStatFetch<Timeseries>(`/api/stats/timeseries?${qs}`, { token, revalidate: 120 }),
+    queryFn: () => apiStatFetch<Timeseries>(`/api/stats/timeseries?${qs}`, { token }),
     enabled: !!token,
+    refetchInterval: 10_000,
   })
 }

@@ -33,13 +33,16 @@ const SchoolClassesPage = () => {
 
   const [name, setName] = useState('')
   const [seasonId, setSeasonId] = useState('2026-spring')
+  const [total, setTotal] = useState('')
   const [modalSource, setModalSource] = useState<SchoolClassRow | null>(null)
 
   const onAdd = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!name.trim()) return
-    createClass.mutate({ name: name.trim(), seasonId })
+    const expectedTotal = parseInt(total, 10)
+    createClass.mutate({ name: name.trim(), seasonId, expectedTotal: expectedTotal > 0 ? expectedTotal : undefined })
     setName('')
+    setTotal('')
   }
 
   return (
@@ -70,6 +73,14 @@ const SchoolClassesPage = () => {
       <form onSubmit={onAdd} className="flex flex-wrap gap-2">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ангийн нэр (ж: 3А)" className={inp} />
         <input value={seasonId} onChange={(e) => setSeasonId(e.target.value)} placeholder="Улирал" className={inp} />
+        <input
+          value={total}
+          onChange={(e) => setTotal(e.target.value.replace(/\D/g, ''))}
+          placeholder="Нийт хүүхэд"
+          inputMode="numeric"
+          aria-label="Нийт хүүхэд"
+          className={`${inp} w-32`}
+        />
         <Button type="submit" disabled={createClass.isPending}>Нэмэх</Button>
       </form>
 

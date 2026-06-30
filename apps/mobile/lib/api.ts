@@ -1,3 +1,4 @@
+import type { ChildScreeningSummary, InferenceDetection, ScreeningGuidance, SymptomSet, UserRole, FollowUpStatus } from '@pinequest/types'
 import type { ChildScreeningSummary, InferenceDetection, Quadrant, SymptomSet, UserRole, FollowUpStatus } from '@pinequest/types'
 import { normalizeInference, detectionsToFindings, triage } from '@pinequest/core'
 import { getToken, type AuthUser } from './auth'
@@ -316,6 +317,34 @@ export const getHelpRequests = () => apiFetch<HelpRequestRow[]>('/api/help/reque
 export const connectHelpRequest = (id: string) =>
   apiFetch<HelpRequest>(`/api/help/requests/${id}/connect`, { method: 'POST' })
 
+/** A booked video-call appointment (server response: the row + its PII-free Jitsi room URL). */
+export type Appointment = {
+  id: string
+  dentistId: string
+  childKey: string
+  schoolId: string
+  level: 'red' | 'yellow'
+  scheduledAt: string
+  roomName: string
+  roomUrl: string
+  status: 'scheduled' | 'completed' | 'cancelled'
+  dentistNote: string | null
+  createdById: string
+  createdAt: string
+}
+
+/** Book a video-call appointment with a volunteer dentist for a flagged child. */
+export const createAppointment = (
+  dentistId: string,
+  childKey: string,
+  scheduledAt: string,
+  level: 'red' | 'yellow',
+) =>
+  apiFetch<Appointment>('/api/appointments', {
+    method: 'POST',
+    body: JSON.stringify({ dentistId, childKey, scheduledAt, level }),
+  })
+
 export type AnalyzeMeta = {
   childKey: string
   classId: string
@@ -325,6 +354,8 @@ export type AnalyzeMeta = {
   deviceId?: string
   /** JSON-serialized SymptomSet — mapped from raw questionnaire answers before the call. */
   symptoms?: string
+  /** Хүүхдийн нас (жилээр) — Gemini-ийн зөвлөмжийг насанд тохируулахад ашиглана. */
+  age?: string
 }
 
 /** One captured region (quadrant) tied to its own detections, for the result UI. */
@@ -346,6 +377,8 @@ export type AnalyzeResult = {
   photos?: PhotoAnalysis[]
   /** Gemini-generated parent advice (server path only; absent on offline/local fallback). */
   advice?: string
+  /** Нас тохирсон дэлгэрэнгүй зөвлөмж (server path only; offline үед байхгүй). */
+  guidance?: ScreeningGuidance
   modelVersion?: string
 }
 

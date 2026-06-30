@@ -26,9 +26,9 @@ export const FeaturesLeftPanel = ({ p }: { p: MotionValue<number> }) => {
   const op0 = useTransform(p, [T1S, T1E], [1, 0.22])
   const op1 = useTransform(p, [T1S, T1E, T2S, T2E], [0.22, 1, 1, 0.22])
   const op2 = useTransform(p, [T2S, T2E], [0.22, 1])
-  const col0 = useTransform(op0, [0.22, 1], ['rgba(255,255,255,0.28)', '#F2B705'])
-  const col1 = useTransform(op1, [0.22, 1], ['rgba(255,255,255,0.28)', '#F2B705'])
-  const col2 = useTransform(op2, [0.22, 1], ['rgba(255,255,255,0.28)', '#F2B705'])
+  const col0 = useTransform(op0, [0.22, 1], ['rgba(255,255,255,0.28)', '#52A075'])
+  const col1 = useTransform(op1, [0.22, 1], ['rgba(255,255,255,0.28)', '#52A075'])
+  const col2 = useTransform(op2, [0.22, 1], ['rgba(255,255,255,0.28)', '#52A075'])
   const cols = [col0, col1, col2]
 
   return (

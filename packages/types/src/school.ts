@@ -18,6 +18,8 @@ export interface SchoolClass {
   name: string
   seasonId: SeasonId
   gradeLevel?: number
+  /** Planned class size set at creation — denominator for screened-vs-remaining coverage. */
+  expectedTotal?: number | null
   /** Carry-forward pointer to the prior season's class this was promoted from. */
   sourceClassId?: string
   /** Screener-set date/time for the next-season screening visit (ISO). */

@@ -33,9 +33,14 @@ classRoutes.get('/schools/:schoolId/classes', authenticate, async (c) => {
 })
 
 classRoutes.post('/schools/:schoolId/classes', authorize('admin'), async (c) => {
-  const { name, seasonId, gradeLevel } = await c.req.json<{ name: string; seasonId: string; gradeLevel?: number }>()
+  const { name, seasonId, gradeLevel, expectedTotal } =
+    await c.req.json<{ name: string; seasonId: string; gradeLevel?: number; expectedTotal?: number }>()
   const [klass] = await c.get('db').insert(schoolClasses)
-    .values({ schoolId: c.req.param('schoolId'), name, seasonId, gradeLevel: gradeLevel ?? null }).returning()
+    .values({
+      schoolId: c.req.param('schoolId'), name, seasonId,
+      gradeLevel: gradeLevel ?? null,
+      expectedTotal: expectedTotal && expectedTotal > 0 ? expectedTotal : null,
+    }).returning()
   return c.json({ success: true, data: klass }, 201)
 })
 

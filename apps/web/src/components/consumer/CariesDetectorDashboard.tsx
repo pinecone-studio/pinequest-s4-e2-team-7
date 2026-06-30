@@ -75,6 +75,7 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
     setPreview(URL.createObjectURL(f))
     setResult(null)
     setAnalysisError(null)
+    save.reset()
   }
 
   const onAnalyze = async () => {
@@ -87,6 +88,8 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
       saveScanResult(scanResult)
       sessionStorage.setItem('screener.lastCapture', persistUrl)
       setResult(scanResult)
+      // Анги/хүүхэд сонгосон бол DB-д хадгалаад дашбордын кэшийг автоматаар синк хийнэ.
+      if (target) save.mutate({ scan: scanResult, target, persistUrl })
     } catch (err) {
       setAnalysisError(scanErrorText(err instanceof Error ? err.message : 'inference_failed'))
     } finally {

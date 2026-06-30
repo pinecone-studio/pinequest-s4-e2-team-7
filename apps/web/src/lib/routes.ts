@@ -1,3 +1,6 @@
+import type { ComponentType, SVGProps } from 'react'
+import { CameraIcon, PhoneIcon, SparklesIcon, UserIcon } from '@heroicons/react/24/solid'
+
 /** Consumer app paths — matches product user-flow diagram. */
 export const ROUTES = {
   landing: '/',
@@ -41,34 +44,34 @@ export const HOME_FEATURES: Array<{
   href: string
   label: string
   desc: string
-  emoji: string
+  Icon: ComponentType<SVGProps<SVGSVGElement>>
 }> = [
   {
     id: 'scan',
     href: ROUTES.scan.root,
     label: 'Screening',
     desc: 'Амны хөндийн зургийг танин, дүгнэлт хийх',
-    emoji: '📷',
+    Icon: CameraIcon,
   },
   {
     id: 'doctor',
     href: ROUTES.doctor.root,
     label: 'Дуудлага',
     desc: 'Эмч, чат, ойрын эмнэлэг',
-    emoji: '🩺',
+    Icon: PhoneIcon,
   },
   {
     id: 'brush',
     href: ROUTES.brush.root,
     label: 'Шүд угаалт',
     desc: 'Шүд угаах зөв арга ба ухаалаг хяналт',
-    emoji: '🪥',
+    Icon: SparklesIcon,
   },
   {
     id: 'profile',
     href: ROUTES.profile.root,
     label: 'Профайл',
     desc: 'Түүх, тохиргоо, динамик',
-    emoji: '👤',
+    Icon: UserIcon,
   },
 ]

@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 export const WARM = {
   bg: '#EDEDED',
   chrome: '#E8E8E8',
-  accent: '#F3B900',
+  accent: '#52A075',
   cardShadow: 'shadow-[0_4px_20px_rgba(0,0,0,0.02)]',
 } as const
 
@@ -56,7 +56,7 @@ export const FeatureRow = ({
   className?: string
 }) => (
   <li className={cn('flex items-center gap-3 py-3.5 text-[14px] text-text-muted', className)}>
-    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#F3B900]/10 text-[#B8860B] dark:text-primary">
+    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#52A075]/10 text-[#3B8C5E] dark:text-primary">
       {icon}
     </span>
     {label}
@@ -92,7 +92,7 @@ export const PillButton = ({
 }) => {
   const variants = {
     primary:
-      'bg-primary text-text-on-primary font-semibold shadow-[0_2px_8px_rgba(242,183,5,0.25)] hover:bg-primary-hover active:scale-[0.98]',
+      'bg-primary text-text-on-primary font-semibold shadow-[0_2px_8px_rgba(82, 160, 117,0.25)] hover:bg-primary-hover active:scale-[0.98]',
     secondary:
       'border border-border bg-surface-raised text-text-base font-semibold hover:bg-surface hover:border-border',
     ghost: 'text-text-muted font-medium hover:bg-surface-raised hover:text-text-base',
@@ -129,7 +129,7 @@ export const FilterPill = ({
     className={cn(
       'rounded-full px-5 py-2 text-[13px] font-semibold transition-all duration-200',
       active
-        ? 'bg-primary text-text-on-primary shadow-[0_2px_8px_rgba(242,183,5,0.25)]'
+        ? 'bg-primary text-text-on-primary shadow-[0_2px_8px_rgba(82, 160, 117,0.25)]'
         : 'bg-surface-raised text-text-muted ring-1 ring-border hover:text-text-base',
     )}
   >

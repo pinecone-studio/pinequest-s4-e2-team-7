@@ -1,7 +1,7 @@
 /**
- * Gemini зөвхөн эцэг эхэд зориулсан ЗӨВЛӨМЖ-ийн текст гаргана — detection/triage
- * биш. Энэ нь web дэх /api/inference/analyze-ийн advice seam-тэй ижил зарчим:
- * triage логик TS (packages/core) дотор үлдэнэ, загвар/AI зөвхөн илрүүлэлт + зөвлөмж.
+ * Gemini эцэг эхэд зориулсан ЗӨВЛӨМЖ (advice) + нас тохирсон дэлгэрэнгүй заавар
+ * (guidance) гаргана — detection/triage биш. triage логик TS (packages/core) дотор
+ * үлдэнэ; загвар/AI зөвхөн илрүүлэлт + зөвлөмж. Prompt → geminiPrompt, parse → geminiParsing.
  */
 import { QUADRANT_LABEL_MN } from '@pinequest/core'
 import type { InferenceDetection, Quadrant, SymptomSet, TriageLevel } from '@pinequest/types'
@@ -140,6 +140,7 @@ export const runGeminiAdvice = async (params: {
     triageLevel: params.triageLevel,
     photos: params.photos,
     symptoms: params.symptoms,
+    age: params.age ?? '',
   })
 
   const parts: Array<Record<string, unknown>> = [{ text: promptText }]
@@ -167,7 +168,7 @@ export const runGeminiAdvice = async (params: {
       return null
     }
     const text = extractGeminiResponseText(await res.json())
-    return text ? parseAdvice(text) : null
+    return text ? parseGuidance(text) : null
   } catch (err) {
     console.error('Gemini advice error:', err)
     return null

@@ -14,7 +14,7 @@ export default function ScanLayout() {
     >
       <Stack.Screen
         name="index"
-        options={{ title: 'Шалгуулагчийн мэдээлэл', headerBackTitle: 'Буцах' }}
+        options={{ title: 'Хэрэглэгчийн мэдээлэл', headerBackTitle: 'Буцах' }}
       />
       <Stack.Screen
         name="consent"
@@ -30,7 +30,7 @@ export default function ScanLayout() {
       />
       <Stack.Screen
         name="result"
-        options={{ title: 'Үр дүн', headerBackVisible: false }}
+        options={{ title: 'Дүгнэлт', headerBackVisible: false }}
       />
     </Stack>
   )

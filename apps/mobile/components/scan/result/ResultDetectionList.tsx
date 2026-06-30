@@ -18,14 +18,21 @@ export default function ResultDetectionList({ detections }: Props) {
     )
   }
 
-  const sorted = [...detections].sort((a, b) => b.confidence - a.confidence)
+  // Нэг төрлийн илрүүлэлт давтагдвал зөвхөн хамгийн өндөр итгэлцэлтэйг үлдээж,
+  // итгэлцлээр буурахаар эрэмбэлнэ — давхардсан картуудыг нэгтгэнэ.
+  const best = new Map<string, InferenceDetection>()
+  for (const d of detections) {
+    const cur = best.get(d.className)
+    if (!cur || d.confidence > cur.confidence) best.set(d.className, d)
+  }
+  const top = [...best.values()].sort((a, b) => b.confidence - a.confidence)
 
   return (
     <View style={s.container}>
       <Text style={[s.label, { color: colors.textMuted }]}>
-        ИЛРҮҮЛСЭН ЗҮЙЛС ({detections.length})
+        ИЛРҮҮЛСЭН ЗҮЙЛС ({top.length})
       </Text>
-      {sorted.map((d, i) => (
+      {top.map((d, i) => (
         <View key={i} style={[s.row, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={[s.dot, { backgroundColor: colors.triageYellowText }]} />
           <Text style={[s.name, { color: colors.textBase }]}>{findingLabel(d.className)}</Text>
