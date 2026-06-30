@@ -31,7 +31,10 @@ const s = StyleSheet.create({
   card: {
     flex: 1,
     borderRadius: 16, borderWidth: StyleSheet.hairlineWidth,
-    alignItems: 'flex-start', justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    // fixed spacing between icon and label (was justifyContent:'space-between',
+    // which collapsed the gap on shorter cards)
+    gap: 12,
     padding: 14,
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04, shadowRadius: 3, elevation: 1,
