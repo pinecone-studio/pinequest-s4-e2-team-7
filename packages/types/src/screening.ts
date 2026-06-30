@@ -95,6 +95,16 @@ export interface SymptomSet {
   trauma?: boolean
 }
 
+/**
+ * One questionnaire item exactly as asked + answered on the capture device,
+ * stored verbatim so the board shows the literal Q&A (immutable event log).
+ * `q`/`a` are display strings (e.g. "Өвддөг шүд байгаа юу?" → "Тийм").
+ */
+export interface QuestionnaireAnswer {
+  q: string
+  a: string
+}
+
 /** Derived triage outcome (computed in @pinequest/core, never by the model). */
 export interface TriageResult {
   level: TriageLevel
@@ -120,6 +130,8 @@ export interface Screening {
   imageRefs: string[]
   findings: ToothFinding[]
   symptoms: SymptomSet
+  /** Literal questionnaire Q&A as asked on the device (verbatim, for the board). */
+  rawAnswers?: QuestionnaireAnswer[]
   triage: TriageResult
   modelName: string
   modelVersion?: string

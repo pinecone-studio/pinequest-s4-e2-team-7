@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
-import { detectionsToFindings, normalizeInference, QUADRANTS, symptomSetSchema, triage, type RawInference } from '@pinequest/core'
-import type { Quadrant, SymptomSet } from '@pinequest/types'
+import { detectionsToFindings, normalizeInference, questionnaireAnswerSchema, QUADRANTS, symptomSetSchema, triage, type RawInference } from '@pinequest/core'
+import type { QuestionnaireAnswer, Quadrant, SymptomSet } from '@pinequest/types'
 import { persistScreening } from '../lib/persistScreening.js'
 import { fallbackAdvice, runGeminiAdvice } from '../lib/geminiAdvice.js'
 import { putBufferImages } from '../lib/r2Images.js'
@@ -18,6 +18,20 @@ const parseSymptoms = (raw: unknown): SymptomSet => {
     return parsed.success ? parsed.data : {}
   } catch {
     return {}
+  }
+}
+
+/** Parse the device's literal questionnaire Q&A (JSON `{q,a}[]`), dropping junk. */
+const parseRawAnswers = (raw: unknown): QuestionnaireAnswer[] => {
+  if (typeof raw !== 'string') return []
+  try {
+    const arr = JSON.parse(raw)
+    if (!Array.isArray(arr)) return []
+    return arr
+      .map((x) => questionnaireAnswerSchema.safeParse(x))
+      .flatMap((r) => (r.success ? [r.data] : []))
+  } catch {
+    return []
   }
 }
 
@@ -64,16 +78,12 @@ analyzeRoutes.post('/analyze', authenticate, async (c) => {
   // Run inference on each region, keeping its detections attributed to the
   // quadrant so the result UI can draw boxes per photo. All detections still feed
   // ONE screening — never split a multi-shot capture across separate records.
-  let photos: { quadrant: Quadrant; detections: ReturnType<typeof normalizeInference>['detections'] }[]
+  const photos: { quadrant: Quadrant; detections: ReturnType<typeof normalizeInference>['detections'] }[] = []
   try {
-    // Run each region's inference concurrently — they're independent, so awaiting
-    // them serially just multiplies the wall-clock latency on the critical path.
-    photos = await Promise.all(
-      shots.map(async (shot) => {
-        const raw = await runInference(inferenceUrl, shot.image)
-        return { quadrant: shot.quadrant, detections: normalizeInference(raw, 'server').detections }
-      }),
-    )
+    for (const shot of shots) {
+      const raw = await runInference(inferenceUrl, shot.image)
+      photos.push({ quadrant: shot.quadrant, detections: normalizeInference(raw, 'server').detections })
+    }
   } catch {
     return c.json({ success: false, data: null, message: 'inference_failed' }, 502)
   }
@@ -81,6 +91,7 @@ analyzeRoutes.post('/analyze', authenticate, async (c) => {
   const allDetections = photos.flatMap((p) => p.detections)
   const findings = detectionsToFindings(allDetections, () => crypto.randomUUID())
   const symptoms = parseSymptoms(body['symptoms'])
+  const rawAnswers = parseRawAnswers(body['rawAnswers'])
   const triageResult = triage(findings, symptoms)
   const screeningId = crypto.randomUUID()
 
@@ -88,16 +99,19 @@ analyzeRoutes.post('/analyze', authenticate, async (c) => {
   // triage/detection нь TS core-ийн албан ёсны үр дүн — Gemini үүнийг өөрчлөхгүй.
   // Тохиргоо/сүлжээ алдаа гарвал triage түвшинд тохирсон энгийн зөвлөмж рүү шилжинэ.
   const geminiKey = c.env.GEMINI_API_KEY
-  const advice =
-    (geminiKey
-      ? await runGeminiAdvice({
-          apiKey: geminiKey,
-          model: c.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
-          triageLevel: triageResult.level,
-          photos,
-          symptoms,
-        })
-      : null) ?? fallbackAdvice(triageResult.level, allDetections.length)
+  const generated = geminiKey
+    ? await runGeminiAdvice({
+        apiKey: geminiKey,
+        model: c.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
+        triageLevel: triageResult.level,
+        detections: allDetections,
+        symptoms,
+        age: typeof body['age'] === 'string' ? (body['age'] as string) : undefined,
+        image: shots[0]?.image,
+      })
+    : null
+  const advice = generated?.advice ?? fallbackAdvice(triageResult.level, allDetections.length)
+  const guidance = generated?.guidance
 
   // Upload the actual photo bytes to R2; the DB keeps only the object keys (refs).
   const buffers = await Promise.all(shots.map((s) => s.image.arrayBuffer()))
@@ -107,7 +121,7 @@ analyzeRoutes.post('/analyze', authenticate, async (c) => {
     {
       id: screeningId, childKey, classId, schoolId, seasonId,
       imageRefs,
-      findings, symptoms, modelName: 'yolov8',
+      findings, symptoms, rawAnswers, modelName: 'yolov8',
       summary: generated ? { advice, guidance } : undefined,
       capturedAt: new Date().toISOString(),
       deviceId: body['deviceId'] as string | undefined,

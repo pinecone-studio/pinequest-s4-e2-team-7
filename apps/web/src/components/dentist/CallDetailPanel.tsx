@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { VideoCameraIcon, CheckCircleIcon, UserCircleIcon } from '@heroicons/react/24/solid'
 import { childSummaryNarrative } from '@pinequest/core'
-import { ImageGallery, QuestionnairePanel, TRIAGE_BADGE, TRIAGE_LABEL } from '@/components/admin/summary/SummaryPanels'
+import { ImageGallery, QuestionnairePanel, RawQuestionnairePanel, TRIAGE_BADGE, TRIAGE_LABEL } from '@/components/admin/summary/SummaryPanels'
 import { useAppointmentSummary, useUpdateAppointmentNote, type AppointmentRow } from '@/hooks/useAppointments'
 import { useCall } from '@/context/IncomingCallContext'
 import { useToast } from '@/components/ui/Toast'
@@ -21,6 +21,15 @@ const countdown = (ms: number) => {
 
 const TABS = [['summary', 'Дүгнэлт'], ['survey', 'Асуумж'], ['note', 'Зөвлөмж']] as const
 type Tab = (typeof TABS)[number][0]
+
+// Gemini-ийн нас тохирсон зөвлөмжийн талбарууд (утас + эмчийн хяналттай ижил гарчиг).
+const GUIDANCE_FIELDS = [
+  { key: 'homeCare', label: 'Гэртээ' },
+  { key: 'brushing', label: 'Шүд угаах' },
+  { key: 'diet', label: 'Хоол хүнс' },
+  { key: 'prevention', label: 'Урьдчилан сэргийлэх' },
+  { key: 'nextStep', label: 'Дараагийн алхам' },
+] as const
 
 const CallDetailPanel = ({ appt }: { appt: AppointmentRow | null }) => {
   const { data: detail, isLoading } = useAppointmentSummary(appt?.id ?? null)
@@ -42,13 +51,20 @@ const CallDetailPanel = ({ appt }: { appt: AppointmentRow | null }) => {
 
   const name = appt.childName ?? appt.childKey.slice(0, 8)
   const summary = detail?.summary
+  // Утсан дээр гарсан Gemini дүгнэлт/зөвлөмж (offline бол хоосон → core narrative руу буцна).
+  const adviceText = detail?.advice?.trim() || ''
+  const adviceConclusion = adviceText.split(/(?<=[.!?])\s+/).map((l) => l.trim()).filter(Boolean)
+  const guidance = detail?.guidance
+  const guidanceSteps = guidance
+    ? GUIDANCE_FIELDS.filter((g) => guidance[g.key]?.trim()).map((g) => `${g.label}: ${guidance[g.key]}`)
+    : []
   const done = appt.status === 'completed'
   const cd = countdown(appt.scheduledAt)
   const save = () => update.mutate({ id: appt.id, note: note.trim() }, { onSuccess: () => toast.success('Зөвлөмж хадгалагдлаа') })
 
   return (
     <div className="flex h-full flex-col gap-4 rounded-2xl border border-border bg-surface p-5 shadow-(--shadow-card)">
-      <ImageGallery refs={detail?.imageRefs ?? []} />
+      <ImageGallery refs={detail?.imageRefs ?? []} screeningId={detail?.summary?.screeningId} />
 
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -81,13 +97,21 @@ const CallDetailPanel = ({ appt }: { appt: AppointmentRow | null }) => {
 
       <div className="min-h-[140px] flex-1">
         {isLoading && <Skeleton className="h-32 rounded-2xl" />}
-        {!isLoading && tab === 'summary' && (summary ? (
+        {!isLoading && tab === 'summary' && ((adviceText || summary) ? (
           <div className="rounded-2xl border border-triage-yellow/20 bg-triage-yellow-bg p-4">
-            <p className="mb-2 text-[12px] leading-relaxed text-text-muted">{name}, {childSummaryNarrative(summary)}</p>
-            <p className="text-[13px] font-semibold leading-snug text-text-base">{summary.headline}</p>
-            {summary.homeSteps.length > 0 && (
+            {adviceText
+              ? adviceConclusion.map((line, i) => (
+                  <p key={i} className="mb-1.5 text-[12px] leading-relaxed text-text-muted last:mb-0">{line}</p>
+                ))
+              : summary && (
+                  <>
+                    <p className="mb-2 text-[12px] leading-relaxed text-text-muted">{name}, {childSummaryNarrative(summary)}</p>
+                    <p className="text-[13px] font-semibold leading-snug text-text-base">{summary.headline}</p>
+                  </>
+                )}
+            {(guidanceSteps.length > 0 || (summary?.homeSteps.length ?? 0) > 0) && (
               <ul className="mt-3 flex flex-col gap-2">
-                {summary.homeSteps.map((step, i) => (
+                {(guidanceSteps.length > 0 ? guidanceSteps : (summary?.homeSteps ?? [])).map((step, i) => (
                   <li key={i} className="flex items-start gap-2 text-[12px] leading-relaxed text-text-muted"><CheckCircleIcon className="mt-0.5 size-3.5 shrink-0 text-triage-yellow/70" />{step}</li>
                 ))}
               </ul>
@@ -95,9 +119,11 @@ const CallDetailPanel = ({ appt }: { appt: AppointmentRow | null }) => {
           </div>
         ) : <p className="rounded-2xl border border-border bg-surface-raised p-4 text-[13px] text-text-muted">Энэ сурагч шалгагдаагүй байна.</p>)}
 
-        {!isLoading && tab === 'survey' && (detail?.questionnaire
-          ? <QuestionnairePanel q={detail.questionnaire} />
-          : <p className="rounded-2xl border border-border bg-surface-raised p-4 text-[13px] text-text-muted">Асуумжийн мэдээлэл алга.</p>)}
+        {!isLoading && tab === 'survey' && (detail?.questionnaireRaw?.length
+          ? <RawQuestionnairePanel answers={detail.questionnaireRaw} />
+          : detail?.questionnaire
+            ? <QuestionnairePanel q={detail.questionnaire} />
+            : <p className="rounded-2xl border border-border bg-surface-raised p-4 text-[13px] text-text-muted">Асуумжийн мэдээлэл алга.</p>)}
 
         {tab === 'note' && (
           <div className="flex flex-col gap-2">

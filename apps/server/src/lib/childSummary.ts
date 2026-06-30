@@ -4,6 +4,8 @@ import { children, screenings, screeningImages, type DB } from '@pinequest/db/d1
 import type {
   ChildScreeningSummary,
   FindingClass,
+  QuestionnaireAnswer,
+  ScreeningGuidance,
   SymptomSet,
   ToothFinding,
   TriageLevel,
@@ -33,7 +35,29 @@ export type ChildSummaryPayload = {
   screeningCount: number
   imageRefs: string[]
   questionnaire: QuestionnaireAnswers | null
+  /** Literal questionnaire Q&A exactly as asked on the device (verbatim). */
+  questionnaireRaw: QuestionnaireAnswer[] | null
+  /** Gemini parent advice produced at capture (same text shown on the phone). */
+  advice: string | null
+  /** Gemini age-aware guidance produced at capture (same as the phone). */
+  guidance: ScreeningGuidance | null
   hospital: null
+}
+
+/** Parse the stored verbatim questionnaire JSON (`{q,a}[]`), tolerating junk. */
+const parseRawAnswers = (raw: string | null | undefined): QuestionnaireAnswer[] | null => {
+  if (!raw) return null
+  try {
+    const arr = JSON.parse(raw)
+    if (!Array.isArray(arr)) return null
+    const ok = arr.filter(
+      (x): x is QuestionnaireAnswer =>
+        !!x && typeof x.q === 'string' && typeof x.a === 'string',
+    )
+    return ok.length ? ok : null
+  } catch {
+    return null
+  }
 }
 
 const toFinding = (f: {
@@ -67,7 +91,7 @@ export const loadChildSummary = async (db: DB, id: string): Promise<ChildSummary
     db.query.screenings.findFirst({
       where: eq(screenings.childKey, child.childKey),
       orderBy: desc(screenings.capturedAt),
-      with: { findings: true, questionnaire: true, review: true, images: { orderBy: asc(screeningImages.order) } },
+      with: { findings: true, questionnaire: true, review: true, summary: true, images: { orderBy: asc(screeningImages.order) } },
     }),
     db.select({ c: count() }).from(screenings).where(eq(screenings.childKey, child.childKey)),
   ])
@@ -107,6 +131,17 @@ export const loadChildSummary = async (db: DB, id: string): Promise<ChildSummary
           gumPimpleOrFistula: latest.questionnaire.gumPimpleOrFistula ?? false,
           trauma: latest.questionnaire.trauma ?? false,
           bleedingGums: latest.questionnaire.bleedingGums ?? null,
+        }
+      : null,
+    questionnaireRaw: parseRawAnswers(latest?.questionnaire?.rawAnswers),
+    advice: latest?.summary?.advice ?? null,
+    guidance: latest?.summary
+      ? {
+          homeCare: latest.summary.homeCare ?? '',
+          brushing: latest.summary.brushing ?? '',
+          diet: latest.summary.diet ?? '',
+          prevention: latest.summary.prevention ?? '',
+          nextStep: latest.summary.nextStep ?? '',
         }
       : null,
     hospital: null,

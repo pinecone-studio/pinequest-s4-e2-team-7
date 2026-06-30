@@ -94,6 +94,8 @@ export const questionnaires = sqliteTable('Questionnaire', {
   bleedingGums: bool('bleedingGums'),
   smoker: bool('smoker'),
   lastCheckupAdult: text('lastCheckupAdult'),
+  /** Literal questionnaire Q&A as asked on the device — JSON `{q,a}[]` (verbatim). */
+  rawAnswers: text('rawAnswers'),
 })
 
 // The only mutable record (two-way sync, version optimistic-lock).

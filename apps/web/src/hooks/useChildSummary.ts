@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import type { ChildScreeningSummary } from '@pinequest/types'
+import type { ChildScreeningSummary, QuestionnaireAnswer, ScreeningGuidance } from '@pinequest/types'
 import { apiFetch } from '@/lib/api'
 import { useSession } from '@/components/providers'
 
@@ -35,6 +35,12 @@ export type ChildSummaryPayload = {
   screeningCount: number
   imageRefs: string[]
   questionnaire: QuestionnaireAnswers | null
+  /** Literal questionnaire Q&A exactly as asked on the phone (verbatim). */
+  questionnaireRaw: QuestionnaireAnswer[] | null
+  /** Gemini parent advice produced at capture (same text shown on the phone). */
+  advice: string | null
+  /** Gemini age-aware guidance produced at capture (same as the phone). */
+  guidance: ScreeningGuidance | null
   hospital: HospitalGuide | null
 }
 
