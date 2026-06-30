@@ -1,35 +1,65 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { FlatCard } from '@/components/consumer/warm/WarmUI'
-import { getLastScanResult, saveScanResult, type ScanResult } from '@/lib/consumerState'
+import { useEffect, useState } from 'react'
+import { Plus, Trash } from '@/lib/icons'
+import { FilterPill, FlatCard } from '@/components/consumer/warm/WarmUI'
+import {
+  addChildName,
+  removeChildName,
+  getChildNames,
+  getLastScanResult,
+  getQuestionnaire,
+  saveScanResult,
+} from '@/lib/consumerState'
 import { analyzeScanImage, scanErrorText } from '@/lib/scanApi'
-import { screeningSaveErrorText } from '@/lib/screeningApi'
-import { useSaveScreening } from '@/hooks/useSaveScreening'
-import { ClassChildPicker, type ScreenTarget } from './caries/ClassChildPicker'
-import { ScanUploader } from './caries/ScanUploader'
-import { ResultsPanel } from './caries/ResultsPanel'
-import { MAX_UPLOAD_BYTES, fileToDataUrl } from './caries/imageUtils'
+import { ImagePanel } from './ImagePanel'
+import { ResultsPanel, ResultsPlaceholder } from './ResultsPanel'
+import { fileToDataUrl, MAX_UPLOAD_BYTES } from './types'
+import type { ScanResult } from '@/lib/consumerState'
 
-/** Скрининг хуудас — анги/хүүхэд сонгож, зураг оруулж, AI шинжилгээ хийгээд DB-д хадгална. */
 export const CariesDetectorDashboard = ({ initialResult = false }: { initialResult?: boolean }) => {
-  const fileRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [result, setResult] = useState<ScanResult | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
   const [analysisError, setAnalysisError] = useState<string | null>(null)
-  const [target, setTarget] = useState<ScreenTarget | null>(null)
-  const save = useSaveScreening()
+  const [childNames, setChildNames] = useState<string[]>([])
+  const [newName, setNewName] = useState('')
+  const [activeFilter, setActiveFilter] = useState('')
 
   useEffect(() => {
-    if (!initialResult) return
-    const saved = getLastScanResult()
-    if (saved) {
-      setResult(saved)
-      setPreview(saved.imageUrl)
+    const stored = getChildNames()
+    const q = getQuestionnaire()
+    const names = q?.childName && !stored.includes(q.childName) ? [...stored, q.childName] : stored
+    setChildNames(names)
+    if (names.length) setActiveFilter((cur) => cur || names[0])
+  }, [])
+
+  useEffect(() => {
+    if (initialResult) {
+      const saved = getLastScanResult()
+      if (saved) {
+        setResult(saved)
+        setPreview(saved.imageUrl)
+      }
     }
   }, [initialResult])
+
+  const handleAddChild = (e: React.FormEvent) => {
+    e.preventDefault()
+    const trimmed = newName.trim()
+    setNewName('')
+    if (!trimmed || childNames.includes(trimmed)) return
+    addChildName(trimmed)
+    setChildNames((prev) => [...prev, trimmed])
+    setActiveFilter(trimmed)
+  }
+
+  const handleRemoveChild = (name: string) => {
+    const next = removeChildName(name)
+    setChildNames(next)
+    if (activeFilter === name) setActiveFilter(next[0] ?? '')
+  }
 
   const onFile = (f: File | null) => {
     if (!f) return
@@ -48,7 +78,7 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
     save.reset()
   }
 
-  const runAnalysis = async () => {
+  const onAnalyze = async () => {
     if (!preview || !file) return
     setAnalyzing(true)
     setAnalysisError(null)
@@ -67,59 +97,73 @@ export const CariesDetectorDashboard = ({ initialResult = false }: { initialResu
     }
   }
 
-  const clearAll = () => {
+  const onClear = () => {
     setPreview(null)
     setFile(null)
     setResult(null)
     setAnalysisError(null)
-    save.reset()
-    if (fileRef.current) fileRef.current.value = ''
   }
 
-  const saveStatus = save.isPending
-    ? { text: 'Сургуулийн бүртгэлд хадгалж байна…', tone: 'text-text-muted' }
-    : save.isSuccess
-      ? { text: `✓ ${target?.childLabel ?? 'Хүүхэд'} — бүртгэлд хадгаллаа`, tone: 'text-triage-green' }
-      : save.isError
-        ? { text: screeningSaveErrorText(save.error instanceof Error ? save.error.message : 'error'), tone: 'text-triage-red' }
-        : null
-
   return (
-    <div className="flex h-full flex-col gap-6">
-      {/* Анги + хүүхэд сонгоно → скрининг хадгалмагц дашборд автоматаар шинэчлэгдэнэ. */}
-      <div className="flex flex-col gap-2">
-        <ClassChildPicker onChange={setTarget} />
-        {saveStatus && <p className={`text-[13px] font-medium ${saveStatus.tone}`}>{saveStatus.text}</p>}
+    <div className="flex h-full flex-col gap-8">
+      {/* Хүүхэд сонгох */}
+      <div className="flex flex-wrap items-center gap-2">
+        {childNames.map((name) => (
+          <FilterPill
+            key={name}
+            label={name}
+            active={activeFilter === name}
+            onClick={() => setActiveFilter(name)}
+          />
+        ))}
+        <form onSubmit={handleAddChild} className="flex items-center gap-2">
+          <input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Хүүхдийн нэр"
+            className="w-36 rounded-full border border-border bg-surface-raised px-4 py-2 text-[13px] text-text-base outline-none transition-colors placeholder:text-text-muted focus:border-[#F3B900]"
+          />
+          <button
+            type="submit"
+            disabled={!newName.trim()}
+            className="btn flex items-center justify-center rounded-full border border-border bg-surface p-2 transition-all hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Plus className="size-5" strokeWidth={2} />
+          </button>
+        </form>
+        {activeFilter && (
+          <button
+            type="button"
+            onClick={() => handleRemoveChild(activeFilter)}
+            className="btn flex items-center justify-center rounded-full border border-border bg-surface p-2 text-text-muted transition-all hover:border-triage-red hover:text-triage-red"
+          >
+            <Trash className="size-5" strokeWidth={2} />
+          </button>
+        )}
       </div>
 
       <div className="grid min-h-0 flex-1 gap-8 xl:grid-cols-[1.15fr_0.85fr]">
         <div className="flex min-h-0 flex-col gap-6">
-          <ScanUploader
-            fileRef={fileRef}
-            displayImage={result?.imageUrl ?? preview}
-            displayDetections={result?.detections ?? []}
+          <ImagePanel
+            file={file}
+            preview={result?.imageUrl ?? preview}
             analyzing={analyzing}
             analysisError={analysisError}
-            canAnalyze={Boolean(file && preview && !analyzing)}
+            detections={result?.detections ?? []}
             onFile={onFile}
-            onAnalyze={runAnalysis}
-            onClear={clearAll}
+            onAnalyze={onAnalyze}
+            onClear={onClear}
           />
         </div>
 
         <div className="min-h-0 xl:sticky xl:top-28">
-          {result ? (
-            <FlatCard glass className="h-full overflow-y-auto p-6 xl:p-8">
+          <FlatCard glass className="h-full overflow-y-auto p-6 xl:p-8">
+            {result ? (
               <ResultsPanel result={result} />
-            </FlatCard>
-          ) : (
-            <FlatCard glass className="flex h-full min-h-[420px] flex-col items-center justify-center p-10 text-center">
-              <p className="mt-5 text-[17px] font-bold text-text-base">Дүгнэлт энд харагдана</p>
-              <p className="mt-2 max-w-xs text-[14px] leading-relaxed text-text-muted">
-                Зураг оруулсны дараа эхлэх товчийг дарна уу.
-              </p>
-            </FlatCard>
-          )}
+            ) : (
+              <ResultsPlaceholder analyzing={analyzing} />
+            )}
+          </FlatCard>
         </div>
       </div>
     </div>

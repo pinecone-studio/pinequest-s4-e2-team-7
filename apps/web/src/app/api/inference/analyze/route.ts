@@ -255,42 +255,25 @@ const runYolo = async (image: Blob, mimeType: string): Promise<RawInference> => 
   return res.json() as Promise<RawInference>
 }
 
-// ── Gemini advice (зураг + загварын илрүүлэлт дээр тулгуурлана) ────────────────
+// ── Gemini advice (ЗӨВХӨН загварын илрүүлэлт + triage дээр тулгуурлана) ─────────
+// Зураг явуулахгүй: зөвлөмж detection/triage текстээс гардаг тул зургийг нэмэх нь
+// чанарт нөлөөлөхгүй, зөвхөн саатал нэмнэ.
 
-// Gemini-д өгөх ил тод JSON гэрээ (responseSchema). Загвар яг эдгээр 6 талбарыг, энэ
-// дарааллаар, цэвэр JSON-оор буцаахаас өөр сонголтгүй болно — parseGuidance шууд parse хийнэ.
-const GUIDANCE_SCHEMA = {
-  type: 'OBJECT',
-  properties: {
-    advice: { type: 'STRING' },
-    homeCare: { type: 'STRING' },
-    brushing: { type: 'STRING' },
-    diet: { type: 'STRING' },
-    prevention: { type: 'STRING' },
-    nextStep: { type: 'STRING' },
-  },
-  required: ['advice', 'homeCare', 'brushing', 'diet', 'prevention', 'nextStep'],
-  propertyOrdering: ['advice', 'homeCare', 'brushing', 'diet', 'prevention', 'nextStep'],
-} as const
-
-const runGeminiAdvice = async (
-  promptText: string,
-  base64Image: string,
-  mimeType: string,
-): Promise<{ advice: string; guidance?: Guidance } | null> => {
+const runGeminiAdvice = async (promptText: string): Promise<string | null> => {
   const geminiBody = {
     contents: [
       {
         role: 'user',
-        parts: [{ text: promptText }, { inlineData: { mimeType, data: base64Image } }],
+        parts: [{ text: promptText }],
       },
     ],
     generationConfig: {
       temperature: 0,
-      // 6 талбартай structured JSON + thinking загвар хоёуланд хүрэлцэхээр өргөн авав.
-      maxOutputTokens: 4096,
+      maxOutputTokens: 512,
       responseMimeType: 'application/json',
-      responseSchema: GUIDANCE_SCHEMA,
+      // 3-4 өгүүлбэрийн энгийн зөвлөмжид "бодох" overhead шаардлагагүй —
+      // үүнийг унтраах нь 2.5-flash-ийн саатлыг мэдэгдэхүйц багасгана.
+      thinkingConfig: { thinkingBudget: 0 },
     },
   }
 
@@ -366,10 +349,7 @@ export async function POST(req: NextRequest) {
     }))
 
   // 3) Gemini зөвхөн зөвлөмжийн текст гаргана (илрүүлэлт/triage дээр тулгуурлан).
-  const base64Image = Buffer.from(await image.arrayBuffer()).toString('base64')
-  const mimeType = image.type || 'image/jpeg'
-
-  let generated: { advice: string; guidance?: Guidance } | null = null
+  let advice: string | null = null
   if (GEMINI_API_KEY) {
     const promptText = buildAdvicePrompt({
       childName: form.get('childName')?.toString().trim() ?? '',
@@ -385,7 +365,7 @@ export async function POST(req: NextRequest) {
       triageLevel: level,
       detections,
     })
-    generated = await runGeminiAdvice(promptText, base64Image, mimeType)
+    advice = await runGeminiAdvice(promptText)
   }
 
   const result: AnalysisResult = {

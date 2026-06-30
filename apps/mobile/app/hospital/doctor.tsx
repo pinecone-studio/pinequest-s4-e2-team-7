@@ -1,12 +1,12 @@
 import { View, Text, Image, ScrollView, TouchableOpacity, Linking, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/lib/ThemeContext'
+import BackButton from '@/components/BackButton'
 
 const DoctorScreen = () => {
   const { colors } = useTheme()
-  const router = useRouter()
   const { name, specialty, clinic, area, avatarUrl, phone } =
     useLocalSearchParams<{ id: string; name: string; specialty: string; clinic: string; area: string; avatarUrl: string; phone: string }>()
 
@@ -19,9 +19,7 @@ const DoctorScreen = () => {
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
       <View style={[s.header, { borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color={colors.textBase} />
-        </TouchableOpacity>
+        <BackButton />
         <Text style={[s.headerTitle, { color: colors.textBase }]}>Эмчийн профайл</Text>
         <View style={s.placeholder} />
       </View>
@@ -82,9 +80,9 @@ const s = StyleSheet.create({
   root: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1 },
   headerTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 17 },
-  placeholder: { width: 24 },
+  placeholder: { width: 40 },
   content: { padding: 16, gap: 16 },
-  card: { borderRadius: 16, borderWidth: 1, padding: 20, alignItems: 'center', gap: 10 },
+  card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 20, alignItems: 'center', gap: 10 },
   avatar: { width: 80, height: 80, borderRadius: 40 },
   avatarFallback: { alignItems: 'center', justifyContent: 'center' },
   avatarText: { fontFamily: 'Inter_700Bold', fontSize: 32 },
@@ -94,7 +92,7 @@ const s = StyleSheet.create({
   badge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20 },
   badgeText: { fontFamily: 'Inter_500Medium', fontSize: 12 },
   actions: { flexDirection: 'row', gap: 12 },
-  btn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 9999, borderWidth: 1 },
+  btn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 9999, borderWidth: StyleSheet.hairlineWidth },
   btnText: { fontFamily: 'Inter_600SemiBold', fontSize: 15 },
   noPhone: { textAlign: 'center', fontSize: 13, fontFamily: 'Inter_400Regular' },
 })
