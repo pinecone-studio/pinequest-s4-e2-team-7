@@ -5,6 +5,7 @@ import { screenings, screeningReviews, children, schoolClasses } from '@pineques
 import { authenticate, authorize } from '../middleware/auth.js'
 import { writeAudit } from '../lib/audit.js'
 import { persistScreening } from '../lib/persistScreening.js'
+import { putBase64Images } from '../lib/r2Images.js'
 import { hasChildAccess, resolveScope, scopeWhere } from '../lib/scopeFilter.js'
 import type { AppEnv } from '../types.js'
 
@@ -15,9 +16,44 @@ screeningRoutes.post('/', authenticate, async (c) => {
   const body = screeningCreateSchema.parse(await c.req.json())
   // A device may only submit screenings for classes/schools within its scope.
   if (!(await hasChildAccess(db, c.get('jwtPayload'), body))) return c.json({ success: false, data: null, message: 'forbidden' }, 403)
+  // Upload captured image bytes (base64) to R2; the DB keeps only the object keys.
+  const imageRefs = body.imageData?.length
+    ? await putBase64Images(c.env.IMAGES, body.id, body.imageData)
+    : body.imageRefs
   const result = triage(body.findings, body.symptoms)
-  const screening = await persistScreening(db, body, result, c.get('jwtPayload').sub)
+  // Map only the fields persistScreening owns (avoid leaking triage/screenedById/etc.).
+  const screening = await persistScreening(
+    db,
+    {
+      id: body.id, childKey: body.childKey, classId: body.classId, schoolId: body.schoolId,
+      seasonId: body.seasonId, imageRefs, findings: body.findings, symptoms: body.symptoms,
+      summary: body.summary, modelName: body.modelName, modelVersion: body.modelVersion,
+      capturedAt: body.capturedAt, deviceId: body.deviceId,
+    },
+    result,
+    c.get('jwtPayload').sub,
+  )
   return c.json({ success: true, data: screening }, 201)
+})
+
+// Serve a screening's captured photo from R2 — auth-scoped (minors' images stay private).
+screeningRoutes.get('/:id/image/:order', authenticate, async (c) => {
+  const db = c.get('db')
+  const screening = await db.query.screenings.findFirst({
+    where: eq(screenings.id, c.req.param('id')),
+    with: { images: true },
+  })
+  if (!screening) return c.json({ success: false, data: null }, 404)
+  if (!(await hasChildAccess(db, c.get('jwtPayload'), screening))) return c.json({ success: false, data: null, message: 'forbidden' }, 403)
+  const order = Number(c.req.param('order'))
+  const img = screening.images.find((im) => im.order === order) ?? screening.images[0]
+  if (!img) return c.json({ success: false, data: null, message: 'no_image' }, 404)
+  const obj = await c.env.IMAGES.get(img.ref)
+  if (!obj) return c.json({ success: false, data: null, message: 'image_not_found' }, 404)
+  return c.body(await obj.arrayBuffer(), 200, {
+    'Content-Type': obj.httpMetadata?.contentType ?? 'image/jpeg',
+    'Cache-Control': 'private, max-age=86400',
+  })
 })
 
 screeningRoutes.get('/', authenticate, async (c) => {
@@ -57,7 +93,7 @@ screeningRoutes.get('/:id', authenticate, async (c) => {
   const db = c.get('db')
   const screening = await db.query.screenings.findFirst({
     where: eq(screenings.id, c.req.param('id')),
-    with: { findings: true, images: true, questionnaire: true, review: true },
+    with: { findings: true, images: true, questionnaire: true, review: true, summary: true },
   })
   if (!screening) return c.json({ success: false, data: null }, 404)
   if (!(await hasChildAccess(db, c.get('jwtPayload'), screening))) return c.json({ success: false, data: null, message: 'forbidden' }, 403)

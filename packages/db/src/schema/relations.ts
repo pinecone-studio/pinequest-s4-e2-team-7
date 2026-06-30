@@ -1,6 +1,6 @@
 import { relations } from 'drizzle-orm'
 import { users } from './people.js'
-import { screenings, toothFindings, screeningImages, questionnaires, screeningReviews } from './screening.js'
+import { screenings, toothFindings, screeningImages, questionnaires, screeningReviews, screeningSummaries } from './screening.js'
 import { auditLogs } from './content.js'
 
 // Declared for Drizzle's relational query API (db.query.*.findMany({ with })).
@@ -9,6 +9,11 @@ export const screeningsRelations = relations(screenings, ({ many, one }) => ({
   images: many(screeningImages),
   questionnaire: one(questionnaires),
   review: one(screeningReviews),
+  summary: one(screeningSummaries),
+}))
+
+export const screeningSummariesRelations = relations(screeningSummaries, ({ one }) => ({
+  screening: one(screenings, { fields: [screeningSummaries.screeningId], references: [screenings.id] }),
 }))
 
 export const toothFindingsRelations = relations(toothFindings, ({ one }) => ({

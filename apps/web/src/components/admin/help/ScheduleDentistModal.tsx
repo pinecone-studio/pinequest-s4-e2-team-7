@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { VideoCameraIcon } from '@heroicons/react/24/solid'
+import { VideoCameraIcon, CheckCircleIcon } from '@heroicons/react/24/solid'
 import Modal from '@/components/ui/Modal'
 import { buildSlots, slotLabel } from '@/lib/appointmentSlots'
 import { useCreateAppointment, type VolunteerDentist } from '@/hooks/useHelp'
@@ -44,9 +44,9 @@ const ScheduleDentistModal = ({ dentist, student, level = 'red', onClose }: Prop
     <Modal open onClose={close} title={dentist.displayName} subtitle={student ? `${student.name} — цаг товлох эсвэл шууд дуудах` : 'Эмчийн боломжит цаг'} size="lg">
       {done ? (
         <div className="text-center">
-          <p className="text-[15px] font-semibold text-text-base">Цаг баталгаажлаа ✅</p>
+          <p className="flex items-center justify-center gap-1.5 text-[15px] font-semibold text-text-base"><CheckCircleIcon className="size-5 text-triage-green" /> Цаг баталгаажлаа</p>
           <p className="mt-1 text-[13px] text-text-muted">{dentist.displayName} · {done}</p>
-          <button onClick={callNow} className="mt-5 w-full rounded-full bg-triage-red py-3 text-[14px] font-semibold text-white transition hover:opacity-90">🎥 Одоо дуудах</button>
+          <button onClick={callNow} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-triage-red py-3 text-[14px] font-semibold text-white transition hover:opacity-90"><VideoCameraIcon className="size-5" /> Одоо дуудах</button>
         </div>
       ) : (
         <>

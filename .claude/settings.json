@@ -5,7 +5,8 @@
       "Bash(/usr/local/lib/node_modules/corepack/shims/pnpm lint *)",
       "Bash(corepack pnpm *)",
       "Bash(pnpm exec *)",
-      "Bash(echo \"EXIT=$?\")"
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(python3 -c *)"
     ]
   }
 }

@@ -175,3 +175,21 @@ export interface ChildScreeningSummary {
   /** "Цаашид хэвшүүлэх арга хэмжээ" — versioned, age-aware ongoing measures. */
   homeSteps: string[]
 }
+
+/**
+ * Нас тохирсон, эцэг эх/асран хамгаалагчид зориулсан гэрийн арчилгааны
+ * дэлгэрэнгүй зөвлөмж (Gemini AI). ЗӨВЛӨМЖ-ийн давхарга — detection/triage биш.
+ * Талбар бүр богино, хүн ойлгомжтой монгол текст. Заримдаа Gemini ирэхгүй ч болно.
+ */
+export interface ScreeningGuidance {
+  /** Яг одоо гэртээ хийх алхмууд */
+  homeCare: string
+  /** Насанд тохирсон шүд угаах заавар */
+  brushing: string
+  /** Шүд бэхжүүлэх / хязгаарлах хоол хүнс */
+  diet: string
+  /** Цоорол ба шүд эмх замбараагүй ургахаас урьдчилан сэргийлэх */
+  prevention: string
+  /** Дараагийн алхам — хэзээ эмчид хандах */
+  nextStep: string
+}

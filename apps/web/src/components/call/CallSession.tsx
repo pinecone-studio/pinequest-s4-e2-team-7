@@ -56,7 +56,7 @@ const CallSession = ({ roomId }: { roomId: string }) => {
       </div>
 
       <video ref={localVideoRef} autoPlay playsInline muted className={`absolute right-4 top-16 rounded-2xl border-2 border-white/30 object-cover ${PIP} ${camOn ? '' : 'hidden'}`} />
-      {!camOn && <div className={`absolute right-4 top-16 flex items-center justify-center rounded-2xl border-2 border-white/30 bg-[#1c2433] text-[11px] text-white/60 ${PIP}`}>Камер унтраалттай</div>}
+      {!camOn && <div className={`absolute right-4 top-16 flex items-center justify-center rounded-2xl border-2 border-white/30 bg-[#1c2433] text-[11px] text-white/60 ${PIP}`}>Камер хаалттай</div>}
 
       <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-4 p-8">
         <button onClick={toggleMic} aria-label="Микрофон" className={`flex size-14 items-center justify-center rounded-full transition ${micOn ? 'bg-white/15 text-white hover:bg-white/25' : 'bg-white text-[#10141c]'}`}><MicrophoneIcon className="size-6" /></button>

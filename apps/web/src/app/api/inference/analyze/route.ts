@@ -7,7 +7,7 @@ import {
   triage,
   type RawInference,
 } from '@pinequest/core'
-import type { SymptomSet } from '@pinequest/types'
+import type { SymptomSet, ToothFinding } from '@pinequest/types'
 
 export const runtime = 'nodejs'
 
@@ -55,12 +55,27 @@ interface Detection {
   box: { x: number; y: number; w: number; h: number }
 }
 
+// Нас тохирсон, эцэг эхэд зориулсан гэрийн арчилгааны дэлгэрэнгүй зөвлөмж.
+interface Guidance {
+  homeCare: string
+  brushing: string
+  diet: string
+  prevention: string
+  nextStep: string
+}
+
 interface AnalysisResult {
   triage: TriageLevel
   urgent: boolean
   needsDoctor: boolean
   detections: Detection[]
   advice: string
+  guidance?: Guidance
+  // Core-computed findings + triage detail — forwarded by the web teacher flow when
+  // it persists the screening to the DB (POST /api/screenings).
+  findings: ToothFinding[]
+  triageScore: number
+  confidentWording: boolean
 }
 
 // YOLO class_name (snake_case) → УI дээр харуулах нэр.
@@ -80,6 +95,17 @@ const fallbackAdvice = (level: TriageLevel, count: number): string => {
   return 'Шүдний байдал харьцангуй хэвийн байна. Жил бүрийн урьдчилан сэргийлэх үзлэгээ тогтмол хийлгэж байгаарай.'
 }
 
+// Triage зэрэг → эмчид хандах яаралтай байдлын чиглүүлэг. Prompt дотор advice/nextStep-ийг
+// жигд найруулахад нэг тодорхой директив болж холбогдоно.
+const URGENCY_BY_LEVEL: Record<TriageLevel, string> = {
+  green:
+    'яаралтай биш — одоогийн зурагт аюулын тод шинж ажиглагдсангүй, дараагийн ээлжит урьдчилан сэргийлэх үзлэгээр үзүүлэхэд хангалттай',
+  yellow:
+    'ойрын 1-2 долоо хоногт төлөвлөгөөтэйгээр шүдний эмчид үзүүлэх — яаралтай биш ч хойшлуулахгүй',
+  red:
+    'аль болох хурдан, өнөөдөр эсвэл маргааш шүдний эмчид хандах; өвдөлт, хаван, халуурал нэмэгдвэл яаралтай тусламжид хандах',
+}
+
 // ── Gemini: зөвхөн ЗӨВЛӨМЖ (detection/triage биш) ────────────────────────────
 
 const extractGeminiResponseText = (data: unknown): string => {
@@ -94,21 +120,29 @@ const extractGeminiResponseText = (data: unknown): string => {
     .trim()
 }
 
-const parseAdvice = (text: string): string => {
-  const cleaned = text.trim()
-  const fenced = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i)
-  const candidate = (fenced?.[1] ?? cleaned).trim()
-  const firstBrace = candidate.indexOf('{')
-  const lastBrace = candidate.lastIndexOf('}')
-  if (firstBrace >= 0 && lastBrace > firstBrace) {
-    try {
-      const parsed = JSON.parse(candidate.slice(firstBrace, lastBrace + 1)) as { advice?: unknown }
-      if (typeof parsed.advice === 'string' && parsed.advice.trim()) return parsed.advice.trim()
-    } catch {
-      // fall through to raw text
-    }
+const asText = (v: unknown): string => (typeof v === 'string' ? v.trim() : '')
+
+/**
+ * Gemini-ийн structured хариунаас дүгнэлт (advice) + дэлгэрэнгүй зөвлөмжийг (guidance)
+ * салгана. responseSchema-ийн ачаар хариу нь markdown/тайлбаргүй цэвэр JSON тул шууд
+ * parse хийнэ. Ховор parse алдаа гарвал бүх текстийг advice болгон буцаана.
+ */
+const parseGuidance = (text: string): { advice: string; guidance?: Guidance } => {
+  let parsed: Record<string, unknown>
+  try {
+    parsed = JSON.parse(text.trim()) as Record<string, unknown>
+  } catch {
+    return { advice: text.trim() }
   }
-  return candidate
+  const guidance: Guidance = {
+    homeCare: asText(parsed.homeCare),
+    brushing: asText(parsed.brushing),
+    diet: asText(parsed.diet),
+    prevention: asText(parsed.prevention),
+    nextStep: asText(parsed.nextStep),
+  }
+  const hasGuidance = Object.values(guidance).some(Boolean)
+  return { advice: asText(parsed.advice) || text.trim(), guidance: hasGuidance ? guidance : undefined }
 }
 
 const buildAdvicePrompt = (params: {
@@ -134,41 +168,78 @@ const buildAdvicePrompt = (params: {
         .join('\n')
     : '  (Загвар зургаас цоорол/хагарал илрүүлээгүй)'
 
-  return `Та хүүхдийн шүдний мэргэжилтэн эмч юм. Та өвчтөний эцэг эхтэй тайван, ойлгомжтой, найрсаг байдлаар ярьж байна. Хариуг ЗААВАЛ цэвэр монгол хэлээр бичнэ. Хятад, орос, англи үг огт хэрэглэхгүй.
+  const age = params.age || 'тодорхойгүй'
+  const urgency = URGENCY_BY_LEVEL[params.triageLevel]
+  const childRef = params.childName || 'хүүхдийн'
 
-ЧУХАЛ: Шүдний зураг дээрх илрүүлэлтийг (detection) АГ загвар (YOLO) аль хэдийн хийсэн. Доорх илрүүлсэн зүйлс болон аюулын зэрэглэл (triage) нь АЛБАН ЁСНЫ үр дүн — та үүнийг өөрчлөхгүй, зөвхөн эцэг эхэд зориулсан ойлгомжтой ЗӨВЛӨМЖ бичнэ.
+  return `Та хүүхдийн шүдний мэргэжлийн эмч. Та өвчтөний эцэг эхтэй нүүр тулан, тайван, дулаахан, ойлгомжтой ярьж байна. Бодит эмч хүн шиг найрсаг ярь — эцэг эхийн санааг тайвшруул, гэхдээ шударга, тодорхой зөвлө. Хариуг ЗААВАЛ цэвэр монгол хэлээр бич. Хятад, орос, англи үг болон эмнэлзүйн хүнд нэр томьёо огт хэрэглэхгүй.
+
+ЧУХАЛ: Зураг дээрх илрүүлэлт (detection) болон аюулын зэрэглэл (triage)-ийг АГ загвар (YOLO) аль хэдийн гаргасан — энэ нь АЛБАН ЁСНЫ үр дүн. Та үүнийг өөрчлөхгүй, зөвхөн эцэг эхэд зориулсан ойлгомжтой ЗӨВЛӨМЖ бичнэ. Энэ нь онош биш, эмчид цаг алдалгүй чиглүүлэх урьдчилсан шалгалт.
 
 ═══════════════════════════════
 ӨВЧТӨНИЙ МЭДЭЭЛЭЛ
 ═══════════════════════════════
-Хүүхдийн нэр       : ${params.childName || 'тодорхойгүй'}
-Нас                : ${params.age || 'тодорхойгүй'}
-Сүүлд эмчид үзсэн  : ${params.lastDentalVisit || 'тодорхойгүй'}
-Өвдөлт бий эсэх    : ${params.hasPain ? 'Тийм' : 'Үгүй'}
-Өвдөлт ямар үед    : ${params.painWhen || 'тодорхойгүй'}
-Хэр удаж өвдөж байна: ${params.painSince || 'тодорхойгүй'}
-Шөнийн өвдөлт      : ${params.nightPain ? 'Тийм' : 'Үгүй'}
-Халуурч байна уу    : ${params.fever ? 'Тийм' : 'Үгүй'}
-Хавдар/дулаарал    : ${params.feverSwelling ? 'Тийм' : 'Үгүй'}
-Дүүргэлт хийлгэсэн  : ${params.filledAt || 'тодорхойгүй'}
+Хүүхдийн нэр        : ${params.childName || 'тодорхойгүй'}
+Нас                 : ${age}
+Сүүлд эмчид үзсэн   : ${params.lastDentalVisit || 'тодорхойгүй'}
+Өвдөлт бий эсэх     : ${params.hasPain ? 'Тийм' : 'Үгүй'}
+Өвдөлт ямар үед     : ${params.painWhen || 'тодорхойгүй'}
+Хэр удаж өвдөж байна : ${params.painSince || 'тодорхойгүй'}
+Шөнийн өвдөлт       : ${params.nightPain ? 'Тийм' : 'Үгүй'}
+Халуурч байна уу     : ${params.fever ? 'Тийм' : 'Үгүй'}
+Хавдар/дулаарал     : ${params.feverSwelling ? 'Тийм' : 'Үгүй'}
+Дүүргэлт хийлгэсэн   : ${params.filledAt || 'тодорхойгүй'}
 
 ═══════════════════════════════
-ЗАГВАРЫН ИЛРҮҮЛСЭН ЗҮЙЛС (албан ёсны)
+ЗАГВАРЫН ИЛРҮҮЛСЭН ШҮДНҮҮД (албан ёсны, өөрчлөхгүй)
 ═══════════════════════════════
-Аюулын зэрэглэл (triage): ${params.triageLevel}
+Аюулын зэрэг (triage): ${params.triageLevel}  →  ${urgency}
 ${findingLines}
 
 ═══════════════════════════════
-ЗӨВЛӨМЖ БИЧИХ ЗАГВАР
+ХАРИУ БИЧИХ ЗААВАР
 ═══════════════════════════════
-3-4 өгүүлбэрээр эцэг эхэд хандан бичнэ үү:
-  • 1-р өгүүлбэр: зургаас юу илэрсэн тухай (загварын илрүүлэлтэд тулгуурла)
-  • 2-р өгүүлбэр: өвчтөний шинж тэмдэгтэй хэрхэн холбогдох тухай
-  • 3-р өгүүлбэр: дараагийн алхам (яаралтай эсэх, хэзээ эмчид очих)
-  • 4-р өгүүлбэр: гэрт авах арга хэмжээ
+Доорх JSON талбар бүрийг ${age} насны хүүхдэд яг тохируулж бөглө. Талбар бүр 2-3 богино,
+жигд урсгалтай өгүүлбэр — хүн ярьж буй мэт чөлөөтэй, гэхдээ цэвэрхэн. Илрүүлсэн шүднүүд,
+өвчтөний өгсөн мэдээлэл (өвдөлт, шөнийн өвдөлт, халуун, хавдар), нас гурвыг хооронд нь
+холбож, утга төгөлдөр зөвлө.
 
-Зөвхөн дараах JSON-ийг буцаана. Өөр текст огт бичихгүй:
-{ "advice": "Монгол хэлээр 3-4 өгүүлбэр." }`
+  • advice     — Эмчийн амнаас гарах ГОЛ дүгнэлт. Мэндчилгээ бичихгүй, шууд ${childRef}
+                 одоогийн байдлыг хэл: илрүүлсэн шүд хэд байгаа, өвдөлт/халуун зэрэг ямар
+                 шинж тэмдэг байгаа, эдгээр нь юу гэсэн үг болохыг 2-3 өгүүлбэрээр энгийнээр
+                 тайлбарла. Аюулгүй найруулга ЗААВАЛ дагана:
+                 – Ногоон зэрэг бол "эдгээр зурагт аюулын тод шинж илрээгүй" гэж хэл;
+                   "цоорол огт байхгүй" гэж бат батлахгүй — нүдэнд үл харагдах завсрын
+                   цоорол байж болзошгүйг зөөлөн сануул.
+                 – Илрүүлэлт бага итгэлцэлтэй (50%-аас доош) бол "...байж магадгүй",
+                   "...шиг харагдаж байна" гэж болгоомжтой найруул.
+                 – Шар/улаан зэрэг эсвэл өвдөлт, халуун, хавдар байвал хэр яаралтай эмчид
+                   хандахыг тодорхой, гэхдээ айлгахгүйгээр хэл.
+  • homeCare   — Яг одоо гэртээ хийх алхмууд: өвдөлт намдаах, юу ажиглах, юунаас зайлсхийх.
+  • brushing   — ${age} насанд тохирсон шүд угаах заавар. Зөвхөн тухайн насанд тохирох
+                 хувилбарыг сонгож хэл: фторын агууламж (3 хүртэл нас 500ppm, 3-аас дээш
+                 1500ppm, савлагааны шошгоор шалгана), оохойн хэмжээ (1-3 нас будааны
+                 ширхэг, 3-6 нас вандуй/чигчий хурууны хумсны хэмжээ), өдөрт өглөө сэрээд
+                 болон орой унтахын өмнө 2 удаа, 7 хүртэл насны хүүхдийн оройн угаалтыг
+                 том хүн хийж өгөх, шүдний завсрын утас хэрэглэх.
+  • diet       — Шүд бэхжүүлэх хоол хүнс (кальцитай сүү/цагаан идээ, хатуу ааруул, ус) ба
+                 хязгаарлах зүйл (чихэр, амтат ундаа, чихэртэй цай, наалддаг чихэр, шүд
+                 угаасны дараа юм идэхгүй).
+  • prevention — Цаашид цоорол БА шүдний эгнээ гажихаас урьдчилан сэргийлэх: сүүн шүдээ
+                 эрт авхуулахгүй байх, удаан хуруу хөхөх/эрүүгээ тулах зэрэг зуршлыг засах,
+                 хатуу хоол сайн зажилж эрүү нүүрний хөгжлийг дэмжих, улирал бүр тогтмол хяналт.
+  • nextStep   — Дараагийн алхам: "${urgency}" гэдгийг хүнд ээлтэйгээр, ойролцоогоор хэзээ
+                 эмчид очихыг хэл.
+
+Зөвхөн дараах бүтэцтэй JSON-ийг буцаана. Markdown, тайлбар, өөр текст огт бичихгүй:
+{
+  "advice": "...",
+  "homeCare": "...",
+  "brushing": "...",
+  "diet": "...",
+  "prevention": "...",
+  "nextStep": "..."
+}`
 }
 
 // ── YOLO inference ────────────────────────────────────────────────────────────
@@ -186,11 +257,27 @@ const runYolo = async (image: Blob, mimeType: string): Promise<RawInference> => 
 
 // ── Gemini advice (зураг + загварын илрүүлэлт дээр тулгуурлана) ────────────────
 
+// Gemini-д өгөх ил тод JSON гэрээ (responseSchema). Загвар яг эдгээр 6 талбарыг, энэ
+// дарааллаар, цэвэр JSON-оор буцаахаас өөр сонголтгүй болно — parseGuidance шууд parse хийнэ.
+const GUIDANCE_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    advice: { type: 'STRING' },
+    homeCare: { type: 'STRING' },
+    brushing: { type: 'STRING' },
+    diet: { type: 'STRING' },
+    prevention: { type: 'STRING' },
+    nextStep: { type: 'STRING' },
+  },
+  required: ['advice', 'homeCare', 'brushing', 'diet', 'prevention', 'nextStep'],
+  propertyOrdering: ['advice', 'homeCare', 'brushing', 'diet', 'prevention', 'nextStep'],
+} as const
+
 const runGeminiAdvice = async (
   promptText: string,
   base64Image: string,
   mimeType: string,
-): Promise<string | null> => {
+): Promise<{ advice: string; guidance?: Guidance } | null> => {
   const geminiBody = {
     contents: [
       {
@@ -200,8 +287,10 @@ const runGeminiAdvice = async (
     ],
     generationConfig: {
       temperature: 0,
-      maxOutputTokens: 2048,
+      // 6 талбартай structured JSON + thinking загвар хоёуланд хүрэлцэхээр өргөн авав.
+      maxOutputTokens: 4096,
       responseMimeType: 'application/json',
+      responseSchema: GUIDANCE_SCHEMA,
     },
   }
 
@@ -216,7 +305,7 @@ const runGeminiAdvice = async (
       return null
     }
     const text = extractGeminiResponseText(await res.json())
-    return text ? parseAdvice(text) : null
+    return text ? parseGuidance(text) : null
   } catch (err) {
     console.error('Gemini advice error:', err)
     return null
@@ -280,7 +369,7 @@ export async function POST(req: NextRequest) {
   const base64Image = Buffer.from(await image.arrayBuffer()).toString('base64')
   const mimeType = image.type || 'image/jpeg'
 
-  let advice: string | null = null
+  let generated: { advice: string; guidance?: Guidance } | null = null
   if (GEMINI_API_KEY) {
     const promptText = buildAdvicePrompt({
       childName: form.get('childName')?.toString().trim() ?? '',
@@ -296,7 +385,7 @@ export async function POST(req: NextRequest) {
       triageLevel: level,
       detections,
     })
-    advice = await runGeminiAdvice(promptText, base64Image, mimeType)
+    generated = await runGeminiAdvice(promptText, base64Image, mimeType)
   }
 
   const result: AnalysisResult = {
@@ -304,7 +393,11 @@ export async function POST(req: NextRequest) {
     urgent: level === 'red',
     needsDoctor: level !== 'green',
     detections,
-    advice: advice ?? fallbackAdvice(level, detections.length),
+    advice: generated?.advice ?? fallbackAdvice(level, detections.length),
+    guidance: generated?.guidance,
+    findings,
+    triageScore: triageResult.score,
+    confidentWording: triageResult.confidentWording,
   }
 
   return NextResponse.json(result)

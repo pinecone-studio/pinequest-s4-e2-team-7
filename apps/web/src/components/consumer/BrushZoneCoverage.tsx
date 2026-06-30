@@ -65,7 +65,7 @@ const SurfaceRow = ({
       <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-[#E8E8E8]">
         <div
           className={`h-full rounded-full transition-all duration-300 ${STATUS_BAR[status]} ${
-            active ? 'ring-2 ring-[#F3B900] ring-offset-1' : ''
+            active ? 'ring-2 ring-[#52A075] ring-offset-1' : ''
           }`}
           style={{ width: `${Math.round(progress * 100)}%` }}
         />
@@ -91,7 +91,7 @@ const QuadrantCard = ({
   return (
     <div
       className={`rounded-2xl border p-3 transition ${
-        isActiveQuadrant ? 'border-[#F3B900] bg-[#F3B900]/5' : 'border-[#E0E0E0] bg-white'
+        isActiveQuadrant ? 'border-[#52A075] bg-[#52A075]/5' : 'border-[#E0E0E0] bg-white'
       }`}
     >
       <div className="mb-2 flex items-center justify-between">

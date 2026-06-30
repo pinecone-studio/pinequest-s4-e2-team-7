@@ -192,7 +192,7 @@ export const BrushOrientation3D = ({
 
         <div className="space-y-4 p-5">
           {zone ? (
-            <div className="rounded-2xl bg-[#F3B900]/12 px-4 py-3 text-center">
+            <div className="rounded-2xl bg-[#52A075]/12 px-4 py-3 text-center">
               <p className="text-[11px] font-semibold text-text-muted">Одоогийн бүс</p>
               <p className="mt-1 text-[15px] font-bold text-text-base">{zoneLabel(zone)}</p>
             </div>
@@ -236,7 +236,7 @@ export const BrushOrientation3D = ({
               value={wsUrl}
               onChange={(e) => onWsUrlChange(e.target.value)}
               placeholder="ws://172.27.221.251:81"
-              className="w-full rounded-xl border border-[#E0E0E0] bg-white px-3 py-2 font-mono text-[11px] text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#F3B900]"
+              className="w-full rounded-xl border border-[#E0E0E0] bg-white px-3 py-2 font-mono text-[11px] text-slate-900 placeholder:text-slate-400 outline-none focus:border-[#52A075]"
               spellCheck={false}
             />
             <button

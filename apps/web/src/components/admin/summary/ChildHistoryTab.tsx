@@ -1,7 +1,11 @@
 'use client'
 
+import type { ComponentType, SVGProps } from 'react'
+import { ArrowUpIcon, ArrowDownIcon, ArrowRightIcon } from '@heroicons/react/24/solid'
 import type { TriageLevel } from '@pinequest/types'
 import type { ChildSeasonDetail } from '@/hooks/useChildHistory'
+
+type IconType = ComponentType<SVGProps<SVGSVGElement>>
 
 const TERM_LABELS: Record<string, string> = { fall: 'Намар', winter: 'Өвөл', spring: 'Хавар' }
 
@@ -18,10 +22,10 @@ const LEVEL_BADGE: Record<TriageLevel, { label: string; cls: string }> = {
   green:  { label: 'Хэвийн',    cls: 'bg-triage-green-bg text-triage-green' },
 }
 
-const DELTA_CLS: Record<string, { icon: string; cls: string }> = {
-  worsened: { icon: '↓', cls: 'text-triage-red' },
-  improved: { icon: '↑', cls: 'text-triage-green' },
-  stable:   { icon: '→', cls: 'text-text-muted' },
+const DELTA_CLS: Record<string, { Icon: IconType; cls: string }> = {
+  worsened: { Icon: ArrowDownIcon, cls: 'text-triage-red' },
+  improved: { Icon: ArrowUpIcon, cls: 'text-triage-green' },
+  stable:   { Icon: ArrowRightIcon, cls: 'text-text-muted' },
 }
 
 /** Newest-first timeline of per-season screening results with delta connectors. */
@@ -45,7 +49,7 @@ const ChildHistoryTab = ({ seasons }: { seasons: ChildSeasonDetail[] }) => {
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="text-[13px] font-semibold text-text-base">{formatSeason(s.seasonId)}</span>
-                {delta && <span className={`text-[13px] font-bold ${delta.cls}`}>{delta.icon}</span>}
+                {delta && <delta.Icon className={`size-3.5 ${delta.cls}`} />}
                 <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${badge.cls}`}>{badge.label}</span>
                 <span className="ml-auto shrink-0 text-[11px] text-text-muted">
                   {new Date(s.capturedAt).toLocaleDateString('mn-MN', { month: 'short', day: 'numeric' })}

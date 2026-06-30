@@ -14,7 +14,7 @@ export const Footer = () => (
       Скрининг-триаж хэрэгсэл · Шүдний эмчийн онош биш
     </p>
     <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.2)' }}>
-      © 2026 ToothLings · MADE IN MONGOLIA 🇲🇳
+      © 2026 ToothLings · MADE IN MONGOLIA
     </p>
   </footer>
 )

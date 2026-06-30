@@ -6,11 +6,11 @@
   --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Courier New', monospace;
 
-  /* brand raw — Honey Gold (same hue in light and dark) */
-  --color-brand-primary: #F2B705;
+  /* brand raw — Sage Green (light + dark variants) */
+  --color-brand-primary: #52A075;
   --color-brand-sidebar: #2A2418;
-  --color-brand-accent: #FFD24D;
-  --color-brand-muted: #FFF0BF;
+  --color-brand-accent: #62D094;
+  --color-brand-muted: #EEF9F3;
 
   /* semantic surfaces — clean neutral light-gray canvas, white cards pop */
   --color-bg: #EDEDED;
@@ -31,10 +31,10 @@
   --color-text-on-primary: #1A1407;
   --color-text-on-sidebar: #1D1D1F;
 
-  /* interactive — Honey Gold (carries near-black text, never white) */
-  --color-primary: #F2B705;
-  --color-primary-hover: #D99E00;
-  --color-primary-subtle: #FFF6DC;
+  /* interactive — Sage Green (carries near-black text, never white) */
+  --color-primary: #52A075;
+  --color-primary-hover: #3B8C5E;
+  --color-primary-subtle: #EEF9F3;
 
   /* accent — soft muted sage for positive indicators (coverage, resolved, growth) */
   --color-accent: #D2E1C8;
@@ -42,7 +42,7 @@
 
   /* chart neutrals — calm 3-tone palette for generic volume charts (NOT triage).
      Triage green/yellow/red stay reserved for clinical-signal surfaces only. */
-  --color-chart-1: #F2B705; /* honey gold highlight (brand) */
+  --color-chart-1: #52A075; /* sage green highlight (brand) */
   --color-chart-2: #C9B98A; /* muted gold-gray */
   --color-chart-3: #C2CAD2; /* neutral gray */
 
@@ -77,7 +77,7 @@
   --shadow-float: 0 8px 32px rgba(0,0,0,0.11), 0 2px 8px rgba(0,0,0,0.05);
 
   /* playful tone-card glow — colored ambient shadow on hover (light) */
-  --shadow-glow-gold: 0 12px 30px -8px rgba(242,183,5,0.45), 0 4px 10px rgba(0,0,0,0.06);
+  --shadow-glow-gold: 0 12px 30px -8px rgba(82, 160, 117,0.45), 0 4px 10px rgba(0,0,0,0.06);
   --shadow-glow-lime: 0 12px 30px -8px rgba(151,191,13,0.40), 0 4px 10px rgba(0,0,0,0.06);
   --shadow-glow-dark: 0 14px 34px -10px rgba(42,36,24,0.55), 0 4px 10px rgba(0,0,0,0.08);
 
@@ -99,9 +99,9 @@
   --color-text-base: #F5F5F7;
   --color-text-muted: #8E8E93;
   --color-text-on-sidebar: #F5F5F7;
-  --color-primary: #FFC93C;
-  --color-primary-hover: #FFD45E;
-  --color-primary-subtle: #2A2310;
+  --color-primary: #62D094;
+  --color-primary-hover: #8AE0B5;
+  --color-primary-subtle: #0C2818;
 
   /* triage dark — same muted system, softly lifted for near-black readability. */
   --color-triage-green: #7FB698;
@@ -116,7 +116,7 @@
   --color-accent-fg: #BFD4B4;
 
   /* chart neutrals — dark (calm, distinguishable on near-black) */
-  --color-chart-1: #FFC93C; /* honey gold highlight (brand) */
+  --color-chart-1: #62D094; /* sage green highlight (brand) */
   --color-chart-2: #8A7C52; /* muted gold-gray */
   --color-chart-3: #5A5A5E; /* neutral gray */
 
@@ -139,7 +139,7 @@
   --shadow-float: none;
 
   /* keep the colored glow in dark — it reads as a soft halo, not a drop shadow */
-  --shadow-glow-gold: 0 12px 34px -10px rgba(255,201,60,0.30);
+  --shadow-glow-gold: 0 12px 34px -10px rgba(98, 208, 148,0.30);
   --shadow-glow-lime: 0 12px 34px -10px rgba(181,224,32,0.26);
   --shadow-glow-dark: 0 0 0 1px rgba(255,255,255,0.06);
 }
@@ -342,8 +342,8 @@ button:disabled,
 
 .consumer-input:focus {
   outline: none;
-  border-color: #F3B900;
-  box-shadow: 0 0 0 3px rgba(243, 185, 0, 0.15);
+  border-color: #52A075;
+  box-shadow: 0 0 0 3px rgba(82, 160, 117, 0.15);
 }
 
 .consumer-input::placeholder {
@@ -394,8 +394,8 @@ button:disabled,
   align-items: center;
   border-radius: 9999px;
   padding: 4px 12px;
-  background: rgba(243, 185, 0, 0.12);
-  color: #b8860b;
+  background: rgba(82, 160, 117, 0.12);
+  color: #3B8C5E;
   font-size: 12px;
   font-weight: 600;
 }

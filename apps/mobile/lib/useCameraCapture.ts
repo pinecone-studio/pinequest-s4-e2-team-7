@@ -64,10 +64,14 @@ export const useCameraCapture = (params: Params) => {
       const symptomsJson = JSON.stringify(symptomsObj)
       const capturedAt = new Date().toISOString()
 
+      // Төрсөн оноос нас тооцоод server руу дамжуулна — Gemini зөвлөмжийг насанд тохируулна.
+      const birthYearNum = parseInt(params.birthYear ?? '', 10)
+      const ageStr = birthYearNum ? String(new Date().getFullYear() - birthYearNum) : ''
+
       const result = await analyzeImages(newPhotos.upper, newPhotos.lower, {
         childKey: params.childKey, classId: params.classId,
         schoolId: params.schoolId, seasonId: params.seasonId,
-        symptoms: symptomsJson,
+        symptoms: symptomsJson, age: ageStr,
       })
 
       if (result.screeningId.startsWith('local-')) {
@@ -99,6 +103,7 @@ export const useCameraCapture = (params: Params) => {
           detectionsCount: String(result.detections.length),
           photos: JSON.stringify(result.photos ?? []),
           advice: result.advice ?? '',
+          guidance: result.guidance ? JSON.stringify(result.guidance) : '',
           guardianPhone: params.guardianPhone ?? '',
           childKey: params.childKey, classId: params.classId,
           schoolId: params.schoolId, seasonId: params.seasonId,

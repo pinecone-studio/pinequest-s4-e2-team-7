@@ -25,7 +25,7 @@ export const useCreateClass = (schoolId: string) => {
   const { token } = useSession()
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (body: { name: string; seasonId: string; gradeLevel?: number }) =>
+    mutationFn: (body: { name: string; seasonId: string; gradeLevel?: number; expectedTotal?: number }) =>
       apiFetch<SchoolClass>(`/api/schools/${schoolId}/classes`, { token, method: 'POST', body }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['classes', schoolId] }),
   })

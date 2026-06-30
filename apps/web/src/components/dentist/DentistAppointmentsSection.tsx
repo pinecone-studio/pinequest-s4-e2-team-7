@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { VideoCameraIcon, ArrowsPointingOutIcon } from '@heroicons/react/24/solid'
+import { VideoCameraIcon, ArrowsPointingOutIcon, DocumentTextIcon } from '@heroicons/react/24/solid'
 import { CalendarDaysIcon } from '@heroicons/react/24/outline'
 import { useMyAppointments, type AppointmentRow } from '@/hooks/useAppointments'
 import { useToast } from '@/components/ui/Toast'
@@ -63,7 +63,7 @@ const DentistAppointmentsSection = () => {
                     </span>
                   </div>
                   <p className="truncate text-[12px] text-text-muted">{time(a.scheduledAt)}{info ? ` · ${info}` : ''}</p>
-                  {a.note && <p className="mt-0.5 truncate text-[11px] text-text-secondary">📝 {a.note}</p>}
+                  {a.note && <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-text-secondary"><DocumentTextIcon className="size-3 shrink-0" /> {a.note}</p>}
                 </div>
                 <IconButton Icon={ArrowsPointingOutIcon} tone="plain" size="sm" label="Дэлгэрэнгүй" onClick={() => setSummary(a)} />
                 <button onClick={() => startCall(a.createdById, a.childName ?? 'Сурагч')} className="btn flex shrink-0 items-center gap-1 rounded-full bg-triage-red px-3.5 py-2 text-[12px] font-semibold text-white transition hover:opacity-90">

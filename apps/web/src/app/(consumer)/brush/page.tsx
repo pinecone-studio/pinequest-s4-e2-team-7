@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, Suspense } from 'react'
+import { ArrowUpRightIcon, ArrowRightIcon } from '@heroicons/react/24/solid'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { AppShell } from '@/components/consumer/AppShell'
@@ -63,9 +64,9 @@ const InstructionsPanel = () => (
           href={`https://youtu.be/${BRUSH_VIDEO_ID}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 inline-block text-[12px] font-semibold text-[#B8860B] hover:underline"
+          className="mt-2 inline-flex items-center gap-1 text-[12px] font-semibold text-[#3B8C5E] hover:underline"
         >
-          YouTube дээр нээх →
+          YouTube дээр нээх <ArrowUpRightIcon className="size-3.5" />
         </a>
       </div>
     </div>
@@ -79,7 +80,7 @@ const InstructionsPanel = () => (
     <ol className="grid gap-3 md:col-span-2 md:grid-cols-2">
       {STEPS.map((step, i) => (
         <li key={i} className="warm-card flex gap-4 p-5 text-[14px] text-slate-700">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-2xl bg-[#F3B900]/15 text-[13px] font-bold text-[#B8860B]">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-2xl bg-[#52A075]/15 text-[13px] font-bold text-[#3B8C5E]">
             {i + 1}
           </span>
           {step}
@@ -189,7 +190,7 @@ const MonitorPanel = () => {
           <p className="text-[13px] text-slate-500">Зорилт 02:00 (бодит хөдөлгөөн)</p>
           <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#E8E8E8]">
             <div
-              className="h-full rounded-full bg-[#F3B900] transition-all"
+              className="h-full rounded-full bg-[#52A075] transition-all"
               style={{ width: `${Math.min(100, (activeSeconds / SESSION_TARGET_SECONDS) * 100)}%` }}
             />
           </div>
@@ -204,7 +205,7 @@ const MonitorPanel = () => {
         {!running ? (
           <Button
             size="lg"
-            className="w-full rounded-full bg-[#F3B900] text-slate-900 hover:bg-[#E5AD00]"
+            className="w-full rounded-full bg-[#52A075] text-slate-900 hover:bg-[#3B8C5E]"
             onClick={start}
           >
             Эхлэх
@@ -217,9 +218,9 @@ const MonitorPanel = () => {
 
         <Link
           href={ROUTES.profile.history}
-          className="block text-center text-[12px] font-semibold text-[#B8860B] hover:underline"
+          className="flex items-center justify-center gap-1 text-center text-[12px] font-semibold text-[#3B8C5E] hover:underline"
         >
-          Түүх →
+          Түүх <ArrowRightIcon className="size-3.5" />
         </Link>
       </aside>
     </div>

@@ -27,5 +27,7 @@ export const useScreenings = (filters: Filters) => {
     queryKey: ['screenings', filters],
     queryFn: () => apiFetch<ScreeningRow[]>(`/api/screenings${qs ? `?${qs}` : ''}`, { token }),
     enabled: !!token,
+    // Mobile-аас синк хийсэн скрининг hard refresh-гүйгээр гарч ирэхэд тогтмол дахин татна.
+    refetchInterval: 10_000,
   })
 }

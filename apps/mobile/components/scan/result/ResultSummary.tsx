@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native'
 import { useTheme } from '@/lib/ThemeContext'
-import type { ChildScreeningSummary, TriageLevel } from '@pinequest/types'
+import type { ChildScreeningSummary, ScreeningGuidance, TriageLevel } from '@pinequest/types'
 
 // Used only when age is unknown (summary === null). Hedged, screening-not-diagnosis.
 const FALLBACK_LEAD: Record<TriageLevel, string> = {
@@ -15,14 +15,29 @@ const FALLBACK_STEPS: Record<TriageLevel, string[]> = {
   red: ['Өдөрт 2 удаа фтортой оохойгоор шүдээ угаах.', 'Чихэрлэг хоол, ундааны хэрэглээг багасгах.', 'Өвдөлт, хавдар, эсвэл халуурвал яаралтай эмнэлэгт хандах.'],
 }
 
-type Props = { summary: ChildScreeningSummary | null; level: TriageLevel; advice?: string | null }
+// Gemini-ийн дэлгэрэнгүй зөвлөмжийн талбаруудыг гарчигтай алхам болгон харуулна.
+const GUIDANCE_STEP_LABELS: { key: keyof ScreeningGuidance; label: string }[] = [
+  { key: 'homeCare', label: 'Гэртээ' },
+  { key: 'brushing', label: 'Шүд угаах' },
+  { key: 'diet', label: 'Хоол хүнс' },
+  { key: 'prevention', label: 'Урьдчилан сэргийлэх' },
+  { key: 'nextStep', label: 'Дараагийн алхам' },
+]
+
+type Props = {
+  summary: ChildScreeningSummary | null
+  level: TriageLevel
+  advice?: string | null
+  guidance?: ScreeningGuidance | null
+}
 
 /**
  * "AI summary": Дүгнэлт + Цаашид хэвшүүлэх арга хэмжээ.
  * `advice` ирвэл (server дэх Gemini) түүнийг дүгнэлт болгон харуулна — web-тэй ижил.
+ * `guidance` ирвэл нас тохирсон дэлгэрэнгүй зөвлөмжийг арга хэмжээ болгон харуулна.
  * Offline/local fallback үед deterministic buildChildSummary руу буцна.
  */
-const ResultSummary = ({ summary, level, advice }: Props) => {
+const ResultSummary = ({ summary, level, advice, guidance }: Props) => {
   const { colors } = useTheme()
   const lvl = summary?.effectiveLevel ?? level
   const rawConclusion = advice ? [advice] : (summary?.conclusion ?? [FALLBACK_LEAD[lvl]])
@@ -31,7 +46,12 @@ const ResultSummary = ({ summary, level, advice }: Props) => {
     .flatMap((line) => line.split(/(?<=[.!?])\s+/))
     .map((line) => line.trim())
     .filter(Boolean)
-  const steps = summary?.homeSteps ?? FALLBACK_STEPS[lvl]
+  const guidanceSteps = guidance
+    ? GUIDANCE_STEP_LABELS.filter((g) => guidance[g.key]?.trim()).map(
+        (g) => `${g.label}: ${guidance[g.key]}`,
+      )
+    : []
+  const steps = guidanceSteps.length ? guidanceSteps : (summary?.homeSteps ?? FALLBACK_STEPS[lvl])
   const bg = lvl === 'green' ? colors.triageGreenBg : lvl === 'yellow' ? colors.triageYellowBg : colors.triageRedBg
   const fg = lvl === 'green' ? colors.triageGreenText : lvl === 'yellow' ? colors.triageYellowText : colors.triageRedText
 

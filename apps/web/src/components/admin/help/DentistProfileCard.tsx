@@ -1,5 +1,6 @@
 'use client'
 
+import { VideoCameraIcon } from '@heroicons/react/24/solid'
 import type { VolunteerDentist } from '@/hooks/useHelp'
 
 export const SPECIALTY_LABEL: Record<string, string> = {
@@ -55,9 +56,9 @@ export const DentistProfileCard = ({ dentist, onConnect, connecting, active }: P
         <button
           onClick={onConnect}
           disabled={connecting}
-          className="shrink-0 rounded-full bg-triage-red px-3 py-2 text-[12px] font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+          className="flex shrink-0 items-center gap-1.5 rounded-full bg-triage-red px-3 py-2 text-[12px] font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
         >
-          📹 Холбогдох
+          <VideoCameraIcon className="size-4" /> Холбогдох
         </button>
       )}
     </div>

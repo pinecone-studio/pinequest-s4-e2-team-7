@@ -3,6 +3,7 @@ import { detectionsToFindings, normalizeInference, symptomSetSchema, triage, typ
 import type { SymptomSet } from '@pinequest/types'
 import { persistScreening } from '../lib/persistScreening.js'
 import { fallbackAdvice, runGeminiAdvice } from '../lib/geminiAdvice.js'
+import { putBufferImages } from '../lib/r2Images.js'
 import { authenticate } from '../middleware/auth.js'
 import { hasChildAccess } from '../lib/scopeFilter.js'
 import type { AppEnv } from '../types.js'
@@ -82,25 +83,30 @@ analyzeRoutes.post('/analyze', authenticate, async (c) => {
   // triage/detection нь TS core-ийн албан ёсны үр дүн — Gemini үүнийг өөрчлөхгүй.
   // Тохиргоо/сүлжээ алдаа гарвал triage түвшинд тохирсон энгийн зөвлөмж рүү шилжинэ.
   const geminiKey = c.env.GEMINI_API_KEY
-  const advice =
-    (geminiKey
-      ? await runGeminiAdvice({
-          apiKey: geminiKey,
-          model: c.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
-          triageLevel: triageResult.level,
-          detections: allDetections,
-          symptoms,
-          image: shots[0]?.image,
-        })
-      : null) ?? fallbackAdvice(triageResult.level, allDetections.length)
+  const generated = geminiKey
+    ? await runGeminiAdvice({
+        apiKey: geminiKey,
+        model: c.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
+        triageLevel: triageResult.level,
+        detections: allDetections,
+        symptoms,
+        age: typeof body['age'] === 'string' ? (body['age'] as string) : undefined,
+        image: shots[0]?.image,
+      })
+    : null
+  const advice = generated?.advice ?? fallbackAdvice(triageResult.level, allDetections.length)
+  const guidance = generated?.guidance
 
-  const imageCount = photos.length
+  // Upload the actual photo bytes to R2; the DB keeps only the object keys (refs).
+  const buffers = await Promise.all(shots.map((s) => s.image.arrayBuffer()))
+  const imageRefs = await putBufferImages(c.env.IMAGES, screeningId, buffers)
   await persistScreening(
     c.get('db'),
     {
       id: screeningId, childKey, classId, schoolId, seasonId,
-      imageRefs: Array.from({ length: imageCount }, (_, i) => `analyze:${screeningId}:${i}`),
+      imageRefs,
       findings, symptoms, modelName: 'yolov8',
+      summary: generated ? { advice, guidance } : undefined,
       capturedAt: new Date().toISOString(),
       deviceId: body['deviceId'] as string | undefined,
     },
@@ -117,6 +123,7 @@ analyzeRoutes.post('/analyze', authenticate, async (c) => {
       detections: allDetections,
       photos,
       advice,
+      guidance,
       modelVersion: c.env.MODEL_VERSION ?? 'yolov8-server',
     },
   }, 201)

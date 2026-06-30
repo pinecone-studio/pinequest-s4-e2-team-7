@@ -82,7 +82,7 @@ export const printChildSummary = (
     Эцсийн дүгнэлтийг мэргэжлийн шүдний эмч баталгаажуулна.
   </div>
   <div class="no-print" style="margin-top:24px;text-align:center;">
-    <button onclick="window.print()" style="background:#F2B705;border:none;border-radius:10px;padding:10px 28px;font-size:14px;font-weight:700;cursor:pointer;color:#1A1407;">PDF хадгалах / Хэвлэх</button>
+    <button onclick="window.print()" style="background:#52A075;border:none;border-radius:10px;padding:10px 28px;font-size:14px;font-weight:700;cursor:pointer;color:#1A1407;">PDF хадгалах / Хэвлэх</button>
   </div>
 </body></html>`
 

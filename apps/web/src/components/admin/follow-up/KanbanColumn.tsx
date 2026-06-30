@@ -1,5 +1,6 @@
 'use client'
 
+import { ChevronUpIcon } from '@heroicons/react/24/solid'
 import type { FollowUpStatus } from '@pinequest/types'
 import type { BoardStudent } from '@/hooks/useBoard'
 import FollowUpCard from './FollowUpCard'
@@ -66,8 +67,8 @@ const KanbanColumn = ({ col, cards, limit, pageSize, isOver, draggingKey, onDrag
         </button>
       )}
       {limit > pageSize && remaining === 0 && (
-        <button onClick={onCollapse} className="btn mt-0.5 w-full rounded-full py-1.5 text-[11px] text-text-muted/60 transition-colors hover:text-text-muted active:scale-[0.98]">
-          Хураах ↑
+        <button onClick={onCollapse} className="btn mt-0.5 flex w-full items-center justify-center gap-1 rounded-full py-1.5 text-[11px] text-text-muted/60 transition-colors hover:text-text-muted active:scale-[0.98]">
+          Хураах <ChevronUpIcon className="size-3" />
         </button>
       )}
     </div>

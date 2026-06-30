@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { InboxIcon, BarsArrowDownIcon, BarsArrowUpIcon, FireIcon } from '@heroicons/react/24/solid'
+import { InboxIcon, BarsArrowDownIcon, BarsArrowUpIcon, FireIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid'
 import type { ScreeningRow } from '@/hooks/useScreenings'
 import { SkeletonTable } from '@/components/ui/Skeleton'
 import EmptyState from '@/components/ui/EmptyState'
@@ -103,9 +103,9 @@ const RecentScreeningsTable = ({ screenings, loading }: Props) => {
             <button
               onClick={() => setPage(p => Math.max(0, p - 1))}
               disabled={safePage === 0}
-              className="rounded-full border border-border px-3 py-1.5 text-[12px] font-medium text-text-base transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[12px] font-medium text-text-base transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
             >
-              ← Өмнөх
+              <ChevronLeftIcon className="size-3.5" /> Өмнөх
             </button>
             <span className="text-[12px] text-text-muted">
               {safePage + 1} / {totalPages}
@@ -113,9 +113,9 @@ const RecentScreeningsTable = ({ screenings, loading }: Props) => {
             <button
               onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
               disabled={safePage === totalPages - 1}
-              className="rounded-full border border-border px-3 py-1.5 text-[12px] font-medium text-text-base transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-[12px] font-medium text-text-base transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Дараах →
+              Дараах <ChevronRightIcon className="size-3.5" />
             </button>
           </div>
         )}

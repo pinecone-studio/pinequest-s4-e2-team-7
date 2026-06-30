@@ -1,6 +1,6 @@
 // The product flow as a connected node graph. Wording stays hedged per the
 // screening-not-diagnosis safety rule. Positions are fractions of a 16:9 canvas.
-export const ACCENT = '#F2B705'
+export const ACCENT = '#52A075'
 
 export type FlowStep = { num: string; title: string; sub: string; fx: number; fy: number }
 

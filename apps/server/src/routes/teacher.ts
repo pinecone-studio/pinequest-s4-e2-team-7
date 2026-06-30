@@ -99,7 +99,13 @@ teacherRoutes.post('/classes/:classId/students', authorize('teacher', 'admin'), 
     }
   })
   await inChunks(rows, (b) => db.insert(children).values(b))
-  return c.json({ success: true, data: { added: rows.length } }, 201)
+  // Return the created rows (incl. childKey + rosterSlot) so the web screening flow
+  // can immediately screen a just-added child without a roster re-fetch.
+  const created = rows.map((r) => ({
+    childKey: r.childKey, rosterSlot: r.rosterSlot,
+    firstName: r.firstName, lastName: r.lastName, birthYear: r.birthYear,
+  }))
+  return c.json({ success: true, data: { added: rows.length, children: created } }, 201)
 })
 
 // Per-child status for one class: roster PII + latest triage level. Powers the class

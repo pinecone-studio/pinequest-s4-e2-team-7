@@ -46,6 +46,8 @@ export const useBoardStudents = () => {
     queryFn: () => apiFetch<BoardStudent[]>('/api/board/students', { token }),
     enabled: !!token,
     staleTime: 60_000,
+    // Mobile yellow/red скрининг → follow-up карт hard refresh-гүйгээр самбарт гарч ирнэ.
+    refetchInterval: 10_000,
   })
 }
 

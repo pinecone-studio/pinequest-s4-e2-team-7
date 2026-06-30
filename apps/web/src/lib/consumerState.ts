@@ -1,10 +1,11 @@
+import type { ToothFinding } from '@pinequest/types'
+
 const QUESTIONNAIRE_KEY = 'screener.questionnaire.v1'
 const BRUSH_SESSION_KEY = 'screener.brushSession.v1'
 const SCAN_RESULT_KEY = 'screener.lastScanResult.v1'
 const SCAN_HISTORY_KEY = 'screener.scanHistory.v1'
 const BRUSH_LOGS_KEY = 'screener.brushLogs.v1'
 const APPOINTMENT_KEY = 'screener.appointment.v1'
-const CHILD_NAMES_KEY = 'screener.childNames.v1'
 
 export type PainWhen = 'cold' | 'hot' | 'spontaneous' | 'night' | 'pressure'
 export type PainSince = 'yesterday' | '2days' | '4days'
@@ -30,6 +31,20 @@ export type ScanDetection = {
   box: { x: number; y: number; w: number; h: number }
 }
 
+/** Нас тохирсон, эцэг эхэд зориулсан гэрийн арчилгааны дэлгэрэнгүй зөвлөмж. */
+export type ScanGuidance = {
+  /** Яг одоо гэртээ хийх алхмууд */
+  homeCare: string
+  /** Насанд тохирсон шүд угаах заавар */
+  brushing: string
+  /** Шүд бэхжүүлэх / хязгаарлах хоол хүнс */
+  diet: string
+  /** Цоорол ба эмх замбараагүй ургалтаас урьдчилан сэргийлэх */
+  prevention: string
+  /** Дараагийн алхам — хэзээ эмчид очих */
+  nextStep: string
+}
+
 export type ScanResult = {
   id: string
   imageUrl: string
@@ -38,6 +53,12 @@ export type ScanResult = {
   needsDoctor: boolean
   detections: ScanDetection[]
   advice: string
+  /** Gemini-ийн нас тохирсон дэлгэрэнгүй зөвлөмж (байхгүй ч болно) */
+  guidance?: ScanGuidance
+  /** Core-computed findings + triage detail — DB-д хадгалахад (POST /api/screenings) ашиглана. */
+  findings?: ToothFinding[]
+  triageScore?: number
+  confidentWording?: boolean
   createdAt: string
 }
 
@@ -161,24 +182,6 @@ export const getLastScanResult = (): ScanResult | null => read(SCAN_RESULT_KEY)
 
 export const getScanHistory = (): ScanResult[] => read(SCAN_HISTORY_KEY) ?? []
 
-/** Child names the user has added, by name (no age/PII). Persisted locally. */
-export const getChildNames = (): string[] => read<string[]>(CHILD_NAMES_KEY) ?? []
-
-export const addChildName = (name: string): string[] => {
-  const trimmed = name.trim()
-  const names = getChildNames()
-  if (!trimmed || names.includes(trimmed)) return names
-  const next = [...names, trimmed]
-  write(CHILD_NAMES_KEY, next)
-  return next
-}
-
-export const removeChildName = (name: string): string[] => {
-  const next = getChildNames().filter((n) => n !== name)
-  write(CHILD_NAMES_KEY, next)
-  return next
-}
-
 export const getAppointment = (): Appointment =>
   read(APPOINTMENT_KEY) ?? {
     doctorName: 'Dr. Batbold',
@@ -201,6 +204,6 @@ export const DEMO_SCAN_RESULT = (imageUrl: string): ScanResult => ({
     { label: 'Cavity', confidence: 0.124, box: { x: 55, y: 42, w: 12, h: 10 } },
   ],
   advice:
-    'Шүдний гадаргуу дээр кариесийн шинж илэрсэн. 2 долоо хоногийн дотор эмчид үзүүлэхийг зөвлөж байна. Өдөрт 2 удаа зөв угаалга хий.',
+    'Цоорсон шүдний гадаргуу танигдсан. Ойрын хугацаанд эмчилгээ хийлгэж, эмчид үзүүлэх шаардлагатай. Шүд угаалтыг зөв аргаар 2 минутаас багагүй угааж хэвшүүлье.',
   createdAt: new Date().toISOString(),
 })

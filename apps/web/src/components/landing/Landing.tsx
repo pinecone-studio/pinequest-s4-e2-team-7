@@ -17,7 +17,7 @@ export const Landing = () => (
   <>
     <style>{`
       :root {
-        --olive: #F2B705;
+        --olive: #52A075;
       }
       .landing-wrap { background: #000; color: #fff; }
     `}</style>

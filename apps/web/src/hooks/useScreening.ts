@@ -17,6 +17,16 @@ export type Questionnaire = {
   lastCheckupAdult: string | null
 } | null
 
+/** Gemini-generated parent advice + age-aware guidance, persisted at screening time. */
+export type ScreeningSummary = {
+  advice: string
+  homeCare: string | null
+  brushing: string | null
+  diet: string | null
+  prevention: string | null
+  nextStep: string | null
+} | null
+
 export type ScreeningDetail = {
   id: string
   childKey: string
@@ -29,6 +39,7 @@ export type ScreeningDetail = {
   images: ScreeningImage[]
   questionnaire: Questionnaire
   review: { confirmedLevel: string; note: string | null } | null
+  summary: ScreeningSummary
 }
 
 export type QueueRow = {

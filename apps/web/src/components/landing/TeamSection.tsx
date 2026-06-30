@@ -13,22 +13,24 @@ import {
 } from 'framer-motion'
 import { useEffect, useState, type CSSProperties } from 'react'
 
-type Member = { name: string; role: string; description: string; image: string }
+type Member = { name: string; role: string; image: string }
 
+// NOTE (temporary): specialized roles collapsed to "Full-stack Developer" for now.
+// Originals were Frontend/Motion, Mobile/Capture, Backend/Sync, ML/Inference, Design/Content.
 const MEMBERS: Member[] = [
-  { name: 'Норовсүрэн', role: 'Frontend / Motion', description: 'Буух хуудас болон hero хэсгийг бүтээж, нийтлэг хөдөлгөөний системийг хариуцсан.', image: '/images/team1.JPG' },
-  { name: 'Ганхөлөг', role: 'Mobile / Capture', description: 'Офлайн-нэн тэргүүн зураг авах урсгал, төхөөрөмж дээрх inference-г үр дүнтэй холбосон.', image: '/images/team2.JPG' },
-  { name: 'Ариунзул', role: 'Backend / Sync', description: 'Өөрчлөгдөшгүй event log, нэг чиглэлийн sync болон Fastify ingest цэгүүдийг зохион бүтээсэн.', image: '/images/team3.JPG' },
-  { name: 'Мөнхжин', role: 'ML / Inference', description: 'YOLOv8 цоорхой илрүүлэгчийг сургаж, ONNX хувилбар болон triage логикийг хариуцсан.', image: '/images/team4.JPG' },
-  { name: 'Чингүүн', role: 'Design / Content', description: '«Скрининг — онош биш» өнгө аяс ба эмчийн баталсан контентыг бүрдүүлсэн.', image: '/images/team5.png' },
+  { name: 'Норовсүрэн', role: 'Full-stack Developer', image: '/images/team1.JPG' },
+  { name: 'Ганхөлөг', role: 'Full-stack Developer', image: '/images/team2.JPG' },
+  { name: 'Ариунзул', role: 'Full-stack Developer', image: '/images/team3.JPG' },
+  { name: 'Мөнхжин', role: 'Full-stack Developer', image: '/images/team4.JPG' },
+  { name: 'Чингүүн', role: 'Full-stack Developer', image: '/images/team5.png' },
 ]
 
 // --- THEME (named so a dark theme can be swapped back in trivially) ---
 const SECTION_BG = '#0a0a0a' // near-black, consistent with the other landing sections
 const GIANT_TEXT = 'rgba(255,255,255,0.06)' // faint giant backdrop word-mark on black
-const GIANT_OLIVE = 'rgba(242,183,5,0.1)' // faint olive for the "Lings" half of the backdrop
+const GIANT_OLIVE = 'rgba(82, 160, 117,0.1)' // faint olive for the "Lings" half of the backdrop
 const LABEL_TEXT = 'var(--olive)' // yellow accent for the small section label
-const ACCENT = 'var(--olive)' // yellow accent (#F2B705); focus rings + role label
+const ACCENT = 'var(--olive)' // yellow accent (#52A075); focus rings + role label
 const CARD_GRADIENT = 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 55%, rgba(0,0,0,0) 100%)'
 
 const SPRING = { type: 'spring', stiffness: 220, damping: 26 } as const
@@ -105,7 +107,7 @@ export const TeamSection = ({ members = MEMBERS }: { members?: Member[] }) => {
     const next = phase.get() + (delta / 1000) * SPEED
     phase.set(((next % count) + count) % count)
   })
-  // The front card (nearest phase) drives the role/description panel.
+  // The front card (nearest phase) drives the role panel.
   useMotionValueEvent(phase, 'change', (p) => {
     const idx = ((Math.round(p) % count) + count) % count
     setActiveIndex((prev) => (prev === idx ? prev : idx))
@@ -155,15 +157,12 @@ export const TeamSection = ({ members = MEMBERS }: { members?: Member[] }) => {
         </div>
       )}
 
-      {/* Active member's role + description (crossfades, reserved height = no layout shift). */}
-      <div className="relative z-30 min-h-22 max-w-xl">
+      {/* Active member's role (crossfades, reserved height = no layout shift). */}
+      <div className="relative z-30 min-h-8 max-w-xl">
         <AnimatePresence>
           <m.div key={activeIndex} className="absolute inset-x-0" initial={reduce ? { opacity: 0 } : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={reduce ? { opacity: 0 } : { opacity: 0, y: -12 }} transition={reduce ? { duration: 0.25 } : SPRING}>
-            <p className="mb-1 text-xs font-bold uppercase tracking-[0.2em]" style={{ color: ACCENT }}>
+            <p className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: ACCENT }}>
               {active.role}
-            </p>
-            <p className="text-sm leading-relaxed md:text-base" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              {active.description}
             </p>
           </m.div>
         </AnimatePresence>
