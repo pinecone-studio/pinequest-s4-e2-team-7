@@ -7,6 +7,7 @@ import { toMongolian } from './errorMessages'
 import { detectionsToFindings, QUADRANTS, TRIAGE_THRESHOLDS } from '@pinequest/core'
 import type { Quadrant, SymptomSet } from '@pinequest/types'
 import { outbox } from './useOutboxSync'
+import { formatAnswers } from './questionnaire'
 import { getUser } from './auth'
 
 type Params = {
@@ -51,13 +52,17 @@ export const useCameraCapture = (params: Params) => {
     try {
       const symptomsObj = parseSymptoms(params.questionnaire)
       const symptomsJson = JSON.stringify(symptomsObj)
+      // Verbatim Q&A as asked on this device — stored + shown on the board as-is.
+      const rawAnswers = formatAnswers(params.questionnaire)
       const capturedAt = new Date().toISOString()
+      const birthYearNum = parseInt(params.birthYear ?? '', 10)
+      const ageStr = birthYearNum ? String(new Date().getFullYear() - birthYearNum) : ''
       const shots = QUADRANTS.map(q => ({ uri: ready[q], quadrant: q }))
 
       const result = await analyzeImages(shots, {
         childKey: params.childKey, classId: params.classId,
         schoolId: params.schoolId, seasonId: params.seasonId,
-        symptoms: symptomsJson, age: ageStr,
+        symptoms: symptomsJson, rawAnswers: JSON.stringify(rawAnswers), age: ageStr,
       })
 
       if (result.screeningId.startsWith('local-')) {
@@ -71,6 +76,7 @@ export const useCameraCapture = (params: Params) => {
           imageRefs: QUADRANTS.map(q => ready[q]),
           findings: detectionsToFindings(result.detections, () => `${result.screeningId}-f${fi++}`),
           symptoms: symptomsObj,
+          rawAnswers,
           triage: {
             level: result.triageLevel, score: result.triageScore,
             confidentWording: result.detections.reduce((m, d) => Math.max(m, d.confidence), 0) >= TRIAGE_THRESHOLDS.confidentWording,

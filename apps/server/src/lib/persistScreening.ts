@@ -2,7 +2,7 @@ import { and, desc, eq, lt } from 'drizzle-orm'
 import {
   screenings, toothFindings, screeningImages, questionnaires, screeningSummaries, type DB,
 } from '@pinequest/db/d1'
-import type { FindingClass, ScreeningGuidance, SymptomSet, ToothFinding, TriageResult } from '@pinequest/types'
+import type { FindingClass, QuestionnaireAnswer, ScreeningGuidance, SymptomSet, ToothFinding, TriageResult } from '@pinequest/types'
 import { computeToothLongitudinal } from '@pinequest/core'
 import { syncFollowUpEpisode } from './followUpEpisode.js'
 
@@ -17,6 +17,8 @@ export type PersistInput = {
   imageData?: string[]
   findings: ToothFinding[]
   symptoms: SymptomSet
+  /** Literal questionnaire Q&A as asked on the device (verbatim, for the board). */
+  rawAnswers?: QuestionnaireAnswer[]
   /** AI summary (dentist-voice advice + age-aware guidance) to persist, if any. */
   summary?: { advice: string; guidance?: ScreeningGuidance }
   modelName: string
@@ -97,6 +99,7 @@ export const persistScreening = async (
     fever: body.symptoms.fever ?? null,
     gumPimpleOrFistula: body.symptoms.gumPimpleOrFistula ?? null,
     trauma: body.symptoms.trauma ?? null,
+    rawAnswers: body.rawAnswers?.length ? JSON.stringify(body.rawAnswers) : null,
   })
 
   // AI summary (advice + age-aware guidance) — reviewable later, not just at capture.

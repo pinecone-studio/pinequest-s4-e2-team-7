@@ -1,5 +1,4 @@
-import type { ChildScreeningSummary, InferenceDetection, ScreeningGuidance, SymptomSet, UserRole, FollowUpStatus } from '@pinequest/types'
-import type { ChildScreeningSummary, InferenceDetection, Quadrant, SymptomSet, UserRole, FollowUpStatus } from '@pinequest/types'
+import type { ChildScreeningSummary, InferenceDetection, ScreeningGuidance, Quadrant, SymptomSet, UserRole, FollowUpStatus } from '@pinequest/types'
 import { normalizeInference, detectionsToFindings, triage } from '@pinequest/core'
 import { getToken, type AuthUser } from './auth'
 import { runLocalInference, isModelCached } from './localInference'
@@ -268,35 +267,6 @@ export type VolunteerDentist = {
 export const getVolunteerDentists = () =>
   apiFetch<VolunteerDentist[]>('/api/help/volunteers')
 
-/** A booked video-call appointment with a volunteer dentist. The Jitsi room is
- *  derived from the row id server-side, so the payload carries no PII. */
-export type Appointment = {
-  id: string
-  dentistId: string
-  childKey: string
-  schoolId: string | null
-  level: 'red' | 'yellow'
-  scheduledAt: string
-  roomName: string
-  roomUrl: string
-  status: 'scheduled' | 'completed' | 'cancelled'
-  createdById: string
-  dentistNote: string | null
-}
-
-/** Book a video call with a volunteer dentist for a flagged child. Additive —
- *  one new appointment row per booking. */
-export const createAppointment = (
-  dentistId: string,
-  childKey: string,
-  scheduledAt: string,
-  level: 'red' | 'yellow',
-) =>
-  apiFetch<Appointment>('/api/appointments', {
-    method: 'POST',
-    body: JSON.stringify({ dentistId, childKey, scheduledAt, level }),
-  })
-
 /** Help requests, role-scoped server-side: a dentist sees open + assigned ones,
  *  a school doctor their school's, a parent/teacher their own. */
 export type HelpRequestRow = {
@@ -354,6 +324,8 @@ export type AnalyzeMeta = {
   deviceId?: string
   /** JSON-serialized SymptomSet — mapped from raw questionnaire answers before the call. */
   symptoms?: string
+  /** JSON-serialized QuestionnaireAnswer[] — verbatim Q&A as asked on the device. */
+  rawAnswers?: string
   /** Хүүхдийн нас (жилээр) — Gemini-ийн зөвлөмжийг насанд тохируулахад ашиглана. */
   age?: string
 }

@@ -99,6 +99,12 @@ export const symptomSetSchema = z.object({
   trauma: z.boolean().optional(),
 })
 
+/** Literal questionnaire Q&A as asked on the device — stored verbatim. */
+export const questionnaireAnswerSchema = z.object({
+  q: z.string(),
+  a: z.string(),
+})
+
 /** AI-generated, age-aware parent guidance (persisted alongside a screening). */
 export const screeningGuidanceSchema = z.object({
   homeCare: z.string(),
@@ -124,6 +130,8 @@ export const screeningCreateSchema = z.object({
   imageRefs: z.array(z.string()),
   findings: z.array(toothFindingSchema),
   symptoms: symptomSetSchema,
+  // Literal questionnaire Q&A as asked on the device (verbatim, for the board).
+  rawAnswers: z.array(questionnaireAnswerSchema).optional(),
   triage: z.object({
     level: z.enum(['green', 'yellow', 'red']),
     score: z.number(),

@@ -3,28 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTheme } from '@/lib/ThemeContext'
-
-type Q = { key: string; text: string; type: 'bool' | 'choice'; choices?: string[] }
-
-const QUESTIONS: Q[] = [
-  { key: 'toothPain', text: 'Өвддөг шүд байгаа юу?', type: 'bool' },
-  {
-    key: 'painTrigger', text: 'Ямар үед өвддөг вэ?', type: 'choice', choices: [
-      'Хүйтэн зүйл идэхэд өвддөг',
-      'Халуун зүйл идэхэд өвддөг',
-      'Өөрөө аяндаа өвддөг',
-      'Шөнө өвддөг',
-    ],
-  },
-  {
-    key: 'painDuration', text: 'Хэзээнээс өвдөж эхлэсэн бэ?', type: 'choice', choices: [
-      'Өчигдрөөс',
-      '2-оос дээш хоног',
-      '4-өөс дээш хоног',
-    ],
-  },
-  { key: 'swellingFever', text: 'Халуурах эсвэл эрүү, нүүр орчмоор хавдаж байсан уу?', type: 'bool' },
-]
+import { QUESTIONS } from '@/lib/questionnaire'
 
 export default function QuestionnaireScreen() {
   const router = useRouter()

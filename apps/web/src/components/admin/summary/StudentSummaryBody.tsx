@@ -5,7 +5,7 @@ import { CheckCircleIcon, PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/so
 import type { BoardStudent } from '@/hooks/useBoard'
 import type { ChildSummaryPayload } from '@/hooks/useChildSummary'
 import { childSummaryNarrative } from '@pinequest/core'
-import { ImageGallery, QuestionnairePanel, HospitalGuidePanel, TRIAGE_BADGE, TRIAGE_LABEL } from './SummaryPanels'
+import { ImageGallery, QuestionnairePanel, RawQuestionnairePanel, HospitalGuidePanel, TRIAGE_BADGE, TRIAGE_LABEL } from './SummaryPanels'
 import Skeleton from '@/components/ui/Skeleton'
 import { formatSeason } from '@/lib/season'
 
@@ -15,6 +15,15 @@ type Props = {
   isLoading: boolean
   statusSlot?: ReactNode      // follow-up status control (FollowUpEditModal only)
 }
+
+// Gemini-ийн нас тохирсон зөвлөмжийн талбарууд (утас + эмчийн хяналттай ижил гарчиг).
+const GUIDANCE_FIELDS = [
+  { key: 'homeCare', label: 'Гэртээ' },
+  { key: 'brushing', label: 'Шүд угаах' },
+  { key: 'diet', label: 'Хоол хүнс' },
+  { key: 'prevention', label: 'Урьдчилан сэргийлэх' },
+  { key: 'nextStep', label: 'Дараагийн алхам' },
+] as const
 
 // Shared body for every student-summary modal — image, triage, questionnaire,
 // contact info, AI advice, hospital. One source of truth → both modals identical.
@@ -26,9 +35,20 @@ const StudentSummaryBody = ({ student, detail, isLoading, statusSlot }: Props) =
     : '—'
   const name = `${student.lastName} ${student.firstName}`.trim()
 
+  // Утсан дээр гарсан Gemini дүгнэлт. Урт текстийг өгүүлбэр бүрээр салгаж мөр болгоно (утастай ижил).
+  const adviceText = detail?.advice?.trim() || ''
+  const adviceConclusion = adviceText
+    .split(/(?<=[.!?])\s+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+  const guidance = detail?.guidance
+  const guidanceSteps = guidance
+    ? GUIDANCE_FIELDS.filter((g) => guidance[g.key]?.trim()).map((g) => `${g.label}: ${guidance[g.key]}`)
+    : []
+
   return (
     <div className="flex flex-col gap-4">
-      <ImageGallery refs={detail?.imageRefs ?? []} />
+      <ImageGallery refs={detail?.imageRefs ?? []} screeningId={detail?.summary?.screeningId} />
 
       <div className="flex flex-wrap items-center gap-2">
         <span className={`rounded-full px-3 py-1.5 text-[12px] font-semibold ${TRIAGE_BADGE[level] ?? 'border border-border bg-surface-raised text-text-muted'}`}>
@@ -40,7 +60,10 @@ const StudentSummaryBody = ({ student, detail, isLoading, statusSlot }: Props) =
       </div>
 
       {isLoading && <Skeleton className="h-28 rounded-2xl" />}
-      {detail?.questionnaire && <QuestionnairePanel q={detail.questionnaire} />}
+      {/* Утсан дээр асуусан яг асуулт-хариултыг харуулна; raw байхгүй бол шинж тэмдгийн жагсаалт руу буцна. */}
+      {detail?.questionnaireRaw?.length
+        ? <RawQuestionnairePanel answers={detail.questionnaireRaw} />
+        : detail?.questionnaire && <QuestionnairePanel q={detail.questionnaire} />}
 
       <div className="rounded-2xl bg-surface-raised px-4">
         {[['Хийсэн огноо', date], ['Анги', `${student.className} — ${formatSeason(student.seasonId)}`]].map(([l, v]) => (
@@ -59,18 +82,28 @@ const StudentSummaryBody = ({ student, detail, isLoading, statusSlot }: Props) =
         </div>
       </div>
 
-      {summary && (
+      {/* Дүгнэлт + зөвлөгөө — утсан дээр гарсан Gemini-ийн advice/guidance-ийг яг тэр хэвээр харуулна.
+          Gemini байхгүй (offline) бол core narrative + гэрийн алхмууд руу буцна. */}
+      {(adviceText || summary) && (
         <div className="rounded-2xl border border-triage-yellow/20 bg-triage-yellow-bg p-4">
           <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-triage-yellow">{name}-д тохирсон зөвлөгөө</p>
-          <p className="mb-2 text-[12px] leading-relaxed text-text-muted">
-            {name}, {childSummaryNarrative(summary)}
-          </p>
-          <p className="text-[13px] font-semibold leading-snug text-text-base">{summary.headline}</p>
-          {summary.homeSteps.length > 0 && (
+          {adviceText
+            ? adviceConclusion.map((line, i) => (
+                <p key={i} className="mb-1.5 text-[12px] leading-relaxed text-text-muted last:mb-0">{line}</p>
+              ))
+            : summary && (
+                <>
+                  <p className="mb-2 text-[12px] leading-relaxed text-text-muted">{name}, {childSummaryNarrative(summary)}</p>
+                  <p className="text-[13px] font-semibold leading-snug text-text-base">{summary.headline}</p>
+                </>
+              )}
+          {(guidanceSteps.length > 0 || (summary?.homeSteps.length ?? 0) > 0) && (
             <>
-              <p className="mb-2 mt-3 text-[11px] font-semibold uppercase tracking-wide text-text-muted">Гэрийн нөхцөлд авах арга хэмжээ</p>
+              <p className="mb-2 mt-3 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                {guidanceSteps.length > 0 ? 'Цаашид хэвшүүлэх арга хэмжээ' : 'Гэрийн нөхцөлд авах арга хэмжээ'}
+              </p>
               <ul className="flex flex-col gap-2">
-                {summary.homeSteps.map((step, i) => (
+                {(guidanceSteps.length > 0 ? guidanceSteps : (summary?.homeSteps ?? [])).map((step, i) => (
                   <li key={i} className="flex items-start gap-2 text-[12px] leading-relaxed text-text-muted">
                     <CheckCircleIcon className="mt-0.5 size-3.5 shrink-0 text-triage-yellow/70" />{step}
                   </li>
@@ -80,7 +113,7 @@ const StudentSummaryBody = ({ student, detail, isLoading, statusSlot }: Props) =
           )}
         </div>
       )}
-      {!summary && !isLoading && (
+      {!adviceText && !summary && !isLoading && (
         <p className="rounded-2xl border border-border bg-surface-raised p-4 text-[13px] text-text-muted">Энэ сурагч шалгагдаагүй байна.</p>
       )}
 

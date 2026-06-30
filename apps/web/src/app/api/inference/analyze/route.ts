@@ -259,7 +259,9 @@ const runYolo = async (image: Blob, mimeType: string): Promise<RawInference> => 
 // Зураг явуулахгүй: зөвлөмж detection/triage текстээс гардаг тул зургийг нэмэх нь
 // чанарт нөлөөлөхгүй, зөвхөн саатал нэмнэ.
 
-const runGeminiAdvice = async (promptText: string): Promise<string | null> => {
+const runGeminiAdvice = async (
+  promptText: string,
+): Promise<{ advice: string; guidance?: Guidance } | null> => {
   const geminiBody = {
     contents: [
       {
@@ -349,7 +351,7 @@ export async function POST(req: NextRequest) {
     }))
 
   // 3) Gemini зөвхөн зөвлөмжийн текст гаргана (илрүүлэлт/triage дээр тулгуурлан).
-  let advice: string | null = null
+  let generated: { advice: string; guidance?: Guidance } | null = null
   if (GEMINI_API_KEY) {
     const promptText = buildAdvicePrompt({
       childName: form.get('childName')?.toString().trim() ?? '',
@@ -365,7 +367,7 @@ export async function POST(req: NextRequest) {
       triageLevel: level,
       detections,
     })
-    advice = await runGeminiAdvice(promptText)
+    generated = await runGeminiAdvice(promptText)
   }
 
   const result: AnalysisResult = {

@@ -27,6 +27,7 @@ screeningRoutes.post('/', authenticate, async (c) => {
     {
       id: body.id, childKey: body.childKey, classId: body.classId, schoolId: body.schoolId,
       seasonId: body.seasonId, imageRefs, findings: body.findings, symptoms: body.symptoms,
+      rawAnswers: body.rawAnswers,
       summary: body.summary, modelName: body.modelName, modelVersion: body.modelVersion,
       capturedAt: body.capturedAt, deviceId: body.deviceId,
     },

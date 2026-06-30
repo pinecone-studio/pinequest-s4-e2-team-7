@@ -5,7 +5,9 @@ import {
   CameraIcon, ChevronLeftIcon, ChevronRightIcon, CheckCircleIcon,
   XCircleIcon, MapPinIcon, ClockIcon, PhoneIcon, QuestionMarkCircleIcon,
 } from '@heroicons/react/24/solid'
+import type { QuestionnaireAnswer } from '@pinequest/types'
 import type { QuestionnaireAnswers, HospitalGuide } from '@/hooks/useChildSummary'
+import { AuthImage } from '@/components/ui/AuthImage'
 
 // Theme-aware triage tokens (NO hardcoded rose/amber/sky — those broke dark mode)
 export const TRIAGE_BADGE: Record<string, string> = {
@@ -31,23 +33,26 @@ const SYMPTOMS: { key: keyof QuestionnaireAnswers; mn: string }[] = [
 
 const navBtn = 'btn absolute top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 disabled:opacity-30'
 
-export const ImageGallery = ({ refs }: { refs: string[] }) => {
+/**
+ * Captured screening photos. The server stores only R2 object keys (refs), and
+ * the bytes are served PRIVATELY via the auth-scoped image route — so we fetch
+ * each photo through <AuthImage> (Bearer token), exactly like the dentist chart.
+ * `screeningId` + the ref index map to `/api/screenings/:id/image/:order`.
+ */
+export const ImageGallery = ({ refs, screeningId }: { refs: string[]; screeningId?: string }) => {
   const [idx, setIdx] = useState(0)
-  if (!refs.length) return (
+  if (!refs.length || !screeningId) return (
     <div className="flex h-40 flex-col items-center justify-center gap-2 rounded-2xl bg-surface-raised text-text-muted/50">
       <CameraIcon className="size-7" /><span className="text-[11px]">Зураг байхгүй</span>
     </div>
   )
-  const real = refs[idx]?.startsWith('http')
   return (
     <div className="relative overflow-hidden rounded-2xl bg-surface-raised">
-      {real
-        ? <img src={refs[idx]} alt="" className="h-44 w-full object-cover" />
-        : <div className="flex h-44 flex-col items-center justify-center gap-2">
-            <CameraIcon className="size-9 text-text-muted/40" />
-            <p className="text-[12px] font-medium text-text-muted">Үзүүлэлт зураг {idx + 1}/{refs.length}</p>
-            <p className="text-[11px] text-text-muted/70">Утаснаас синк хийгдвэл харагдана</p>
-          </div>}
+      <AuthImage
+        path={`/api/screenings/${screeningId}/image/${idx}`}
+        alt={`Үзүүлэлт зураг ${idx + 1}/${refs.length}`}
+        className="h-44 w-full object-cover"
+      />
       {refs.length > 1 && <>
         <button onClick={() => setIdx((i) => Math.max(0, i - 1))} disabled={idx === 0} aria-label="Өмнөх" className={`${navBtn} left-2`}><ChevronLeftIcon className="size-4" /></button>
         <button onClick={() => setIdx((i) => Math.min(refs.length - 1, i + 1))} disabled={idx === refs.length - 1} aria-label="Дараах" className={`${navBtn} right-2`}><ChevronRightIcon className="size-4" /></button>
@@ -56,6 +61,35 @@ export const ImageGallery = ({ refs }: { refs: string[] }) => {
         </div>
         <span className="absolute right-2 top-2 rounded-full bg-black/40 px-2 py-0.5 text-[10px] text-white">{idx + 1}/{refs.length}</span>
       </>}
+    </div>
+  )
+}
+
+/**
+ * Verbatim questionnaire — the literal Q&A exactly as asked + answered on the
+ * phone (immutable event log). Preferred over the derived symptom checklist when
+ * the device captured raw answers, so the board matches the phone screen 1:1.
+ */
+export const RawQuestionnairePanel = ({ answers }: { answers: QuestionnaireAnswer[] }) => {
+  const isYes = (a: string) => a.trim() === 'Тийм'
+  return (
+    <div className="rounded-2xl bg-surface-raised px-4 py-3">
+      <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-text-muted">Асуумжаар</p>
+      <div className="flex flex-col gap-2.5">
+        {answers.map(({ q, a }, i) => (
+          <div key={i} className="flex items-start justify-between gap-3">
+            <span className="flex items-start gap-2 text-[12px] leading-tight text-text-base">
+              {a.trim() === 'Үгүй'
+                ? <CheckCircleIcon className="mt-0.5 size-4 shrink-0 text-triage-green" />
+                : isYes(a)
+                  ? <XCircleIcon className="mt-0.5 size-4 shrink-0 text-triage-red" />
+                  : <QuestionMarkCircleIcon className="mt-0.5 size-4 shrink-0 text-text-muted/60" />}
+              {q}
+            </span>
+            <span className="shrink-0 text-right text-[12px] font-medium text-text-base">{a}</span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
