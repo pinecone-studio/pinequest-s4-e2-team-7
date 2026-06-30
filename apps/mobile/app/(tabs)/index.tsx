@@ -17,6 +17,7 @@ import SchoolOverviewSection from '@/components/home/SchoolOverviewSection'
 import RedStudentsBoardSection from '@/components/home/RedStudentsBoardSection'
 import HelpRequestsSection from '@/components/dentist/HelpRequestsSection'
 import QuickActionGrid from '@/components/home/QuickActionGrid'
+import AdBanner from '@/components/home/AdBanner'
 
 const HomeScreen = () => {
   const { dark } = useTheme()
@@ -86,6 +87,7 @@ const HomeScreen = () => {
         {config.showScanHero && <ScanHeroCard onScan={() => router.push('/scan')} />}
         {config.sections.map(renderSection)}
         <QuickActionGrid actions={actions} />
+        <AdBanner />
         </ScrollView>
       </SafeAreaView>
     </ThemeContext.Provider>
