@@ -81,13 +81,18 @@ export const useAppointmentSummary = (apptId: string | null) => {
   })
 }
 
-// Dentist saves their post-call advice note on an appointment.
+// Dentist finishes the call: saves the advice note + a verdict (treatment_needed /
+// postponed). The verdict closes the child's follow-up episode, so the admin board
+// is invalidated too.
 export const useUpdateAppointmentNote = () => {
   const { token } = useSession()
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, note }: { id: string; note: string }) =>
-      apiFetch(`/api/appointments/${id}`, { token, method: 'PATCH', body: { note } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['appointments'] }),
+    mutationFn: ({ id, note, outcome }: { id: string; note: string; outcome?: 'treatment_needed' | 'postponed' }) =>
+      apiFetch(`/api/appointments/${id}`, { token, method: 'PATCH', body: { note, ...(outcome && { outcome }) } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['appointments'] })
+      qc.invalidateQueries({ queryKey: ['board-students'] })
+    },
   })
 }

@@ -10,6 +10,7 @@ import {
   type MyClass,
   type RosterChild,
 } from '@/lib/screeningApi'
+import { formatChildName } from '@pinequest/core'
 import Dropdown, { type DropdownOption } from '@/components/ui/Dropdown'
 import { formatSeason } from '@/lib/season'
 import { ScreeningProgress } from './ScreeningProgress'
@@ -110,7 +111,7 @@ export const ClassChildPicker = ({
   ]
   const childOptions: DropdownOption[] = [
     { value: '', label: 'Хүүхэд сонгох…', Icon: UserIcon },
-    ...roster.map((r) => ({ value: r.childKey, label: `${r.screenedAt ? '✓ ' : ''}${r.lastName} ${r.firstName}`, Icon: UserIcon })),
+    ...roster.map((r) => ({ value: r.childKey, label: `${r.screenedAt ? '✓ ' : ''}${formatChildName(r)}`, Icon: UserIcon })),
   ]
 
   const emit = (kid: { childKey: string; firstName: string; lastName: string; birthYear: number }) => {

@@ -1,4 +1,4 @@
-import type { ToothFinding } from '@pinequest/types'
+import type { QuestionnaireAnswer, ToothFinding } from '@pinequest/types'
 
 const QUESTIONNAIRE_KEY = 'screener.questionnaire.v1'
 const BRUSH_SESSION_KEY = 'screener.brushSession.v1'
@@ -118,6 +118,29 @@ export const getQuestionnaire = (): QuestionnaireAnswers | null => {
   }
 }
 
+// Mongolian labels for the choice answers — shared by the questionnaire form and
+// the verbatim Q&A stored for the board.
+export const PAIN_WHEN_LABEL: Record<PainWhen, string> = {
+  cold: 'Хүйтэн зүйлд', hot: 'Халуун зүйлд', spontaneous: 'Аяндаа', night: 'Шөнө', pressure: 'Дарах үед',
+}
+export const PAIN_SINCE_LABEL: Record<PainSince, string> = {
+  yesterday: 'Өчигдрөөс', '2days': '2 хоног', '4days': '4-өөс дээш хоног',
+}
+
+/** Verbatim Q&A for the board's questionnaire panel (mirrors the mobile rawAnswers). */
+export const questionnaireRawAnswers = (q: QuestionnaireAnswers | null): QuestionnaireAnswer[] => {
+  if (!q) return []
+  const out: QuestionnaireAnswer[] = [
+    { q: 'Өвддөг шүд байгаа юу?', a: q.hasPainfulTooth === 'yes' ? 'Тийм' : 'Үгүй' },
+  ]
+  if (q.hasPainfulTooth === 'yes') {
+    if (q.painWhen) out.push({ q: 'Ямар үед өвддөг вэ?', a: PAIN_WHEN_LABEL[q.painWhen] })
+    if (q.painSince) out.push({ q: 'Хэзээнээс өвдөж эхэлсэн бэ?', a: PAIN_SINCE_LABEL[q.painSince] })
+  }
+  out.push({ q: 'Халуурах эсвэл нүүр хавдах шинж байсан уу?', a: q.feverSwelling === 'yes' ? 'Тийм' : 'Үгүй' })
+  return out
+}
+
 /** Questionnaire → triage symptom flags for AI analyze. */
 export const questionnaireSymptoms = (q: QuestionnaireAnswers | null) => {
   if (!q || q.hasPainfulTooth !== 'yes') {
@@ -177,8 +200,6 @@ export const saveScanResult = (result: ScanResult): void => {
   history.unshift(result)
   write(SCAN_HISTORY_KEY, history.slice(0, 20))
 }
-
-export const getLastScanResult = (): ScanResult | null => read(SCAN_RESULT_KEY)
 
 export const getScanHistory = (): ScanResult[] => read(SCAN_HISTORY_KEY) ?? []
 

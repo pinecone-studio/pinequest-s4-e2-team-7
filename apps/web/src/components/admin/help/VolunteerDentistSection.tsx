@@ -7,6 +7,7 @@ import type { BoardStudent } from '@/hooks/useBoard'
 import type { ChildSummaryPayload } from '@/hooks/useChildSummary'
 import { useVolunteerDentists, useRequestHelp } from '@/hooks/useHelp'
 import type { VolunteerDentist } from '@/hooks/useHelp'
+import { TRIAGE_LABEL } from '@/lib/triage'
 import { DentistProfileCard } from './DentistProfileCard'
 
 const VolunteerDentistsMap = dynamic(
@@ -22,6 +23,7 @@ type Props = {
 export const VolunteerDentistSection = ({ student, detail }: Props) => {
   const { data: dentists = [], isLoading } = useVolunteerDentists()
   const requestHelp = useRequestHelp()
+  const [view, setView] = useState<'dentists' | 'map'>('dentists')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [requested, setRequested] = useState<string | null>(null)
   const [distances, setDistances] = useState<Record<string, number>>({})
@@ -36,11 +38,7 @@ export const VolunteerDentistSection = ({ student, detail }: Props) => {
   // Sort by distance when available, otherwise preserve server order
   const sorted = useMemo(() => {
     if (Object.keys(distances).length === 0) return dentists
-    return [...dentists].sort((a, b) => {
-      const da = distances[a.id] ?? Infinity
-      const db = distances[b.id] ?? Infinity
-      return da - db
-    })
+    return [...dentists].sort((a, b) => (distances[a.id] ?? Infinity) - (distances[b.id] ?? Infinity))
   }, [dentists, distances])
 
   const handleConnect = (dentist: VolunteerDentist) => {
@@ -55,67 +53,62 @@ export const VolunteerDentistSection = ({ student, detail }: Props) => {
 
   return (
     <div className="mt-4 space-y-3 rounded-2xl border border-triage-red/30 bg-triage-red-bg/50 p-4">
-      <div className="flex items-center gap-2">
-        <span className="inline-flex h-5 items-center rounded-full bg-triage-red px-2.5 text-[11px] font-bold tracking-wide text-white">
-          УЛААН
-        </span>
-        <p className="text-[13px] font-semibold text-text-base">Сайн дурын эмчтэй холбогдох</p>
-      </div>
+      <p className="text-[13px] font-bold text-triage-red">{TRIAGE_LABEL.red}</p>
 
       {headline && (
-        <div className="rounded-2xl bg-white/70 px-3 py-2.5">
+        <div className="rounded-2xl bg-surface-raised px-3 py-2.5">
           <p className="mb-1 text-[10px] font-medium uppercase tracking-wide text-text-muted">Хүүхдийн хяналтын тойм</p>
           <p className="text-[13px] leading-relaxed text-text-base">{headline}</p>
         </div>
       )}
 
-      <div className="h-52 overflow-hidden rounded-2xl border border-border">
-        <VolunteerDentistsMap
-          dentists={dentists}
-          selectedId={selectedId}
-          onSelect={(d) => setSelectedId(d.id)}
-          onDistancesReady={handleDistances}
-          className="h-full w-full"
-        />
+      {/* Эмч / Газрын зураг — one at a time so the modal stays compact */}
+      <div className="flex gap-1 rounded-full bg-surface-raised p-1">
+        {(['dentists', 'map'] as const).map((v) => (
+          <button key={v} type="button" onClick={() => setView(v)}
+            className={`btn flex-1 rounded-full px-3 py-1.5 text-[12px] font-semibold transition-colors ${view === v ? 'bg-primary text-text-on-primary' : 'text-text-muted hover:text-text-base'}`}>
+            {v === 'dentists' ? `Эмч${isLoading ? '' : ` (${dentists.length})`}` : 'Газрын зураг'}
+          </button>
+        ))}
       </div>
 
-      <div className="space-y-2">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-text-muted">
-          Холбогдох боломжтой шүдний эмч{isLoading ? '…' : `(${dentists.length})`}
+      {view === 'map' ? (
+        <div className="h-64 overflow-hidden rounded-2xl border border-border">
+          <VolunteerDentistsMap
+            dentists={dentists}
+            selectedId={selectedId}
+            onSelect={(d) => setSelectedId(d.id)}
+            onDistancesReady={handleDistances}
+            className="h-full w-full"
+          />
+        </div>
+      ) : isLoading ? (
+        <div className="space-y-2">{[0, 1].map((i) => <div key={i} className="h-16 animate-pulse rounded-2xl bg-surface-raised" />)}</div>
+      ) : sorted.length === 0 ? (
+        <p className="text-[13px] text-text-muted">Одоогоор боломжтой сайн дурын эмч байхгүй.</p>
+      ) : (
+        <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
           {Object.keys(distances).length > 0 && (
-            <span className="ml-1 normal-case text-primary">· Ойролцоогоор эрэмблэгдсэн</span>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-primary">Ойролцоогоор эрэмблэгдсэн</p>
           )}
-        </p>
-        {isLoading ? (
-          <div className="space-y-2">
-            {[0, 1].map((i) => <div key={i} className="h-16 animate-pulse rounded-2xl bg-surface-raised" />)}
-          </div>
-        ) : sorted.length === 0 ? (
-          <p className="text-[13px] text-text-muted">Одоогоор боломжтой сайн дурын эмч байхгүй.</p>
-        ) : (
-          <div className="max-h-56 overflow-y-auto space-y-2 pr-1">
-            {sorted.map((d) => {
-              const dist = distances[d.id]
-              return (
-                <div key={d.id}>
-                  <DentistProfileCard
-                    dentist={d}
-                    active={selectedId === d.id}
-                    connecting={requestHelp.isPending && selectedId === d.id}
-                    onConnect={requested === d.id ? undefined : () => {
-                      setSelectedId(d.id)
-                      handleConnect(d)
-                    }}
-                  />
-                  {dist != null && (
-                    <p className="ml-3 mt-0.5 flex items-center gap-1 text-[10px] text-primary font-medium"><MapPinIcon className="size-3" /> {dist.toFixed(0)} км</p>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
+          {sorted.map((d) => {
+            const dist = distances[d.id]
+            return (
+              <div key={d.id}>
+                <DentistProfileCard
+                  dentist={d}
+                  active={selectedId === d.id}
+                  connecting={requestHelp.isPending && selectedId === d.id}
+                  onConnect={requested === d.id ? undefined : () => { setSelectedId(d.id); handleConnect(d) }}
+                />
+                {dist != null && (
+                  <p className="ml-3 mt-0.5 flex items-center gap-1 text-[10px] font-medium text-primary"><MapPinIcon className="size-3" /> {dist.toFixed(0)} км</p>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {requested && (
         <p className="rounded-2xl bg-triage-green-bg px-3 py-2 text-[12px] text-triage-green">

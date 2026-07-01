@@ -12,9 +12,10 @@ const DENTISTS = [
 export const seedDentists = async (db: DB, passwordHash: string) => {
   for (const d of DENTISTS) {
     await db.insert(users).values({ id: d.uid, email: `${d.uid}@screener.mn`, name: d.name, role: 'dentist', phone: d.phone, passwordHash }).onConflictDoNothing()
-    await db.insert(volunteerDentists).values({
-      id: `vol-${d.uid}`,
-      userId: d.uid,
+    // Upsert the PROFILE fields so re-seeding repairs a stale row (e.g. one created
+    // before `specialty`/`experienceYears` existed) instead of keeping the old data.
+    // `isAvailable` stays insert-only so a dentist's live on/off toggle isn't clobbered.
+    const profile = {
       displayName: d.name,
       specialty: d.specialty,
       org: 'Бүртгэлтэй шүдний эмч',
@@ -22,7 +23,9 @@ export const seedDentists = async (db: DB, passwordHash: string) => {
       avatarUrl: d.avatar,
       experienceYears: d.experienceYears,
       licenseNo: d.licenseNo,
-      isAvailable: d.isAvailable,
-    }).onConflictDoNothing()
+    }
+    await db.insert(volunteerDentists)
+      .values({ id: `vol-${d.uid}`, userId: d.uid, isAvailable: d.isAvailable, ...profile })
+      .onConflictDoUpdate({ target: volunteerDentists.userId, set: profile })
   }
 }

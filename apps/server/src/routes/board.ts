@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
-import { and, asc, desc, eq, inArray, isNull } from 'drizzle-orm'
-import { children, screenings, screeningReviews, schoolClasses, followUps, followUpEpisodes, followUpEvents } from '@pinequest/db/d1'
+import { and, asc, desc, eq, inArray, isNull, ne } from 'drizzle-orm'
+import { children, screenings, screeningReviews, schoolClasses, followUps, followUpEpisodes, followUpEvents, appointments, volunteerDentists } from '@pinequest/db/d1'
 import { authenticate, authorize } from '../middleware/auth.js'
 import { resolveScope, scopeWhere, hasChildAccess } from '../lib/scopeFilter.js'
 import { writeAudit } from '../lib/audit.js'
@@ -11,6 +11,7 @@ import type { AppEnv } from '../types.js'
 const FOLLOWUP_STATUSES = [
   'flagged', 'contacted', 'doctor_connected', 'treatment_done', 'treatment_refused', 'unclear',
 ]
+const VERDICTS = new Set(['treatment_needed', 'postponed'])
 
 export const boardRoutes = new Hono<AppEnv>()
 
@@ -29,7 +30,7 @@ boardRoutes.get('/students', authenticate, async (c) => {
   const classIds = [...new Set(kids.map((k) => k.classId))]
   const keys = [...new Set(kids.map((k) => k.childKey))]
 
-  const [classes, scrRows, openEpisodes] = await Promise.all([
+  const [classes, scrRows, episodeRows, apptRows] = await Promise.all([
     db.select({ id: schoolClasses.id, name: schoolClasses.name, seasonId: schoolClasses.seasonId })
       .from(schoolClasses).where(inArray(schoolClasses.id, classIds)),
 
@@ -48,17 +49,38 @@ boardRoutes.get('/students', authenticate, async (c) => {
       .where(inArray(screenings.childKey, keys))
       .orderBy(desc(screenings.capturedAt)),
 
-    // Open episodes supply followUpStatus + escalationFlag.
+    // Latest episode per child: an OPEN one gives followUpStatus + escalationFlag;
+    // a CLOSED one whose status is a dentist verdict gives dentistVerdict.
     db.select({
       childKey: followUpEpisodes.childKey,
       status: followUpEpisodes.status,
       escalationFlag: followUpEpisodes.escalationFlag,
+      closedAt: followUpEpisodes.closedAt,
     }).from(followUpEpisodes)
-      .where(and(inArray(followUpEpisodes.childKey, keys), isNull(followUpEpisodes.closedAt))),
+      .where(inArray(followUpEpisodes.childKey, keys))
+      .orderBy(desc(followUpEpisodes.updatedAt)),
+
+    // Latest non-cancelled dentist appointment per child — the follow-up card shows
+    // the booked date + which dentist, and (once completed) the dentist's advice note.
+    db.select({
+      childKey: appointments.childKey,
+      scheduledAt: appointments.scheduledAt,
+      status: appointments.status,
+      dentistNote: appointments.dentistNote,
+      dentistName: volunteerDentists.displayName,
+    }).from(appointments)
+      .leftJoin(volunteerDentists, eq(volunteerDentists.id, appointments.dentistId))
+      .where(and(inArray(appointments.childKey, keys), ne(appointments.status, 'cancelled')))
+      .orderBy(desc(appointments.scheduledAt)),
   ])
 
   const classBy = new Map(classes.map((k) => [k.id, k]))
-  const episodeBy = new Map(openEpisodes.map((e) => [e.childKey, e]))
+  // First row per child = latest episode (ordered by updatedAt desc).
+  const episodeBy = new Map<string, (typeof episodeRows)[number]>()
+  for (const e of episodeRows) if (!episodeBy.has(e.childKey)) episodeBy.set(e.childKey, e)
+  // First row per child is the latest appointment (ordered by scheduledAt desc).
+  const apptBy = new Map<string, (typeof apptRows)[number]>()
+  for (const a of apptRows) if (!apptBy.has(a.childKey)) apptBy.set(a.childKey, a)
 
   // Single pass: build latest + per-season snapshots.
   const latest = new Map<string, (typeof scrRows)[number]>()
@@ -74,6 +96,8 @@ boardRoutes.get('/students', authenticate, async (c) => {
     const s = latest.get(k.childKey)
     const klass = classBy.get(k.classId)
     const ep = episodeBy.get(k.childKey)
+    const epOpen = ep && !ep.closedAt ? ep : null
+    const appt = apptBy.get(k.childKey)
 
     // Season history: ascending by capturedAt → trend can read newest-first on client.
     const seasonRows = [...(seasonMap.get(k.childKey)?.values() ?? [])]
@@ -96,8 +120,9 @@ boardRoutes.get('/students', authenticate, async (c) => {
       k.childKey, trendEntries, s?.capturedAt?.toISOString() ?? '',
     )
 
-    // followUpStatus: prefer open episode, fall back to null.
-    const followUpStatus = ep?.status ?? null
+    // followUpStatus from an OPEN episode; a closed verdict episode surfaces as dentistVerdict.
+    const followUpStatus = epOpen?.status ?? null
+    const dentistVerdict = ep && ep.closedAt && VERDICTS.has(ep.status) ? ep.status : null
 
     return {
       id: k.id, childKey: k.childKey, firstName: k.firstName, lastName: k.lastName,
@@ -108,7 +133,12 @@ boardRoutes.get('/students', authenticate, async (c) => {
       latestScreeningId: s?.id ?? null,
       screenedAt: s?.capturedAt ?? null,
       followUpStatus,
-      escalationFlag: ep?.escalationFlag ?? false,
+      dentistVerdict,
+      escalationFlag: epOpen?.escalationFlag ?? false,
+      appointmentAt: appt ? appt.scheduledAt.getTime() : null,
+      appointmentDentistName: appt?.dentistName ?? null,
+      appointmentStatus: appt?.status ?? null,
+      appointmentNote: appt?.dentistNote ?? null,
       seasonHistory,
       seasonCount: seasonHistory.length,
       trend,

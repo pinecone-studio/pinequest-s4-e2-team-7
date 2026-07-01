@@ -3,18 +3,25 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import { useSchedule, type ScheduleEvent } from '@/hooks/useSchedule'
+import { useMyAppointments } from '@/hooks/useAppointments'
 import PlayCard from '@/components/ui/PlayCard'
 import { SkeletonCard } from '@/components/ui/Skeleton'
+import { formatDayMonthMn, formatMonthMn } from '@/lib/dateMn'
 
 const WEEKDAYS = ['Да', 'Мя', 'Лх', 'Пү', 'Ба', 'Бя', 'Ня']
 const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
 const keyToDate = (k: string) => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m, d) }
+
+// Per-kind styling for the day popover: class visit, follow-up, dentist call.
+const EVENT_DOT: Record<string, string> = { visit: 'bg-primary', followup: 'bg-triage-yellow', appointment: 'bg-triage-red' }
+const EVENT_LABEL: Record<string, string> = { visit: 'Дараагийн хяналт', followup: 'Хяналт', appointment: 'Эмчтэй уулзалт' }
 
 // Month calendar marking DB-scheduled class visits + follow-up appointments.
 // The selected-day detail floats as a popover OVER the area below the grid, so it
 // never grows the card or pushes the sibling "Дараагийн хяналт" card around.
 const ScheduleCalendar = ({ className }: { className?: string }) => {
   const { data, isLoading } = useSchedule()
+  const { data: appts } = useMyAppointments()
   const today = new Date()
   const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() })
   const [sel, setSel] = useState<string>(dayKey(today))
@@ -32,8 +39,21 @@ const ScheduleCalendar = ({ className }: { className?: string }) => {
 
   if (isLoading) return <SkeletonCard rows={4} />
 
+  // Dentist calls (child + dentist name) merged in alongside class visits + follow-ups,
+  // so a red student's booked time shows up right on the month grid.
+  const apptEvents: ScheduleEvent[] = (appts ?? [])
+    .filter((a) => a.status !== 'cancelled')
+    .map((a) => ({
+      id: `appt-${a.id}`,
+      kind: 'appointment',
+      date: new Date(a.scheduledAt).toISOString(),
+      title: a.childName ?? 'Хүүхэд',
+      subtitle: a.dentistName ? `${a.dentistName} эмч` : null,
+      schoolId: '',
+    }))
+
   const byDay = new Map<string, ScheduleEvent[]>()
-  for (const e of data ?? []) {
+  for (const e of [...(data ?? []), ...apptEvents]) {
     const k = dayKey(new Date(e.date))
     byDay.set(k, [...(byDay.get(k) ?? []), e])
   }
@@ -55,7 +75,7 @@ const ScheduleCalendar = ({ className }: { className?: string }) => {
 
   const pick = (k: string) => { setSel(k); setOpen(true) }
   const selEvents = byDay.get(sel) ?? []
-  const selLabel = keyToDate(sel).toLocaleDateString('mn-MN', { month: 'long', day: 'numeric', weekday: 'short' })
+  const selLabel = formatDayMonthMn(keyToDate(sel))
 
   return (
     // Raise above the sibling card while the popover is open so it overlays cleanly.
@@ -65,27 +85,30 @@ const ScheduleCalendar = ({ className }: { className?: string }) => {
           <h2 className="text-[15px] font-semibold text-text-base">Календар</h2>
           <div className="flex items-center gap-1">
             <button onClick={() => shift(-1)} aria-label="Өмнөх сар" className="btn rounded-full p-1 text-text-muted hover:bg-surface-raised hover:text-text-base"><ChevronLeftIcon className="size-4" /></button>
-            <span className="min-w-23 text-center text-[12px] font-medium text-text-base">{first.toLocaleDateString('mn-MN', { year: 'numeric', month: 'long' })}</span>
+            <span className="min-w-23 text-center text-[12px] font-medium text-text-base">{formatMonthMn(first)}</span>
             <button onClick={() => shift(1)} aria-label="Дараагийн сар" className="btn rounded-full p-1 text-text-muted hover:bg-surface-raised hover:text-text-base"><ChevronRightIcon className="size-4" /></button>
           </div>
         </div>
 
-        <div className="relative">
+        {/* Hovering a day previews its schedule; leaving the grid dismisses the popover
+            so it never lingers over the cards below. Click still works for touch. */}
+        <div className="relative" onMouseLeave={() => setOpen(false)}>
           <div className="grid grid-cols-7 gap-1 text-center">
             {WEEKDAYS.map((w) => <span key={w} className="pb-1 text-[10px] font-medium text-text-muted">{w}</span>)}
             {cells.map((d, i) => {
               if (!d) return <span key={i} />
               const k = dayKey(d)
-              const has = byDay.has(k)
+              const dayEvents = byDay.get(k)
+              const hasAppt = dayEvents?.some((e) => e.kind === 'appointment')
               const isToday = k === dayKey(today)
               const isSel = k === sel && open
               return (
-                <button key={i} onClick={() => pick(k)}
+                <button key={i} onClick={() => pick(k)} onMouseEnter={() => pick(k)}
                   className={`btn relative flex aspect-square items-center justify-center rounded-full text-[12px] tabular-nums transition-colors ${
                     isSel ? 'bg-primary font-bold text-text-on-primary' : isToday ? 'bg-primary-subtle font-semibold text-primary' : 'text-text-base hover:bg-surface-raised'
                   }`}>
                   {d.getDate()}
-                  {has && <span className={`absolute bottom-1 size-1 rounded-full ${isSel ? 'bg-text-on-primary' : 'bg-primary'}`} />}
+                  {dayEvents && <span className={`absolute bottom-1 size-1 rounded-full ${isSel ? 'bg-text-on-primary' : hasAppt ? 'bg-triage-red' : 'bg-primary'}`} />}
                 </button>
               )
             })}
@@ -103,12 +126,13 @@ const ScheduleCalendar = ({ className }: { className?: string }) => {
                 <div className="flex flex-col gap-2">
                   {selEvents.map((e) => (
                     <div key={e.id} className="flex items-start gap-2">
-                      <span className={`mt-1 size-2 shrink-0 rounded-full ${e.kind === 'visit' ? 'bg-primary' : 'bg-triage-yellow'}`} />
+                      <span className={`mt-1 size-2 shrink-0 rounded-full ${EVENT_DOT[e.kind] ?? 'bg-primary'}`} />
                       <div className="min-w-0">
                         <p className="truncate text-[12px] font-medium text-text-base">{e.title}</p>
-                        <p className="text-[10px] text-text-muted">
+                        <p className="truncate text-[10px] text-text-muted">
                           {new Date(e.date).toLocaleTimeString('mn-MN', { hour: '2-digit', minute: '2-digit' })}
-                          {e.kind === 'visit' ? ' · Дараагийн хяналт' : ' · Хяналт'}
+                          {` · ${EVENT_LABEL[e.kind] ?? ''}`}
+                          {e.subtitle ? ` · ${e.subtitle}` : ''}
                         </p>
                       </div>
                     </div>

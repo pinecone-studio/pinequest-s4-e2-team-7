@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native'
 import { useEffect, useState } from 'react'
 import { useTheme } from '@/lib/ThemeContext'
+import { formatChildName } from '@pinequest/core'
 import { getMyScreenings, getMyClasses, getRosterStatus } from '@/lib/api'
 import type { ScreeningRow } from '@/lib/profileData'
 
@@ -31,7 +32,7 @@ const HistorySection = ({ userId, role }: Props) => {
           setRows(
             screened.map((s) => ({
               id: s.childKey,
-              childName: `${s.lastName} ${s.firstName}`,
+              childName: formatChildName(s),
               triageLevel: s.latestLevel!,
               date: toDate(s.screenedAt!),
               classId: s.classId,

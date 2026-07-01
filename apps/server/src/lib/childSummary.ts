@@ -1,6 +1,6 @@
-import { eq, desc, count, asc } from 'drizzle-orm'
+import { and, eq, desc, count, asc } from 'drizzle-orm'
 import { buildChildSummary } from '@pinequest/core'
-import { children, screenings, screeningImages, type DB } from '@pinequest/db/d1'
+import { children, screenings, screeningImages, users, type DB } from '@pinequest/db/d1'
 import type {
   ChildScreeningSummary,
   FindingClass,
@@ -18,6 +18,14 @@ export type QuestionnaireAnswers = {
   gumPimpleOrFistula: boolean
   trauma: boolean
   bleedingGums: boolean | null
+}
+
+/** Dentist review attached to this screening (confirm/override + free-text note). */
+export type DentistNote = {
+  confirmedLevel: TriageLevel
+  note: string | null
+  reviewerName: string | null
+  reviewedAt: string
 }
 
 /** Roster-side child fields the board may show (PII stays server-scoped). */
@@ -41,6 +49,8 @@ export type ChildSummaryPayload = {
   advice: string | null
   /** Gemini age-aware guidance produced at capture (same as the phone). */
   guidance: ScreeningGuidance | null
+  /** Dentist's confirm/override review of this screening, if one exists. */
+  dentistNote: DentistNote | null
   hospital: null
 }
 
@@ -83,18 +93,36 @@ const toSymptoms = (q: {
   trauma: q?.trauma ?? false,
 })
 
-export const loadChildSummary = async (db: DB, id: string): Promise<ChildSummaryPayload | null> => {
+// `screeningId` → one specific past screening (ownership-checked by childKey); omit → latest.
+export const loadChildSummary = async (db: DB, id: string, screeningId?: string): Promise<ChildSummaryPayload | null> => {
   const child = await db.query.children.findFirst({ where: eq(children.id, id) })
   if (!child) return null
 
   const [latest, cnt] = await Promise.all([
     db.query.screenings.findFirst({
-      where: eq(screenings.childKey, child.childKey),
+      where: screeningId
+        ? and(eq(screenings.id, screeningId), eq(screenings.childKey, child.childKey))
+        : eq(screenings.childKey, child.childKey),
       orderBy: desc(screenings.capturedAt),
       with: { findings: true, questionnaire: true, review: true, summary: true, images: { orderBy: asc(screeningImages.order) } },
     }),
     db.select({ c: count() }).from(screenings).where(eq(screenings.childKey, child.childKey)),
   ])
+
+  // Dentist confirm/override note for this screening (its reviewer's name resolved
+  // from the roster). Surfaced so red children carry the dentist's own words.
+  let dentistNote: DentistNote | null = null
+  if (latest?.review) {
+    const reviewer = latest.review.reviewedById
+      ? await db.query.users.findFirst({ where: eq(users.id, latest.review.reviewedById), columns: { name: true } })
+      : null
+    dentistNote = {
+      confirmedLevel: latest.review.confirmedLevel as TriageLevel,
+      note: latest.review.note ?? null,
+      reviewerName: reviewer?.name ?? null,
+      reviewedAt: (latest.review.updatedAt ?? latest.review.createdAt).toISOString(),
+    }
+  }
 
   const summary = latest
     ? buildChildSummary({
@@ -144,6 +172,7 @@ export const loadChildSummary = async (db: DB, id: string): Promise<ChildSummary
           nextStep: latest.summary.nextStep ?? '',
         }
       : null,
+    dentistNote,
     hospital: null,
   }
 }

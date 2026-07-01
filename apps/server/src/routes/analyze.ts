@@ -120,6 +120,7 @@ analyzeRoutes.post('/analyze', authenticate, async (c) => {
         triageLevel: triageResult.level,
         detections: allDetections,
         symptoms,
+        rawAnswers: rawAnswers ?? undefined,
         age: typeof body['age'] === 'string' ? (body['age'] as string) : undefined,
         image: shots[0]?.image,
       })

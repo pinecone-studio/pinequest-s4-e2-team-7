@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { and, desc, eq, inArray } from 'drizzle-orm'
-import { screeningCreateSchema, triage } from '@pinequest/core'
+import { screeningCreateSchema, triage, formatChildName } from '@pinequest/core'
 import { screenings, screeningReviews, children, schoolClasses } from '@pinequest/db/d1'
 import { authenticate, authorize } from '../middleware/auth.js'
 import { writeAudit } from '../lib/audit.js'
@@ -81,11 +81,16 @@ screeningRoutes.get('/', authenticate, async (c) => {
   // direct screenings) simply resolve to null.
   const keys = [...new Set(data.map((s) => s.childKey))]
   const kids = keys.length
-    ? await db.select({ childKey: children.childKey, classId: children.classId, firstName: children.firstName, lastName: children.lastName })
+    ? await db.select({ id: children.id, childKey: children.childKey, classId: children.classId, firstName: children.firstName, lastName: children.lastName })
         .from(children).where(inArray(children.childKey, keys))
     : []
-  const nameByKey = new Map(kids.map((k) => [`${k.classId}::${k.childKey}`, `${k.lastName} ${k.firstName}`.trim()]))
-  const withNames = data.map((s) => ({ ...s, childName: nameByKey.get(`${s.classId}::${s.childKey}`) ?? null }))
+  const nameByKey = new Map(kids.map((k) => [`${k.classId}::${k.childKey}`, formatChildName(k)]))
+  const idByKey = new Map(kids.map((k) => [`${k.classId}::${k.childKey}`, k.id]))
+  const withNames = data.map((s) => ({
+    ...s,
+    childName: nameByKey.get(`${s.classId}::${s.childKey}`) ?? null,
+    childId: idByKey.get(`${s.classId}::${s.childKey}`) ?? null,
+  }))
 
   return c.json({ success: true, data: withNames })
 })
@@ -102,7 +107,7 @@ screeningRoutes.get('/:id', authenticate, async (c) => {
     where: and(eq(children.classId, screening.classId), eq(children.childKey, screening.childKey)),
     columns: { firstName: true, lastName: true, birthYear: true },
   })
-  const childName = kid ? `${kid.lastName} ${kid.firstName}`.trim() : null
+  const childName = kid ? formatChildName(kid) : null
   const klass = await db.query.schoolClasses.findFirst({
     where: eq(schoolClasses.id, screening.classId),
     columns: { name: true },

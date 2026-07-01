@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { TriageLevel, FollowUpStatus, ChildTrendSnapshot } from '@pinequest/types'
+import type { TriageLevel, FollowUpStatus, DentistVerdict, ChildTrendSnapshot } from '@pinequest/types'
+import { formatChildName } from '@pinequest/core'
 import { apiFetch } from '@/lib/api'
 import { openParentEmail } from '@/lib/parentEmail'
 import { useSession } from '@/components/providers'
@@ -32,7 +33,14 @@ export type BoardStudent = {
   latestScreeningId: string | null
   screenedAt: string | null
   followUpStatus: FollowUpStatus | null
+  /** The appointed dentist's post-call verdict (null until the call is finished). */
+  dentistVerdict: DentistVerdict | null
   escalationFlag: boolean
+  /** Latest non-cancelled dentist appointment: date (ms), dentist, status, advice note. */
+  appointmentAt: number | null
+  appointmentDentistName: string | null
+  appointmentStatus: string | null
+  appointmentNote: string | null
   seasonHistory: SeasonSnapshot[]
   seasonCount: number
   trend: ChildTrendSnapshot | null
@@ -109,6 +117,6 @@ export const useSendToParent = () => {
   const { token } = useSession()
   return async (s: BoardStudent) => {
     const payload = await apiFetch<ChildSummaryPayload>(`/api/children/${s.id}/summary`, { token })
-    if (payload.summary) openParentEmail(`${s.lastName} ${s.firstName}`, s.guardianEmail, payload.summary, payload.hospital)
+    if (payload.summary) openParentEmail(formatChildName(s), s.guardianEmail, payload.summary, payload.hospital)
   }
 }

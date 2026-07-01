@@ -1,5 +1,11 @@
-import type { FollowUpStatus } from '@pinequest/types'
+import type { FollowUpStatus, DentistVerdict } from '@pinequest/types'
 import type { BoardStudent } from '@/hooks/useBoard'
+
+/** The appointed dentist's two post-call verdicts — label + pill styling. */
+export const VERDICT_META: Record<DentistVerdict, { label: string; text: string; bg: string }> = {
+  treatment_needed: { label: 'Эмчилгээ хийлгэх', text: 'text-triage-yellow', bg: 'bg-triage-yellow-bg' },
+  postponed:        { label: 'Хойшлуулсан',      text: 'text-text-muted',    bg: 'bg-surface-raised' },
+}
 
 /**
  * Хүүхэд ӨМНӨ улаан (яаралтай) байгаад одоо улаанаас сайжирсан эсэх — улирлын түүхийн

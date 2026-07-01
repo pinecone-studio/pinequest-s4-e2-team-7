@@ -9,10 +9,14 @@ import { useAppointmentSummary, useUpdateAppointmentNote, type AppointmentRow } 
 import { useCall } from '@/context/IncomingCallContext'
 import { useToast } from '@/components/ui/Toast'
 import Skeleton from '@/components/ui/Skeleton'
+import { formatDateTimeMn } from '@/lib/dateMn'
 
-const fmt = (ms: number) => new Date(ms).toLocaleString('mn-MN', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-const countdown = (ms: number) => {
-  const diff = ms - Date.now()
+const fmt = (ms: number) => formatDateTimeMn(ms)
+// scheduledAt may arrive as an ISO string, so coerce (like fmt) before arithmetic —
+// `string - Date.now()` is NaN, which surfaced as "NaN өдрийн дараа".
+const countdown = (at: number | string) => {
+  const diff = new Date(at).getTime() - Date.now()
+  if (Number.isNaN(diff)) return { soon: false, text: '' }
   if (diff <= 0) return { soon: true, text: 'Товлосон цаг болсон' }
   const h = Math.floor(diff / 3.6e6), mn = Math.round((diff % 3.6e6) / 6e4)
   if (diff < 3.6e6) return { soon: true, text: `${mn} минутын дараа` }
@@ -23,7 +27,7 @@ const countdown = (ms: number) => {
 const TABS = [['summary', 'Дүгнэлт'], ['survey', 'Асуумж'], ['note', 'Зөвлөмж']] as const
 type Tab = (typeof TABS)[number][0]
 
-const CallDetailPanel = ({ appt }: { appt: AppointmentRow | null }) => {
+const CallDetailPanel = ({ appt, readOnly = false }: { appt: AppointmentRow | null; readOnly?: boolean }) => {
   const { data: detail, isLoading } = useAppointmentSummary(appt?.id ?? null)
   const update = useUpdateAppointmentNote()
   const { startCall } = useCall()
@@ -49,7 +53,8 @@ const CallDetailPanel = ({ appt }: { appt: AppointmentRow | null }) => {
   const guidance = detail?.guidance
   const done = appt.status === 'completed'
   const cd = countdown(appt.scheduledAt)
-  const save = () => update.mutate({ id: appt.id, note: note.trim() }, { onSuccess: () => toast.success('Зөвлөмж хадгалагдлаа') })
+  const saveVerdict = (outcome: 'treatment_needed' | 'postponed') =>
+    update.mutate({ id: appt.id, note: note.trim(), outcome }, { onSuccess: () => toast.success('Дүгнэлт хадгалагдлаа') })
 
   return (
     <div className="flex h-full flex-col gap-4 rounded-2xl border border-border bg-surface p-5 shadow-(--shadow-card)">
@@ -119,21 +124,34 @@ const CallDetailPanel = ({ appt }: { appt: AppointmentRow | null }) => {
 
         {tab === 'note' && (
           <div className="flex flex-col gap-2">
-            <p className="text-[12px] text-text-muted">Дуудлага дууссаны дараа дараагийн алхмын зөвлөмжөө бичнэ үү.</p>
-            <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4}
-              placeholder="Жишээ: 36-р шүдийг 2 долоо хоногт эмчлүүлэх, фтор түрхэх…"
-              className="w-full resize-none rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary" />
-            <button onClick={save} disabled={update.isPending} className="btn self-end rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-text-on-primary hover:bg-primary-hover disabled:opacity-60">
-              {update.isPending ? 'Хадгалж байна…' : 'Зөвлөмж хадгалах'}
-            </button>
+            <p className="text-[12px] text-text-muted">
+              {readOnly ? 'Эмчийн бичсэн зөвлөмж (зөвхөн харах).' : 'Дуудлага дууссаны дараа зөвлөмжөө бичээд дүгнэлтээ сонгоно уу.'}
+            </p>
+            <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} readOnly={readOnly}
+              placeholder={readOnly ? 'Зөвлөмж бичигдээгүй байна.' : 'Жишээ: 36-р шүдийг 2 долоо хоногт эмчлүүлэх, фтор түрхэх…'}
+              className="w-full resize-none rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary read-only:opacity-80 read-only:focus:ring-0" />
+            {!readOnly && (
+              <div className="flex gap-2">
+                <button onClick={() => saveVerdict('treatment_needed')} disabled={update.isPending}
+                  className="btn flex-1 rounded-full bg-triage-yellow px-4 py-2.5 text-[13px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60">
+                  Эмчилгээ хийлгэх
+                </button>
+                <button onClick={() => saveVerdict('postponed')} disabled={update.isPending}
+                  className="btn flex-1 rounded-full border border-border bg-surface-raised px-4 py-2.5 text-[13px] font-semibold text-text-base transition hover:bg-border disabled:opacity-60">
+                  Хойшлуулсан
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      <button onClick={() => startCall(appt.createdById, appt.childName ?? 'Сурагч')}
-        className="btn flex w-full items-center justify-center gap-2 rounded-full bg-triage-red py-3 text-[14px] font-bold text-white transition hover:opacity-90">
-        <VideoCameraIcon className="size-5" /> Видео дуудлага хийх
-      </button>
+      {!readOnly && (
+        <button onClick={() => startCall(appt.createdById, appt.childName ?? 'Сурагч')}
+          className="btn flex w-full items-center justify-center gap-2 rounded-full bg-triage-red py-3 text-[14px] font-bold text-white transition hover:opacity-90">
+          <VideoCameraIcon className="size-5" /> Видео дуудлага хийх
+        </button>
+      )}
     </div>
   )
 }

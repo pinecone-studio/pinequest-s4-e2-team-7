@@ -5,7 +5,6 @@ import type { FollowUpStatus } from '@pinequest/types'
 import {
   useBoardStudents,
   useSendToParent,
-  useSetFollowUpStatus,
   type BoardStudent,
 } from '@/hooks/useBoard'
 import KanbanColumn from '@/components/admin/follow-up/KanbanColumn'
@@ -63,10 +62,7 @@ const FollowUpBoard = () => {
   const { data: students, isLoading } = useBoardStudents()
   const { seasonId, seasons } = useSeason()
   const send = useSendToParent()
-  const setStatus = useSetFollowUpStatus()
   const [editing, setEditing] = useState<BoardStudent | null>(null)
-  const [draggingKey, setDraggingKey] = useState<string | null>(null)
-  const [dragOverCol, setDragOverCol] = useState<FollowUpStatus | null>(null)
   const [search, setSearch] = useState('')
   const [classFilter, setClassFilter] = useState('')
   const [colPages, setColPages] = useState<Record<string, number>>(() =>
@@ -100,16 +96,15 @@ const FollowUpBoard = () => {
   const byStatus = useMemo(() => {
     const map: Record<string, BoardStudent[]> = {}
     for (const col of COLUMNS) map[col.status] = []
-    for (const s of filtered) map[columnFor(effectiveFollowUpStatus(s)).status].push(s)
+    // A recorded dentist verdict closes the case → the "Холбогдсон" column,
+    // regardless of the (now-null) follow-up status.
+    for (const s of filtered) {
+      const key = s.dentistVerdict ? 'treatment_done' : columnFor(effectiveFollowUpStatus(s)).status
+      map[key].push(s)
+    }
     for (const col of COLUMNS) map[col.status].sort(byUrgency)
     return map
   }, [filtered])
-
-  const onDrop = (targetStatus: FollowUpStatus) => {
-    if (draggingKey) setStatus.mutate({ childKey: draggingKey, status: targetStatus })
-    setDraggingKey(null)
-    setDragOverCol(null)
-  }
 
   useSetPageHeader({
     title: 'Хяналт',
@@ -168,7 +163,7 @@ const FollowUpBoard = () => {
       </div>
 
       {isLoading || (seasons.length > 0 && !seasonId) ? (
-        <SkeletonKanban />
+        <SkeletonKanban cols={2} />
       ) : flagged.length === 0 ? (
         <EmptyState
           Icon={ClipboardDocumentListIcon}
@@ -185,23 +180,10 @@ const FollowUpBoard = () => {
                 cards={byStatus[col.status] ?? []}
                 limit={colPages[col.status] ?? PAGE_SIZE}
                 pageSize={PAGE_SIZE}
-                isOver={dragOverCol === col.status}
-                draggingKey={draggingKey}
-                onDragOver={() => setDragOverCol(col.status)}
-                onDragLeave={(e) => {
-                  if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOverCol(null)
-                }}
-                onDrop={() => onDrop(col.status)}
                 onSend={(s) => {
                   void send(s).catch(() => {})
                 }}
-                onStatus={(childKey, st) => setStatus.mutate({ childKey, status: st })}
                 onEdit={setEditing}
-                onDragStart={setDraggingKey}
-                onDragEnd={() => {
-                  setDraggingKey(null)
-                  setDragOverCol(null)
-                }}
                 onShowMore={() =>
                   setColPages((p) => ({
                     ...p,

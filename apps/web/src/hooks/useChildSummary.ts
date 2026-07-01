@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import type { ChildScreeningSummary, QuestionnaireAnswer, ScreeningGuidance } from '@pinequest/types'
+import type { ChildScreeningSummary, QuestionnaireAnswer, ScreeningGuidance, TriageLevel } from '@pinequest/types'
 import { apiFetch } from '@/lib/api'
 import { useSession } from '@/components/providers'
 
@@ -19,6 +19,13 @@ export type HospitalGuide = {
   travelMinutes: number
   schedule: string
   phone: string
+}
+
+export type DentistNote = {
+  confirmedLevel: TriageLevel
+  note: string | null
+  reviewerName: string | null
+  reviewedAt: string
 }
 
 export type ChildSummaryPayload = {
@@ -41,14 +48,20 @@ export type ChildSummaryPayload = {
   advice: string | null
   /** Gemini age-aware guidance produced at capture (same as the phone). */
   guidance: ScreeningGuidance | null
+  /** Dentist's confirm/override review of this screening, if one exists. */
+  dentistNote: DentistNote | null
   hospital: HospitalGuide | null
 }
 
-export const useChildSummary = (childId: string | null) => {
+/** Latest screening by default; pass a `screeningId` to load one specific past screening. */
+export const useChildSummary = (childId: string | null, screeningId?: string | null) => {
   const { token } = useSession()
   return useQuery({
-    queryKey: ['child-summary', childId],
-    queryFn: () => apiFetch<ChildSummaryPayload>(`/api/children/${childId}/summary`, { token }),
+    queryKey: ['child-summary', childId, screeningId ?? 'latest'],
+    queryFn: () => apiFetch<ChildSummaryPayload>(
+      `/api/children/${childId}/summary${screeningId ? `?screeningId=${screeningId}` : ''}`,
+      { token },
+    ),
     enabled: !!token && !!childId,
   })
 }

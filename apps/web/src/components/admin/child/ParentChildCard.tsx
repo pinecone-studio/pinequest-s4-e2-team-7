@@ -3,12 +3,13 @@
 import ChildSummaryCard from '@/components/admin/child/ChildSummaryCard'
 import { useChildSummary } from '@/hooks/useChildSummary'
 import type { BoardStudent } from '@/hooks/useBoard'
+import { formatChildName } from '@pinequest/core'
 import { PageSpinner } from '@/components/ui/Spinner'
 
 /** One linked child, with their latest hedged screening summary + advice. */
 const ParentChildCard = ({ student }: { student: BoardStudent }) => {
   const { data, isLoading } = useChildSummary(student.id)
-  const name = `${student.lastName} ${student.firstName}`
+  const name = formatChildName(student)
   return (
     <div className="flex flex-col gap-3">
       <h2 className="text-lg font-semibold tracking-tight text-text-base">

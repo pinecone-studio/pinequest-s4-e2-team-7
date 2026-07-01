@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid'
 import type { UserRole } from '@pinequest/types'
 import { ROLE_LABEL } from './UserTableRow'
@@ -13,6 +14,7 @@ type Props = {
   active: ActiveFilter; onActive: (a: ActiveFilter) => void
   roles: RoleCount[]
   total: number
+  action?: ReactNode
 }
 
 const chip = (on: boolean) =>
@@ -26,9 +28,10 @@ const ACTIVE: { v: ActiveFilter; label: string }[] = [
   { v: 'inactive', label: 'Идэвхгүй' },
 ]
 
-const UsersFilterBar = ({ q, onQ, role, onRole, active, onActive, roles, total }: Props) => (
+const UsersFilterBar = ({ q, onQ, role, onRole, active, onActive, roles, total, action }: Props) => (
   <div className="flex flex-col gap-3">
     <div className="flex flex-wrap items-center gap-2">
+      {action}
       <div className="relative">
         <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-muted" />
         <input

@@ -12,14 +12,21 @@ export type FollowUpStatus =
   | 'treatment_done'
   | 'treatment_refused'
   | 'unclear'
-  | 'superseded'      // system: a later-season screening opened a new episode
-  | 'season_cleared'  // system: a green screening in a later season closed this arc
+  | 'treatment_needed' // dentist verdict after the video call: needs treatment (Эмчилгээ хийлгэх)
+  | 'postponed'        // dentist verdict after the video call: can wait (Хойшлуулсан)
+  | 'superseded'       // system: a later-season screening opened a new episode
+  | 'season_cleared'   // system: a green screening in a later season closed this arc
+
+/** The two outcomes the appointed dentist records at the end of the video call. */
+export type DentistVerdict = 'treatment_needed' | 'postponed'
 
 /** Terminal reason stored on a closed FollowUpEpisode. */
 export type EpisodeCloseReason =
   | 'treatment_done'
   | 'treatment_refused'
   | 'unclear'
+  | 'treatment_needed'
+  | 'postponed'
   | 'season_cleared'
   | 'superseded'
 

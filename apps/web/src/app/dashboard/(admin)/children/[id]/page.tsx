@@ -6,6 +6,7 @@ import { TriageBadge } from '@/components/ui/TriageBadge'
 import ChildSummaryCard from '@/components/admin/child/ChildSummaryCard'
 import { useChild, useChildSummary } from '@/hooks/useChildren'
 import { useScreenings } from '@/hooks/useScreenings'
+import { formatChildName } from '@pinequest/core'
 import { formatSeason } from '@/lib/season'
 
 const ChildDetailPage = () => {
@@ -14,7 +15,7 @@ const ChildDetailPage = () => {
   const { data: payload } = useChildSummary(id)
   const { data: screenings } = useScreenings({ childKey: child?.childKey })
 
-  const fullName = child ? `${child.lastName} ${child.firstName}` : '…'
+  const fullName = child ? formatChildName(child) : '…'
 
   return (
     <section className="flex flex-col gap-5">

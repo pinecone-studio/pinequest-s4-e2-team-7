@@ -1,4 +1,5 @@
 export * from './childKey.js'
+export * from './childName.js'
 export * from './fdi.js'
 export * from './triage.js'
 export * from './childSummary.js'

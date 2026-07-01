@@ -111,14 +111,13 @@ const AdminUsersPage = () => {
 
   return (
     <section className="flex flex-col gap-5">
-      {canManage && <UserCreateForm />}
-
       <UsersFilterBar
         q={q} onQ={setQ}
         role={roleFilter} onRole={setRoleFilter}
         active={activeFilter} onActive={setActiveFilter}
         roles={roleCounts}
         total={filtered.length}
+        action={canManage ? <UserCreateForm /> : undefined}
       />
 
       {canManage && selectedIds.length > 0 && (

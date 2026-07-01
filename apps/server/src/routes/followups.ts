@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { and, desc, eq, inArray, isNull } from 'drizzle-orm'
-import { followUpUpdateSchema } from '@pinequest/core'
+import { followUpUpdateSchema, formatChildName } from '@pinequest/core'
 import { followUps, followUpEpisodes, followUpEvents, children } from '@pinequest/db/d1'
 import { authorize } from '../middleware/auth.js'
 import { writeAudit } from '../lib/audit.js'
@@ -37,7 +37,7 @@ followUpRoutes.get('/', authorize('follow_up', 'dentist', 'admin'), async (c) =>
   const byKey = new Map(kids.map((ch) => [ch.childKey, ch]))
   const data = list.map((f) => {
     const ch = byKey.get(f.childKey)
-    return { ...f, childName: ch ? `${ch.lastName} ${ch.firstName}` : null, guardianPhone: ch?.guardianPhone ?? null }
+    return { ...f, childName: ch ? formatChildName(ch) : null, guardianPhone: ch?.guardianPhone ?? null }
   })
   return c.json({ success: true, data })
 })

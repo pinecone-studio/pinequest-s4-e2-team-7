@@ -1,5 +1,5 @@
 import { SUMMARY_STYLE_GUIDE } from '@pinequest/core'
-import type { InferenceDetection, SymptomSet, TriageLevel } from '@pinequest/types'
+import type { InferenceDetection, QuestionnaireAnswer, SymptomSet, TriageLevel } from '@pinequest/types'
 
 // YOLO class_name (snake_case) → УI дээр харуулах нэр.
 const CLASS_LABEL: Record<string, string> = {
@@ -40,6 +40,10 @@ export const buildAdvicePrompt = (params: {
   triageLevel: TriageLevel
   detections: InferenceDetection[]
   symptoms: SymptomSet
+  // Verbatim questionnaire Q&A from capture — carries detail the boolean SymptomSet
+  // drops (e.g. how long the pain has lasted, what triggers it), so the advice is
+  // grounded in the image AND the answers, not the photo alone.
+  rawAnswers?: QuestionnaireAnswer[]
   age: string
 }): string => {
   const findingLines = params.detections.length
@@ -56,6 +60,11 @@ export const buildAdvicePrompt = (params: {
   const symptomLines = (Object.keys(params.symptoms) as Array<keyof SymptomSet>)
     .filter((k) => params.symptoms[k])
     .map((k) => `  • ${SYMPTOM_LABEL[k] ?? k}`)
+    .join('\n')
+
+  const answerLines = (params.rawAnswers ?? [])
+    .filter((a) => a.a && a.a.trim())
+    .map((a) => `  • ${a.q} → ${a.a}`)
     .join('\n')
 
   const age = params.age || 'тодорхойгүй'
@@ -75,7 +84,10 @@ export const buildAdvicePrompt = (params: {
 ${findingLines}
 
 АСУУМЖИЙН ШИНЖ ТЭМДЭГ:
-${symptomLines || '  (Цоорсон шүдний гадаргуу танигдсангүй)'}
+${symptomLines || '  (Аюулын шинж тэмдэг тэмдэглэгдээгүй)'}
+
+АСУУМЖИЙН ХАРИУЛТ (эцэг эх/сурагчаас утсаар шууд асуусан — үнэн зөв):
+${answerLines || '  (Асуумжийн хариулт бүртгэгдээгүй)'}
 
 ═══════════════════════════════
 ХАРИУ БИЧИХ ЗААВАР
@@ -88,12 +100,13 @@ ${SUMMARY_STYLE_GUIDE}
 
   • advice     — Эмчийн ГОЛ дүгнэлт (2-3 өгүүлбэр, мэндчилгээгүй). Энэ зурагт ЯГ юу
                  танигдсаныг тодорхой хэл: хэдэн шүд, аль хэсэгт, цоорол том уу жижиг үү,
-                 нийцэл хэр вэ. Асуумжид халуурах / эрүү нүүр орчмоор хавагнах / шөнийн
-                 өвдөлт зэрэг шинж тэмдэглэгдсэн бол ЗААВАЛ дурдаж, "шалтгааныг олж яаралтай
-                 эмчилгээ хийлгэх шаардлагатай" гэдгийг хэл (жишээ нь: "Хүүхэд халуурсан,
-                 эрүү нүүр орчмоор хавдсан гэх тул шалтгааныг олж эмчилгээ хийлгэх
-                 шаардлагатай."). Илрүүлэлтгүй ногоон үед "аюулын тод шинж илрээгүй" гэ —
-                 "цоорол огт байхгүй" гэж батлахгүй.
+                 нийцэл хэр вэ. Асуумжийн ХАРИУЛТыг заавал тооц: өвдөлт хэзээнээс эхэлсэн,
+                 ямар үед (хүйтэн/халуун/шөнө) илэрдэг, халуурах / эрүү нүүр орчмоор хавагнах
+                 зэрэг шинж байвал ЗААВАЛ дурдаж, "шалтгааныг олж яаралтай эмчилгээ хийлгэх
+                 шаардлагатай" гэдгийг хэл (жишээ нь: "Хүүхэд 4-өөс дээш хоног өвдсөн, хүйтэн
+                 зүйлд мэдрэг байгаа тул шалтгааныг олж эмчилгээ хийлгэх шаардлагатай.").
+                 Илрүүлэлтгүй ногоон үед "аюулын тод шинж илрээгүй" гэ — "цоорол огт байхгүй"
+                 гэж батлахгүй.
   • homeCare   — Яг одоо гэртээ хийх алхмууд (өвдөлт намдаах, юу ажиглах, юунаас зайлсхийх).
   • brushing   — ${age} насанд тохирсон шүд угаах заавар (найруулгын зааврын нэр томьёогоор).
   • diet       — Шүд бэхжүүлэх / хязгаарлах хоол хүнс.

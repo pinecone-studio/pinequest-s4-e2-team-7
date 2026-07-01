@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { and, eq, isNotNull, inArray } from 'drizzle-orm'
 import { schoolClasses, followUps, children } from '@pinequest/db/d1'
+import { formatChildName } from '@pinequest/core'
 import { authenticate } from '../middleware/auth.js'
 import { schoolScope } from '../lib/scopeFilter.js'
 import type { AppEnv } from '../types.js'
@@ -27,7 +28,7 @@ scheduleRoutes.get('/', authenticate, async (c) => {
 
   const keys = appts.map((a) => a.childKey)
   const kids = keys.length ? await db.select().from(children).where(inArray(children.childKey, keys)) : []
-  const byKey = new Map(kids.map((k) => [k.childKey, `${k.lastName} ${k.firstName}`]))
+  const byKey = new Map(kids.map((k) => [k.childKey, formatChildName(k)]))
 
   const events = [
     ...visits.map((v) => ({ id: `visit-${v.id}`, kind: 'visit' as const, date: v.date, title: v.name, subtitle: v.seasonId, schoolId: v.schoolId })),

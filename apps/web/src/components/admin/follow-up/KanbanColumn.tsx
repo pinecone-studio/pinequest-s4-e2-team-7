@@ -12,53 +12,32 @@ type Props = {
   cards: BoardStudent[]
   limit: number
   pageSize: number
-  isOver: boolean
-  draggingKey: string | null
-  onDragOver: () => void
-  onDragLeave: (e: React.DragEvent) => void
-  onDrop: () => void
   onSend: (s: BoardStudent) => void
-  onStatus: (childKey: string, status: FollowUpStatus) => void
   onEdit: (s: BoardStudent) => void
-  onDragStart: (childKey: string) => void
-  onDragEnd: () => void
   onShowMore: () => void
   onCollapse: () => void
 }
 
-const KanbanColumn = ({ col, cards, limit, pageSize, isOver, draggingKey, onDragOver, onDragLeave, onDrop, onSend, onStatus, onEdit, onDragStart, onDragEnd, onShowMore, onCollapse }: Props) => {
+// Read-only column: cards are placed by their status/dentist verdict. No drag —
+// status is set by the dentist, not moved here.
+const KanbanColumn = ({ col, cards, limit, pageSize, onSend, onEdit, onShowMore, onCollapse }: Props) => {
   const shown = cards.slice(0, limit)
   const remaining = cards.length - shown.length
 
   return (
-    <div
-      onDragOver={(e) => { e.preventDefault(); onDragOver() }}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
-      className={`flex min-w-70 flex-1 flex-col gap-3 rounded-2xl p-2 transition-all duration-150 ${isOver ? 'bg-primary-subtle/60 ring-2 ring-primary/30' : ''}`}
-    >
+    <div className="flex min-w-70 flex-1 flex-col gap-3 rounded-2xl p-2">
       <div className={`inline-flex items-center gap-2 self-start rounded-full px-3 py-1.5 text-[12.5px] font-bold ${col.count}`}>
         <span className={`size-2 rounded-full ${col.dot}`} />
         {col.label}
         <span className="rounded-full bg-surface/80 px-1.5 py-0.5 text-[11px] tabular-nums shadow-sm">{cards.length}</span>
       </div>
 
-      <div className="flex min-h-[60px] flex-col gap-2.5">
+      <div className="flex min-h-15 flex-col gap-2.5">
         {cards.length === 0 ? (
-          <div className={`rounded-2xl border-2 border-dashed py-10 text-center text-[12px] transition-colors duration-150 ${isOver ? 'border-primary/40 text-primary/60' : 'border-border/60 text-text-muted/40'}`}>
-            {isOver ? 'Энд тавих' : 'Хоосон'}
-          </div>
+          <div className="rounded-2xl border-2 border-dashed border-border/60 py-10 text-center text-[12px] text-text-muted/40">Хоосон</div>
         ) : shown.map((s) => (
-          <FollowUpCard key={s.id} student={s}
-            onSend={() => onSend(s)}
-            onStatus={(st) => onStatus(s.childKey, st)}
-            onEdit={() => onEdit(s)}
-            dragging={draggingKey === s.childKey}
-            onDragStart={() => onDragStart(s.childKey)}
-            onDragEnd={onDragEnd}
-          />
+          <FollowUpCard key={s.id} student={s} onSend={() => onSend(s)} onEdit={() => onEdit(s)} />
         ))}
-        {isOver && cards.length > 0 && <div className="h-1.5 rounded-full bg-primary/30" />}
       </div>
 
       {remaining > 0 && (

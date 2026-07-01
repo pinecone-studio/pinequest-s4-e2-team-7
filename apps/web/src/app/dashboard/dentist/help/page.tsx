@@ -1,6 +1,7 @@
 'use client'
 
 import BrandLoader from '@/components/ui/BrandLoader'
+import { useSession } from '@/components/providers'
 import { useVolunteerProfile } from '@/hooks/useHelp'
 import { useMyAppointments } from '@/hooks/useAppointments'
 import DentistRegisterForm from '@/components/dentist/DentistRegisterForm'
@@ -9,21 +10,26 @@ import DentistAvailabilityToggle from '@/components/dentist/DentistAvailabilityT
 import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
 
 const DentistHelpPage = () => {
+  const { role } = useSession()
+  const isAdmin = role === 'admin'
   const { data: profile, isLoading: profileLoading } = useVolunteerProfile()
   const { data: appts = [], isLoading } = useMyAppointments()
 
   useSetPageHeader({
     title: 'Эмчийн самбар',
-    subtitle: 'Зөвхөн яаралтай эмчилгээ шаардлагатай дүгнэлт гарсан сурагчид дуудлага хийх боломжтой.',
-    actions: <DentistAvailabilityToggle />,
+    subtitle: isAdmin
+      ? 'Бүх эмчийн дуудлагын самбар (зөвхөн харах).'
+      : 'Зөвхөн яаралтай эмчилгээ шаардлагатай дүгнэлт гарсан сурагчид дуудлага хийх боломжтой.',
+    actions: isAdmin ? undefined : <DentistAvailabilityToggle />,
   })
 
   if (profileLoading) return <BrandLoader className="py-20" />
-  if (!profile) return <DentistRegisterForm />
+  // Admins have no volunteer profile — they view every dentist's calls read-only.
+  if (!profile && !isAdmin) return <DentistRegisterForm />
 
   return (
     <section className="page-in-wrap">
-      {isLoading ? <BrandLoader className="py-20" /> : <DentistCallBoard appts={appts} />}
+      {isLoading ? <BrandLoader className="py-20" /> : <DentistCallBoard appts={appts} readOnly={isAdmin} />}
     </section>
   )
 }

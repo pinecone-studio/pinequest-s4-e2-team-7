@@ -2,17 +2,12 @@
 
 import type { ComponentType, SVGProps } from 'react'
 import { ArrowUpIcon, ArrowDownIcon, ExclamationTriangleIcon, ArrowsRightLeftIcon } from '@heroicons/react/24/solid'
-import type { ChildTrendSnapshot, TriageLevel } from '@pinequest/types'
+import type { ChildTrendSnapshot } from '@pinequest/types'
 import type { SeasonSnapshot } from '@/hooks/useBoard'
 import { formatSeason } from '@/lib/season'
+import { TRIAGE_DOT } from '@/lib/triage'
 
 type IconType = ComponentType<SVGProps<SVGSVGElement>>
-
-const DOT_CLS: Record<TriageLevel, string> = {
-  red: 'bg-triage-red',
-  yellow: 'bg-triage-yellow',
-  green: 'bg-triage-green',
-}
 
 type TrendInfo = { Icon: IconType | null; textCls: string; bg: string; label: string } | null
 const TREND: Record<string, TrendInfo> = {
@@ -45,7 +40,7 @@ const SeasonDotRail = ({ history, trend }: Props) => {
       {visible.map((s) => (
         <span
           key={s.seasonId}
-          className={`size-2 shrink-0 rounded-full ${DOT_CLS[s.effectiveLevel] ?? 'bg-border'}`}
+          className={`size-2 shrink-0 rounded-full ${TRIAGE_DOT[s.effectiveLevel] ?? 'bg-border'}`}
           title={formatSeason(s.seasonId)}
         />
       ))}

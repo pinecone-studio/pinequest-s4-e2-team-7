@@ -54,7 +54,7 @@ const UserCreateForm = () => {
 
   return (
     <>
-      <Button variant="primary" size="sm" className="self-start" onClick={() => setOpen(true)}>
+      <Button variant="primary" size="sm" onClick={() => setOpen(true)}>
         <UserPlusIcon className="size-4" /> Шинэ хэрэглэгч
       </Button>
 

@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { UsersIcon, TrashIcon } from '@heroicons/react/24/solid'
-import { useBoardStudents, useSendToParent, useDeleteChild, useSetFollowUpStatus, type BoardStudent } from '@/hooks/useBoard'
+import { formatChildName } from '@pinequest/core'
+import { useBoardStudents, useSendToParent, useDeleteChild, type BoardStudent } from '@/hooks/useBoard'
 import { useToast } from '@/components/ui/Toast'
 import ConfirmModal from '@/components/ui/ConfirmModal'
 import { SkeletonCard } from '@/components/ui/Skeleton'
@@ -14,12 +15,13 @@ import EmptyState from '@/components/ui/EmptyState'
 import { useSetPageHeader } from '@/components/shell/ShellHeaderContext'
 import { useSeason } from '@/components/shared/SeasonProvider'
 import { scopeStudentsToSeason } from '@/lib/seasonScope'
+import { TRIAGE_LABEL, TRIAGE_DOT, TRIAGE_SOFT, TRIAGE_TEXT, TRIAGE_NONE } from '@/lib/triage'
 
 const TRIAGE_GROUPS = [
-  { level: 'red',    label: 'Яаралтай эмчилгээ шаардлагатай', dot: 'bg-triage-red',    pill: 'bg-triage-red-bg text-triage-red' },
-  { level: 'yellow', label: 'Эмчилгээ шаардлагатай',           dot: 'bg-triage-yellow', pill: 'bg-triage-yellow-bg text-triage-yellow' },
-  { level: 'green',  label: 'Дараагийн хяналтанд хамруулах',   dot: 'bg-triage-green',  pill: 'bg-triage-green-bg text-triage-green' },
-  { level: 'none',   label: 'Шалгаагүй',                       dot: 'bg-border',        pill: 'bg-surface-raised text-text-muted' },
+  { level: 'red',    label: TRIAGE_LABEL.red,    dot: TRIAGE_DOT.red,    pill: `${TRIAGE_SOFT.red} ${TRIAGE_TEXT.red}` },
+  { level: 'yellow', label: TRIAGE_LABEL.yellow, dot: TRIAGE_DOT.yellow, pill: `${TRIAGE_SOFT.yellow} ${TRIAGE_TEXT.yellow}` },
+  { level: 'green',  label: TRIAGE_LABEL.green,  dot: TRIAGE_DOT.green,  pill: `${TRIAGE_SOFT.green} ${TRIAGE_TEXT.green}` },
+  { level: 'none',   label: TRIAGE_NONE.label,   dot: TRIAGE_NONE.dot,   pill: `${TRIAGE_NONE.soft} ${TRIAGE_NONE.text}` },
 ]
 
 // Ангийн нэр = анги + бүлэг (ж: "3А") — түүнийг задлан шүүлтэд тааруулна.
@@ -37,7 +39,6 @@ const SummaryBoard = () => {
   const { seasonId, setSeasonId } = useSeason()
   const send = useSendToParent()
   const del = useDeleteChild()
-  const setStatus = useSetFollowUpStatus()
   const toast = useToast()
   const [selected, setSelected] = useState<BoardStudent | null>(null)
   const [editing, setEditing] = useState<BoardStudent | null>(null)
@@ -93,7 +94,7 @@ const SummaryBoard = () => {
   const handleSend = async (s: BoardStudent) => {
     try {
       await send(s)
-      toast.success(`${s.lastName}-д мэдэгдэл илгээлээ`)
+      toast.success(`${formatChildName(s)}-д мэдэгдэл илгээлээ`)
     } catch {
       toast.error('Илгээхэд алдаа гарлаа')
     }
@@ -140,7 +141,6 @@ const SummaryBoard = () => {
                   onSend={(s) => { void handleSend(s) }}
                   onEdit={setEditing}
                   onDelete={setDeleting}
-                  onStatus={(s, status) => { setStatus.mutate({ childKey: s.childKey, status }) }}
                 />
               </div>
             )
@@ -157,7 +157,7 @@ const SummaryBoard = () => {
         onConfirm={handleDelete}
         isPending={del.isPending}
         title="Сурагч устгах"
-        message={deleting ? `${deleting.lastName} ${deleting.firstName}-г жагсаалтаас хасах уу? Энэ үйлдлийг буцааж болохгүй.` : ''}
+        message={deleting ? `${formatChildName(deleting)}-г жагсаалтаас хасах уу? Энэ үйлдлийг буцааж болохгүй.` : ''}
         confirmIcon={TrashIcon}
       />
     </section>
