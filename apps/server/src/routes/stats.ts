@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { and, count, eq, inArray, ne } from 'drizzle-orm'
-import { screenings, children, followUps, screeningReviews } from '@pinequest/db/d1'
+import { screenings, children, followUps, screeningReviews, schoolClasses } from '@pinequest/db/d1'
 import { authenticate } from '../middleware/auth.js'
 import { resolveScope, scopeWhere } from '../lib/scopeFilter.js'
 import type { AppEnv } from '../types.js'
@@ -88,13 +88,19 @@ statsRoutes.get('/', authenticate, async (c) => {
   const fuSchool = scope.all
     ? (querySchoolId ? eq(followUps.schoolId, querySchoolId) : undefined)
     : inArray(followUps.schoolId, scope.schoolIds.length ? scope.schoolIds : ['__no_scope__'])
+  // Classes in scope for the coverage denominator (season/school-filtered).
+  const clsSc = scopeWhere(scope, { classId: schoolClasses.id, schoolId: schoolClasses.schoolId })
+  const clsWhere = and(clsSc, seasonId ? eq(schoolClasses.seasonId, seasonId) : undefined, querySchoolId ? eq(schoolClasses.schoolId, querySchoolId) : undefined)
 
-  const [eventRows, childRow, flaggedRow, resolvedRow] = await Promise.all([
+  const [eventRows, classRows, enrolledGroups, flaggedRow, resolvedRow] = await Promise.all([
     // One row per screening event, with whether that event was dentist-reviewed.
     db.select({ childKey: screenings.childKey, triageLevel: screenings.triageLevel, reviewId: screeningReviews.id })
       .from(screenings).leftJoin(screeningReviews, eq(screeningReviews.screeningId, screenings.id))
       .where(and(scSc, seasonCond, querySchool)),
-    db.select({ c: count() }).from(children).where(and(chSc, eq(children.isActive, true), querySchoolId ? eq(children.schoolId, querySchoolId) : undefined)),
+    db.select({ id: schoolClasses.id, expectedTotal: schoolClasses.expectedTotal }).from(schoolClasses).where(clsWhere),
+    db.select({ classId: children.classId, c: count() }).from(children)
+      .where(and(chSc, eq(children.isActive, true), querySchoolId ? eq(children.schoolId, querySchoolId) : undefined))
+      .groupBy(children.classId),
     db.select({ c: count() }).from(followUps).where(and(fuSchool, eq(followUps.status, 'flagged'))),
     db.select({ c: count() }).from(followUps).where(and(fuSchool, ne(followUps.status, 'flagged'))),
   ])
@@ -121,12 +127,17 @@ statsRoutes.get('/', authenticate, async (c) => {
     if (!v.reviewed && (v.level === 'red' || v.level === 'yellow')) pendingReview += 1
   }
   const totalScreened = perChild.size
+  // Coverage denominator = planned class sizes (expectedTotal) for the season,
+  // falling back to a class's active roster count when no total was set. Mirrors
+  // the teacher's Хамрагдсан/Үлдсэн bars and the per-class list rows.
+  const enrolledByClass = new Map(enrolledGroups.map((g) => [g.classId, g.c]))
+  const coverageTotal = classRows.reduce((sum, k) => sum + (k.expectedTotal ?? enrolledByClass.get(k.id) ?? 0), 0)
   return c.json({
     success: true,
     data: {
       totalScreened,
       triage,
-      coverage: { screened: totalScreened, total: childRow[0]?.c ?? 0 },
+      coverage: { screened: totalScreened, total: coverageTotal },
       pendingReview,
       flaggedFollowUps: flaggedRow[0]?.c ?? 0,
       resolvedFollowUps: resolvedRow[0]?.c ?? 0,

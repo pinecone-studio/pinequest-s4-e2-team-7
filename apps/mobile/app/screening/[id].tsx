@@ -190,10 +190,10 @@ export default function ScreeningDetailScreen() {
               <Field label="Улирал" value={seasonLabelMn(detail.seasonId)} colors={colors} />
             </View>
 
-            <Text style={[s.section, { color: colors.textBase }]}>Илэрсэн зүйлс</Text>
+            <Text style={[s.section, { color: colors.textBase }]}>Цоород өртсөн шүд</Text>
             <View style={[s.tableHead, { borderColor: colors.border }]}>
-              <Text style={[s.th, s.col1, { color: colors.textMuted }]}>Шүд (FDI)</Text>
-              <Text style={[s.th, s.col2, { color: colors.textMuted }]}>Төрөл</Text>
+              <Text style={[s.th, s.col1, { color: colors.textMuted }]}>Шүдний дугаар (FDI)</Text>
+              <Text style={[s.th, s.col2, { color: colors.textMuted }]}>Гарал</Text>
               <Text style={[s.th, s.col3, { color: colors.textMuted }]}>Магадлал</Text>
             </View>
             {detail.findings.length ? (
@@ -212,7 +212,7 @@ export default function ScreeningDetailScreen() {
               </Text>
             )}
 
-            <Text style={[s.section, { color: colors.textBase }]}>Асуумжийн шинж тэмдэг</Text>
+            <Text style={[s.section, { color: colors.textBase }]}>Асуумжаар</Text>
             {activeSymptoms(detail.questionnaire).length ? (
               activeSymptoms(detail.questionnaire).map((sym) => (
                 <View key={sym} style={s.symRow}>
@@ -222,14 +222,14 @@ export default function ScreeningDetailScreen() {
               ))
             ) : (
               <Text style={[s.muted, { color: colors.textMuted, paddingVertical: 4 }]}>
-                Шинж тэмдэг бүртгэгдээгүй
+                Цоорлын шинж танигдсангүй
               </Text>
             )}
 
             {detail.review ? (
               <View style={[s.reviewBox, { borderColor: colors.border }]}>
                 <Text style={[s.label, { color: colors.textMuted }]}>
-                  ШҮДНИЙ ЭМЧИЙН БАТАЛГААЖУУЛАЛТ
+                  Шүдний эмчтэй холбогдсон хүүхдүүд
                 </Text>
                 <Text style={[s.reviewLevel, { color: colors.textBase }]}>
                   {LEVEL_LABEL[detail.review.confirmedLevel] ?? detail.review.confirmedLevel}
@@ -243,8 +243,8 @@ export default function ScreeningDetailScreen() {
             ) : null}
 
             <Text style={[s.foot, { color: colors.textDisabled, borderColor: colors.border }]}>
-              Асуумж болон зурагт үндэслэсэн дүгнэлт нь шүд цоорох өвчний үндсэн онoш биш бөгөөд,
-              өвчний үндсэн онoш биш болно.
+              Асуумж болон зурагт үндэслэсэн дүгнэлт нь шүд цоорох өвчний үндсэн онoш биш юм.
+
             </Text>
           </View>
         </ScrollView>
@@ -263,7 +263,7 @@ export default function ScreeningDetailScreen() {
             <>
               <Ionicons name="share-outline" size={18} color={colors.primaryText} />
               <Text style={[s.shareText, { color: colors.primaryText }]}>
-                PDF болгож хадгалах / хуваалцах
+                PDF илгээх
               </Text>
             </>
           )}

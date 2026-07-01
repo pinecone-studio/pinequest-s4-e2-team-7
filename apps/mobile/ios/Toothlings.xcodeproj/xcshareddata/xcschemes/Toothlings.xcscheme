@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "PineQuest.app"
-               BlueprintName = "PineQuest"
-               ReferencedContainer = "container:PineQuest.xcodeproj">
+               BuildableName = "Toothlings.app"
+               BlueprintName = "Toothlings"
+               ReferencedContainer = "container:Toothlings.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "PineQuestTests.xctest"
-               BlueprintName = "PineQuestTests"
-               ReferencedContainer = "container:PineQuest.xcodeproj">
+               BuildableName = "ToothlingsTests.xctest"
+               BlueprintName = "ToothlingsTests"
+               ReferencedContainer = "container:Toothlings.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "PineQuest.app"
-            BlueprintName = "PineQuest"
-            ReferencedContainer = "container:PineQuest.xcodeproj">
+            BuildableName = "Toothlings.app"
+            BlueprintName = "Toothlings"
+            ReferencedContainer = "container:Toothlings.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "PineQuest.app"
-            BlueprintName = "PineQuest"
-            ReferencedContainer = "container:PineQuest.xcodeproj">
+            BuildableName = "Toothlings.app"
+            BlueprintName = "Toothlings"
+            ReferencedContainer = "container:Toothlings.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

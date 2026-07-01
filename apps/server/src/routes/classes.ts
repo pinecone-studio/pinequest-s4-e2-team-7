@@ -78,7 +78,8 @@ classRoutes.post('/classes/:classId/carry-forward', authorize('screener', 'admin
 
   const [created] = await db.insert(schoolClasses).values({
     schoolId: source.schoolId, name: newName ?? source.name, seasonId: newSeasonId, gradeLevel: source.gradeLevel,
-    sourceClassId: source.id, scheduledAt: scheduledAt ? new Date(scheduledAt) : null, reminderPhone: reminderPhone ?? null,
+    expectedTotal: source.expectedTotal, sourceClassId: source.id,
+    scheduledAt: scheduledAt ? new Date(scheduledAt) : null, reminderPhone: reminderPhone ?? null,
   }).returning()
 
   await inChunks(sourceChildren.map((ch) => ({

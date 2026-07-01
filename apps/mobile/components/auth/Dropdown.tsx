@@ -34,7 +34,7 @@ const Dropdown = <T extends string>({ label, value, options, onChange, placehold
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Pressable style={s.backdrop} onPress={() => setOpen(false)}>
           <Pressable style={[s.sheet, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={s.sheetContent}>
               {options.map((o) => {
                 const active = o.value === value
                 return (
@@ -63,20 +63,22 @@ const s = StyleSheet.create({
   label: { fontSize: 11, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.8 },
   trigger: {
     borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 12,
-    paddingHorizontal: 14,
+    borderRadius: 9999,
+    paddingHorizontal: 18,
     height: 52,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  triggerText: { fontSize: 16, flex: 1 },
+  triggerText: { fontSize: 16, flex: 1, fontFamily: 'Inter_500Medium' },
   chevron: { fontSize: 14, marginLeft: 8 },
   backdrop: { flex: 1, backgroundColor: '#0006', justifyContent: 'center', paddingHorizontal: 28 },
-  sheet: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, maxHeight: '60%', overflow: 'hidden' },
+  sheet: { borderRadius: 20, borderWidth: StyleSheet.hairlineWidth, maxHeight: '60%', overflow: 'hidden' },
+  sheetContent: { padding: 6 },
   option: {
-    paddingHorizontal: 18,
-    paddingVertical: 15,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 9999,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

@@ -2,28 +2,33 @@ import { View, Text, TextInput, StyleSheet, type KeyboardTypeOptions } from 'rea
 import { useTheme } from '@/lib/ThemeContext'
 
 type Props = {
-  label: string
   value: string
   onChange: (v: string) => void
+  /** Optional label above the field. Auth forms omit it (placeholder-only, like web). */
+  label?: string
   placeholder?: string
   keyboard?: KeyboardTypeOptions
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters'
 }
 
-const TextField = ({ label, value, onChange, placeholder, keyboard, autoCapitalize }: Props) => {
+const TextField = ({ value, onChange, label, placeholder, keyboard, autoCapitalize }: Props) => {
   const { colors } = useTheme()
+  const input = (
+    <TextInput
+      style={[s.input, { borderColor: colors.border, backgroundColor: colors.surfaceRaised, color: colors.textBase }]}
+      value={value}
+      onChangeText={onChange}
+      placeholder={placeholder}
+      placeholderTextColor={colors.textDisabled}
+      keyboardType={keyboard}
+      autoCapitalize={autoCapitalize}
+    />
+  )
+  if (!label) return input
   return (
     <View style={s.group}>
       <Text style={[s.label, { color: colors.textMuted }]}>{label}</Text>
-      <TextInput
-        style={[s.input, { borderColor: colors.border, backgroundColor: colors.surfaceRaised, color: colors.textBase }]}
-        value={value}
-        onChangeText={onChange}
-        placeholder={placeholder}
-        placeholderTextColor={colors.textDisabled}
-        keyboardType={keyboard}
-        autoCapitalize={autoCapitalize}
-      />
+      {input}
     </View>
   )
 }
@@ -31,7 +36,7 @@ const TextField = ({ label, value, onChange, placeholder, keyboard, autoCapitali
 const s = StyleSheet.create({
   group: { gap: 6 },
   label: { fontSize: 11, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.8 },
-  input: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, paddingHorizontal: 14, height: 52, fontSize: 16 },
+  input: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 9999, paddingHorizontal: 18, height: 52, fontSize: 16, fontFamily: 'Inter_500Medium' },
 })
 
 export default TextField

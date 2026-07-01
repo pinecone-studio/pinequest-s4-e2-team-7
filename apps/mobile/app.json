@@ -12,13 +12,13 @@
       "resizeMode": "contain",
       "backgroundColor": "#FFFFFF",
       "dark": {
-        "image": "./assets/logoYellow.png",
+        "image": "./assets/logoGreen.png",
         "backgroundColor": "#1C1C1E"
       }
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pinequest.app",
+      "bundleIdentifier": "org.name.PineQuest",
       "infoPlist": {
         "NSCameraUsageDescription": "Хүүхдийн шүдийг скрининг хийхэд камер ашиглана."
       }

@@ -20,7 +20,7 @@ export const IntraoralImageView = ({
       return (
         <div
           key={i}
-          className="absolute rounded-lg border border-[#52A075]/70 bg-[#52A075]/10"
+          className="absolute rounded-lg border border-[#0e9594]/70 bg-[#0e9594]/10"
           style={{
             left: `${d.box.x}%`,
             top: `${d.box.y}%`,

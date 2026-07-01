@@ -50,6 +50,7 @@ teacherRoutes.post('/classes', authorize('teacher', 'admin'), async (c) => {
 
   const inserted = await db.insert(schoolClasses).values({
     schoolId, name: body.name, seasonId: body.seasonId, gradeLevel: body.gradeLevel ?? null,
+    expectedTotal: body.expectedTotal ?? null,
     scheduledAt: body.scheduledAt ? new Date(body.scheduledAt) : null, reminderPhone: body.reminderPhone ?? null,
   }).returning().catch(() => null)
   if (!inserted?.[0]) return c.json({ success: false, data: null, message: 'duplicate_class' }, 409)
@@ -70,6 +71,22 @@ teacherRoutes.post('/classes', authorize('teacher', 'admin'), async (c) => {
       .onConflictDoNothing()
   }
   return c.json({ success: true, data: { ...klass, enrolled: body.students.length, screened: 0 } }, 201)
+})
+
+// Update a class's "total kids to evaluate" (expectedTotal) — the coverage
+// denominator that drives the Хамрагдсан/Үлдсэн bars and dashboard coverage.
+// Scoped to class owners. `null`/0 clears it (falls back to roster size).
+teacherRoutes.patch('/classes/:classId', authorize('teacher', 'admin'), async (c) => {
+  const db = c.get('db')
+  const classId = c.req.param('classId')
+  if (!(await hasClassScope(db, c.get('jwtPayload'), classId))) {
+    return c.json({ success: false, data: null, message: 'forbidden' }, 403)
+  }
+  const { expectedTotal } = await c.req.json<{ expectedTotal?: number | null }>()
+  const value = typeof expectedTotal === 'number' && expectedTotal > 0 ? Math.floor(expectedTotal) : null
+  const [updated] = await db.update(schoolClasses).set({ expectedTotal: value }).where(eq(schoolClasses.id, classId)).returning()
+  if (!updated) return c.json({ success: false, data: null, message: 'not_found' }, 404)
+  return c.json({ success: true, data: updated })
 })
 
 // Append students to an existing class. Roster slots continue from the current max

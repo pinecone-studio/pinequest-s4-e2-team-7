@@ -13,10 +13,12 @@ type RoleChoice = UserRole | 'teacher_parent'
 
 const NEEDS_SCHOOL: RoleChoice[] = ['teacher', 'school_doctor', 'teacher_parent']
 const NEEDS_CHILD: RoleChoice[] = ['parent', 'teacher_parent']
+// A teacher owns one class → capture it (name + planned size) at signup.
+const NEEDS_CLASS: RoleChoice[] = ['teacher', 'teacher_parent']
 
 const ROLE_DD: DropdownOption<RoleChoice>[] = [
   ...ROLE_OPTIONS.map((o) => ({ value: o.value as RoleChoice, label: o.label })),
-  { value: 'teacher_parent', label: 'Багш + эцэг эх (хослол)' },
+  { value: 'teacher_parent', label: 'Багш + эцэг эх (хамт)' },
 ]
 const INST_DD: DropdownOption<string>[] = [
   { value: 'Сургууль', label: 'Сургууль' },
@@ -29,7 +31,7 @@ const RegisterForm = ({ onDone }: { onDone: () => void }) => {
   const { submit, busy, error } = useAuth(onDone)
   const [role, setRole] = useState<RoleChoice>('parent')
   const [instType, setInstType] = useState<string>('Сургууль')
-  const [f, setF] = useState({ name: '', phone: '', email: '', extra: '', childName: '', password: '', confirm: '' })
+  const [f, setF] = useState({ name: '', phone: '', email: '', extra: '', childName: '', className: '', classTotal: '', password: '', confirm: '' })
   const [errs, setErrs] = useState<Record<string, string>>({})
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => {
     setF((p) => ({ ...p, [k]: e.target.value }))
@@ -38,13 +40,17 @@ const RegisterForm = ({ onDone }: { onDone: () => void }) => {
 
   const needsSchool = NEEDS_SCHOOL.includes(role)
   const needsChild = NEEDS_CHILD.includes(role)
+  const needsClass = NEEDS_CLASS.includes(role)
   const schoolName = instType === 'other' ? f.extra.trim() : `${instType} ${f.extra.trim()}`.trim()
+  const classTotal = parseInt(f.classTotal, 10)
 
   const validate = (): Record<string, string> => {
     const e: Record<string, string> = {}
     if (!f.name.trim()) e.name = 'Нэрээ оруулна уу'
     if (needsSchool && !f.extra.trim()) e.extra = instType === 'other' ? 'Байгууллагын нэрээ оруулна уу' : 'Дугаараа оруулна уу'
     if (needsChild && !f.childName.trim()) e.childName = 'Хүүхдийн нэрийг оруулна уу'
+    if (needsClass && !f.className.trim()) e.className = 'Ангийн нэрээ оруулна уу'
+    if (needsClass && !(classTotal > 0)) e.classTotal = 'Үнэлэх хүүхдийн тоог оруулна уу'
     if (!f.phone.trim()) e.phone = 'Утасны дугаараа оруулна уу'
     if (f.password.length < 6) e.password = '6+ тэмдэгт нууц үг оруулна уу'
     if (!f.confirm) e.confirm = 'Нууц үгээ давтана уу'
@@ -66,6 +72,7 @@ const RegisterForm = ({ onDone }: { onDone: () => void }) => {
       role: actualRole,
       ...(needsSchool ? { schoolName } : {}),
       ...(needsChild ? { childName: f.childName.trim() } : {}),
+      ...(needsClass ? { className: f.className.trim(), expectedTotal: classTotal } : {}),
     })
   }
 
@@ -78,7 +85,7 @@ const RegisterForm = ({ onDone }: { onDone: () => void }) => {
       <Err k="name" />
 
       <Dropdown value={role} options={ROLE_DD} ariaLabel="Үүрэг" size="md"
-        onChange={(v) => { setRole(v); setF((p) => ({ ...p, extra: '', childName: '' })); setErrs((p) => ({ ...p, extra: '', childName: '' })) }} />
+        onChange={(v) => { setRole(v); setF((p) => ({ ...p, extra: '', childName: '', className: '', classTotal: '' })); setErrs((p) => ({ ...p, extra: '', childName: '', className: '', classTotal: '' })) }} />
 
       {needsSchool && (
         <>
@@ -90,6 +97,21 @@ const RegisterForm = ({ onDone }: { onDone: () => void }) => {
               : <input type="number" inputMode="numeric" value={f.extra} onChange={set('extra')} placeholder="Дугаар" className={`${inputCls} flex-1${ec('extra')}`} />}
           </div>
           <Err k="extra" />
+        </>
+      )}
+
+      {needsClass && (
+        <>
+          <input value={f.className} onChange={set('className')} placeholder="Ангийн нэр (ж: 3А)" className={inputCls + ec('className')} />
+          <Err k="className" />
+          <input
+            inputMode="numeric"
+            value={f.classTotal}
+            onChange={(e) => { setF((p) => ({ ...p, classTotal: e.target.value.replace(/\D/g, '') })); setErrs((p) => ({ ...p, classTotal: '' })) }}
+            placeholder="Нийт сурагч"
+            className={inputCls + ec('classTotal')}
+          />
+          <Err k="classTotal" />
         </>
       )}
 

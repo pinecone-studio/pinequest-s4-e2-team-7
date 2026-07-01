@@ -28,9 +28,9 @@ const MEMBERS: Member[] = [
 // --- THEME (named so a dark theme can be swapped back in trivially) ---
 const SECTION_BG = '#0a0a0a' // near-black, consistent with the other landing sections
 const GIANT_TEXT = 'rgba(255,255,255,0.06)' // faint giant backdrop word-mark on black
-const GIANT_OLIVE = 'rgba(82, 160, 117,0.1)' // faint olive for the "Lings" half of the backdrop
+const GIANT_OLIVE = 'rgba(14, 149, 148,0.1)' // faint olive for the "Lings" half of the backdrop
 const LABEL_TEXT = 'var(--olive)' // yellow accent for the small section label
-const ACCENT = 'var(--olive)' // yellow accent (#52A075); focus rings + role label
+const ACCENT = 'var(--olive)' // yellow accent (#0e9594); focus rings + role label
 const CARD_GRADIENT = 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 55%, rgba(0,0,0,0) 100%)'
 
 const SPRING = { type: 'spring', stiffness: 220, damping: 26 } as const

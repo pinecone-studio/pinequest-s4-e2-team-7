@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { useAuth } from '@/lib/useAuth'
-import LoginIdentifierField from './LoginIdentifierField'
+import TextField from './TextField'
 import PinField from './PinField'
 import PrimaryButton from './PrimaryButton'
 
@@ -31,8 +31,14 @@ const LoginForm = () => {
 
   return (
     <View style={s.root}>
-      <LoginIdentifierField value={identifier} onChange={(v) => { setIdentifier(v); setFormErr('') }} />
-      <PinField value={password} onChange={setPassword} />
+      <TextField
+        value={identifier}
+        onChange={(v) => { setIdentifier(v); setFormErr('') }}
+        placeholder="Имэйл эсвэл утасны дугаар"
+        keyboard="email-address"
+        autoCapitalize="none"
+      />
+      <PinField value={password} onChange={setPassword} placeholder="Нууц үг" />
       {formErr ? <Text style={s.error}>{formErr}</Text> : error ? <Text style={s.error}>{error}</Text> : null}
       <PrimaryButton
         label="Нэвтрэх"

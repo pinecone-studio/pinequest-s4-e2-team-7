@@ -16,7 +16,7 @@ export const GreetingHeader = ({ name }: { name: string }) => {
           Онлайн
         </span>
       </div>
-      <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#52A075] text-[15px] font-bold text-slate-900">
+      <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#0e9594] text-[15px] font-bold text-white">
         {initial}
       </span>
     </div>
@@ -42,13 +42,13 @@ export const ChildrenTabRow = ({
 export const ScanHeroCard = ({ href, label = 'Зураг авах' }: { href: string; label?: string }) => (
   <Link
     href={href}
-    className="flex items-center justify-between gap-4 rounded-2xl bg-[#52A075] p-6 shadow-[0_4px_20px_rgba(82, 160, 117,0.35)] transition-all hover:bg-[#3B8C5E]"
+    className="flex items-center justify-between gap-4 rounded-2xl bg-[#0e9594] p-6 shadow-[0_4px_20px_rgba(14, 149, 148,0.35)] transition-all hover:bg-[#0b7a79]"
   >
     <div>
       <p className="text-[20px] font-bold text-slate-900">Урьдчилан сэргийлэх</p>
       <p className="mt-1 text-[14px] text-slate-900/75">Амны хөндийн байдлын хяналт</p>
     </div>
-    <span className="inline-flex shrink-0 items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-[14px] font-semibold text-[#52A075]">
+    <span className="inline-flex shrink-0 items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-[14px] font-semibold text-[#0e9594]">
       <CameraIcon className="h-4 w-4" /> {label}
     </span>
   </Link>
@@ -73,7 +73,7 @@ export const LastScreeningCard = ({
 }) => (
   <Link
     href={href}
-    className="warm-card flex items-center gap-4 p-4 transition-all hover:ring-2 hover:ring-[#52A075]/30"
+    className="warm-card flex items-center gap-4 p-4 transition-all hover:ring-2 hover:ring-[#0e9594]/30"
   >
     <span className={cn('size-3 shrink-0 rounded-full', TRIAGE_DOT[triage])} />
     <div className="min-w-0 flex-1">
@@ -99,7 +99,7 @@ export const QuickActionGrid = ({
         href={href}
         className="warm-card flex aspect-square flex-col justify-between p-4 transition-all hover:bg-surface-raised"
       >
-        <span className="flex size-10 items-center justify-center rounded-2xl bg-[#52A075]/12 text-lg">
+        <span className="flex size-10 items-center justify-center rounded-2xl bg-[#0e9594]/12 text-lg">
           {icon}
         </span>
         <span className="whitespace-pre-line text-[13px] font-semibold leading-snug text-text-base">
@@ -143,7 +143,7 @@ export const QuestionProgress = ({ step, total }: { step: number; total: number 
     </div>
     <div className="h-2 overflow-hidden rounded-full bg-consumer-chrome">
       <div
-        className="h-full rounded-full bg-[#52A075] transition-all"
+        className="h-full rounded-full bg-[#0e9594] transition-all"
         style={{ width: `${(step / total) * 100}%` }}
       />
     </div>
@@ -166,7 +166,7 @@ export const RadioCard = ({
   <label
     className={cn(
       'warm-card flex cursor-pointer items-center gap-3 p-4 transition-all',
-      checked && 'ring-2 ring-[#52A075]',
+      checked && 'ring-2 ring-[#0e9594]',
     )}
   >
     <input
@@ -175,7 +175,7 @@ export const RadioCard = ({
       value={value}
       checked={checked}
       onChange={onChange}
-      className="size-4 accent-[#52A075]"
+      className="size-4 accent-[#0e9594]"
     />
     <span className="text-[14px] font-medium text-text-base">{label}</span>
   </label>
@@ -205,13 +205,13 @@ export const ClinicListCard = ({
   <div
     className={cn(
       'warm-card flex items-center gap-3 p-4 transition-all',
-      active && 'ring-2 ring-[#52A075]',
+      active && 'ring-2 ring-[#0e9594]',
     )}
   >
     <button type="button" onClick={onSelect} className="min-w-0 flex-1 text-left">
       <p className="font-semibold text-text-base">{name}</p>
       <p className="mt-0.5 flex items-center gap-1 text-[12px] text-text-muted">
-        <StarIcon className="h-3.5 w-3.5 text-[#52A075]" /> {rating.toFixed(1)} · {distanceKm.toFixed(1)} км
+        <StarIcon className="h-3.5 w-3.5 text-[#0e9594]" /> {rating.toFixed(1)} · {distanceKm.toFixed(1)} км
       </p>
       <p className="mt-1 line-clamp-1 text-[12px] text-text-muted">{addr}</p>
       <p className="flex items-center gap-1 text-[11px] text-text-muted"><ClockIcon className="h-3.5 w-3.5" /> {hours}</p>
@@ -220,7 +220,7 @@ export const ClinicListCard = ({
       {phone ? (
         <a
           href={`tel:${phone.replace(/-/g, '')}`}
-          className="flex size-10 items-center justify-center rounded-full bg-[#52A075] text-slate-900 shadow-sm transition hover:bg-[#3B8C5E]"
+          className="flex size-10 items-center justify-center rounded-full bg-[#0e9594] text-white shadow-sm transition hover:bg-[#0b7a79]"
           aria-label="Залгах"
         >
           <PhoneIcon className="h-4 w-4" />
@@ -229,7 +229,7 @@ export const ClinicListCard = ({
       <button
         type="button"
         onClick={onNavigate}
-        className="flex size-10 items-center justify-center rounded-full bg-slate-900 text-[#52A075] shadow-sm transition hover:opacity-90"
+        className="flex size-10 items-center justify-center rounded-full bg-slate-900 text-[#0e9594] shadow-sm transition hover:opacity-90"
         aria-label="Маршрут"
       >
         <ArrowUpRightIcon className="h-4 w-4" />

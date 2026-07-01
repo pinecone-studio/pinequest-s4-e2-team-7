@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { CalendarDaysIcon, AcademicCapIcon, UserIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { useSession } from '@/components/providers'
 import {
   getMyClasses,
@@ -9,7 +10,10 @@ import {
   type MyClass,
   type RosterChild,
 } from '@/lib/screeningApi'
+import Dropdown, { type DropdownOption } from '@/components/ui/Dropdown'
+import { formatSeason } from '@/lib/season'
 import { ScreeningProgress } from './ScreeningProgress'
+import { ClassTotalEditor } from './ClassTotalEditor'
 
 /** What the dashboard needs to persist a screening to the DB. */
 export type ScreenTarget = {
@@ -18,10 +22,12 @@ export type ScreenTarget = {
   schoolId: string
   seasonId: string
   childLabel: string
+  /** Хүүхдийн нас (birthYear-аас бодсон). Web дээр асуумж байхгүй тул AI зөвлөмжийн цорын ганц өвчтөний контекст. */
+  age: string
 }
 
 const selectCls =
-  'rounded-full border border-border bg-surface-raised px-4 py-2 text-[13px] text-text-base outline-none transition-colors placeholder:text-text-muted focus:border-[#52A075]'
+  'rounded-full border border-border bg-surface-raised px-4 py-2 text-[13px] text-text-base outline-none transition-colors placeholder:text-text-muted focus:border-[#0e9594] disabled:cursor-not-allowed disabled:opacity-50'
 
 /** Улирал → анги → хүүхэд гэсэн тусдаа шүүлтүүрээр сонгоно. Улирал/ангийн шинжилсэн-үлдсэн прогрессийг харуулна. */
 export const ClassChildPicker = ({ onChange }: { onChange: (t: ScreenTarget | null) => void }) => {
@@ -29,6 +35,7 @@ export const ClassChildPicker = ({ onChange }: { onChange: (t: ScreenTarget | nu
   const [classes, setClasses] = useState<MyClass[]>([])
   const [seasonId, setSeasonId] = useState('')
   const [classId, setClassId] = useState('')
+  const [childKey, setChildKey] = useState('')
   const [roster, setRoster] = useState<RosterChild[]>([])
   const [adding, setAdding] = useState(false)
   const [first, setFirst] = useState('')
@@ -61,21 +68,44 @@ export const ClassChildPicker = ({ onChange }: { onChange: (t: ScreenTarget | nu
   useEffect(() => {
     onChange(null)
     setAdding(false)
-    if (!classId) return setRoster([])
+    setChildKey('')
+    if (!classId) {
+      setRoster([])
+      return
+    }
     getRosterStatus(token, classId).then(setRoster).catch(() => setRoster([]))
   }, [classId, token])
 
   const cls = classes.find((c) => c.id === classId)
   const screenedInClass = roster.filter((r) => r.screenedAt).length
+  // Persist the teacher-set total locally so both the class + season bars recompute.
+  const applyTotal = (n: number) =>
+    setClasses((cs) => cs.map((c) => (c.id === classId ? { ...c, expectedTotal: n } : c)))
 
-  const emit = (kid: { childKey: string; firstName: string; lastName: string }) => {
+  // Header-ийн улирлын сонголттой ижил Dropdown UI — placeholder + icon-той сонголтууд.
+  const seasonOptions: DropdownOption[] = [
+    { value: '', label: 'Улирал сонгох…', Icon: CalendarDaysIcon },
+    ...seasons.map((s) => ({ value: s, label: formatSeason(s), Icon: CalendarDaysIcon })),
+  ]
+  const classOptions: DropdownOption[] = [
+    { value: '', label: 'Анги сонгох…', Icon: AcademicCapIcon },
+    ...seasonClasses.map((c) => ({ value: c.id, label: `${c.name} (${c.screened}/${c.enrolled})`, Icon: AcademicCapIcon })),
+  ]
+  const childOptions: DropdownOption[] = [
+    { value: '', label: 'Хүүхэд сонгох…', Icon: UserIcon },
+    ...roster.map((r) => ({ value: r.childKey, label: `${r.screenedAt ? '✓ ' : ''}${r.lastName} ${r.firstName}`, Icon: UserIcon })),
+  ]
+
+  const emit = (kid: { childKey: string; firstName: string; lastName: string; birthYear: number }) => {
     if (!cls) return
+    const age = kid.birthYear ? String(new Date().getFullYear() - kid.birthYear) : ''
     onChange({
       childKey: kid.childKey,
       classId: cls.id,
       schoolId: cls.schoolId,
       seasonId: cls.seasonId,
       childLabel: `${kid.lastName} ${kid.firstName}`.trim() || kid.childKey,
+      age,
     })
   }
 
@@ -90,6 +120,7 @@ export const ClassChildPicker = ({ onChange }: { onChange: (t: ScreenTarget | nu
       if (created) {
         setRoster(await getRosterStatus(token, classId).catch(() => roster))
         emit(created)
+        setChildKey(created.childKey)
         setAdding(false)
         setFirst('')
         setLast('')
@@ -105,62 +136,60 @@ export const ClassChildPicker = ({ onChange }: { onChange: (t: ScreenTarget | nu
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-border bg-surface-raised p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <select
+        <Dropdown
           value={seasonId}
-          onChange={(e) => {
-            setSeasonId(e.target.value)
+          options={seasonOptions}
+          onChange={(v) => {
+            setSeasonId(v)
             setClassId('')
           }}
-          className={selectCls}
-          aria-label="Улирал сонгох"
+          ariaLabel="Улирал сонгох"
+          className="min-w-48"
+        />
+
+        <Dropdown
+          value={classId}
+          options={classOptions}
+          onChange={(v) => setClassId(v)}
+          ariaLabel="Анги сонгох"
+          disabled={!seasonId}
+          className="min-w-48"
+        />
+
+        <Dropdown
+          value={childKey}
+          options={childOptions}
+          onChange={(v) => {
+            setChildKey(v)
+            const kid = roster.find((r) => r.childKey === v)
+            if (kid) emit(kid)
+            else onChange(null)
+          }}
+          ariaLabel="Хүүхэд сонгох"
+          disabled={!classId || adding}
+          className="min-w-48"
+        />
+
+        <button
+          type="button"
+          onClick={() => setAdding(true)}
+          disabled={!classId || adding}
+          className="btn rounded-full border border-border bg-surface px-4 py-2 text-[13px] font-semibold text-text-base transition hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <option value="">Улирал сонгох…</option>
-          {seasons.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-
-        {seasonId && (
-          <select value={classId} onChange={(e) => setClassId(e.target.value)} className={selectCls} aria-label="Анги сонгох">
-            <option value="">Анги сонгох…</option>
-            {seasonClasses.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name} ({c.screened}/{c.enrolled})
-              </option>
-            ))}
-          </select>
-        )}
-
-        {classId && !adding && (
-          <>
-            <select
-              defaultValue=""
-              onChange={(e) => {
-                const kid = roster.find((r) => r.childKey === e.target.value)
-                if (kid) emit(kid)
-              }}
-              className={selectCls}
-              aria-label="Хүүхэд сонгох"
-            >
-              <option value="">Хүүхэд сонгох…</option>
-              {roster.map((r) => (
-                <option key={r.childKey} value={r.childKey}>
-                  {r.screenedAt ? '✓ ' : ''}{r.lastName} {r.firstName}
-                </option>
-              ))}
-            </select>
-            <button type="button" onClick={() => setAdding(true)} className="btn rounded-full border border-border bg-surface px-4 py-2 text-[13px] font-semibold text-text-base transition hover:border-primary">
-              + Шинэ хүүхэд
-            </button>
-          </>
-        )}
+          + Шинэ хүүхэд
+        </button>
       </div>
 
       {/* Улирал/ангиар шинжилсэн-үлдсэн хүүхдийн прогресс. */}
       {seasonId && <ScreeningProgress label="Улирал" screened={seasonTotals.screened} total={seasonTotals.total} />}
-      {classId && <ScreeningProgress label={cls?.name ?? 'Анги'} screened={screenedInClass} total={cls?.expectedTotal || roster.length} />}
+      {classId && cls && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="min-w-[240px] flex-1">
+            <ScreeningProgress label={cls.name} screened={screenedInClass} total={cls.expectedTotal || roster.length} />
+          </div>
+          <ClassTotalEditor classId={cls.id} value={cls.expectedTotal} onSaved={applyTotal} />
+        </div>
+      )}
 
       {classId && adding && (
         <div className="flex flex-wrap items-center gap-2">
@@ -170,8 +199,8 @@ export const ClassChildPicker = ({ onChange }: { onChange: (t: ScreenTarget | nu
           <button type="button" disabled={busy || !first.trim() || !last.trim() || !age.trim()} onClick={handleAdd} className="btn rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-text-on-primary transition hover:bg-primary-hover disabled:opacity-50">
             {busy ? 'Нэмж байна…' : 'Нэмж сонгох'}
           </button>
-          <button type="button" onClick={() => setAdding(false)} className="btn rounded-full border border-border bg-surface px-4 py-2 text-[13px] text-text-muted transition hover:border-border">
-            Болих
+          <button type="button" onClick={() => setAdding(false)} aria-label="Болих" title="Болих" className="btn inline-flex items-center justify-center rounded-full border border-border bg-surface p-2 text-text-muted transition hover:border-border">
+            <TrashIcon className="size-4 shrink-0" />
           </button>
         </div>
       )}

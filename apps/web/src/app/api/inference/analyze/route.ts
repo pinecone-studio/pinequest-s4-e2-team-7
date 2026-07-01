@@ -64,6 +64,22 @@ interface Guidance {
   nextStep: string
 }
 
+// Gemini-д өгөх ил тод JSON гэрээ (responseSchema) — server талын GUIDANCE_SCHEMA-тай ижил.
+// Загварыг яг эдгээр 6 талбарыг, энэ дарааллаар, цэвэр JSON-оор буцаахад хүргэнэ.
+const GUIDANCE_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    advice: { type: 'STRING' },
+    homeCare: { type: 'STRING' },
+    brushing: { type: 'STRING' },
+    diet: { type: 'STRING' },
+    prevention: { type: 'STRING' },
+    nextStep: { type: 'STRING' },
+  },
+  required: ['advice', 'homeCare', 'brushing', 'diet', 'prevention', 'nextStep'],
+  propertyOrdering: ['advice', 'homeCare', 'brushing', 'diet', 'prevention', 'nextStep'],
+} as const
+
 interface AnalysisResult {
   triage: TriageLevel
   urgent: boolean
@@ -255,26 +271,37 @@ const runYolo = async (image: Blob, mimeType: string): Promise<RawInference> => 
   return res.json() as Promise<RawInference>
 }
 
-// ── Gemini advice (ЗӨВХӨН загварын илрүүлэлт + triage дээр тулгуурлана) ─────────
-// Зураг явуулахгүй: зөвлөмж detection/triage текстээс гардаг тул зургийг нэмэх нь
-// чанарт нөлөөлөхгүй, зөвхөн саатал нэмнэ.
+// ── Gemini advice (загварын илрүүлэлт + triage + ЗУРАГ дээр тулгуурлана) ─────────
+// Мобайлтай ижил: зургийг inlineData-аар хавсаргана (web нэг л зураг, тал нь хамаагүй).
+// triage/detection-ийг YOLO + TS core аль хэдийн шийдсэн — Gemini зөвхөн нас тохирсон
+// ЗӨВЛӨМЖ бичнэ, triage-г өөрчлөхгүй.
 
 const runGeminiAdvice = async (
   promptText: string,
+  image?: Blob,
 ): Promise<{ advice: string; guidance?: Guidance } | null> => {
+  const parts: Array<Record<string, unknown>> = [{ text: promptText }]
+  if (image) {
+    try {
+      const base64 = Buffer.from(await image.arrayBuffer()).toString('base64')
+      parts.push({ inlineData: { mimeType: image.type || 'image/jpeg', data: base64 } })
+    } catch {
+      // зураг заавал биш — текст-only prompt руу шилжинэ
+    }
+  }
+
   const geminiBody = {
-    contents: [
-      {
-        role: 'user',
-        parts: [{ text: promptText }],
-      },
-    ],
+    contents: [{ role: 'user', parts }],
     generationConfig: {
       temperature: 0,
-      maxOutputTokens: 512,
+      // 6 талбартай structured JSON + thinking загварт хүрэлцэхээр өргөн авав
+      // (512 байсан нь Кирилл текстийг дунд нь тасалж, JSON parse унагаан → түүхий
+      //  JSON-ийг advice болгон харуулдаг байсан). Server талын тохиргоотой ижил.
+      maxOutputTokens: 4096,
       responseMimeType: 'application/json',
-      // 3-4 өгүүлбэрийн энгийн зөвлөмжид "бодох" overhead шаардлагагүй —
-      // үүнийг унтраах нь 2.5-flash-ийн саатлыг мэдэгдэхүйц багасгана.
+      responseSchema: GUIDANCE_SCHEMA,
+      // Thinking унтраав: structured зөвлөмжид reasoning хэрэггүй бөгөөд thinking нь
+      // token-ийн төсвийг идэж хариуг хоослох (хоосон guidance → fallback) ба саатал нэмдэг.
       thinkingConfig: { thinkingBudget: 0 },
     },
   }
@@ -367,7 +394,7 @@ export async function POST(req: NextRequest) {
       triageLevel: level,
       detections,
     })
-    generated = await runGeminiAdvice(promptText)
+    generated = await runGeminiAdvice(promptText, image)
   }
 
   const result: AnalysisResult = {

@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs'
 import type { UserRole } from '@pinequest/types'
 import { users, schools, children, parentChildLinks, userScopes } from '@pinequest/db/d1'
 import { authenticate } from '../middleware/auth.js'
+import { ensureTeacherClass } from '../lib/teacherClass.js'
 import type { AppEnv } from '../types.js'
 
 export const authRoutes = new Hono<AppEnv>()
@@ -67,8 +68,8 @@ const SELF_ROLES = ['teacher', 'school_doctor', 'parent'] as const
 
 authRoutes.post('/register', async (c) => {
   const db = c.get('db')
-  const { name, email, password, phone, role, schoolName, childName } =
-    await c.req.json<{ name: string; email?: string; password: string; phone?: string; role?: string; schoolName?: string; childName?: string }>()
+  const { name, email, password, phone, role, schoolName, childName, className, expectedTotal } =
+    await c.req.json<{ name: string; email?: string; password: string; phone?: string; role?: string; schoolName?: string; childName?: string; className?: string; expectedTotal?: number }>()
   // Phone is the required identifier — remote soum residents may have no email.
   const normPhone = /^\d{8}$/.test((phone ?? '').trim()) ? `+976${(phone ?? '').trim()}` : (phone ?? '').trim()
   if (!name || !normPhone || !password || password.length < 6) {
@@ -119,6 +120,12 @@ authRoutes.post('/register', async (c) => {
   const [user] = await db.insert(users)
     .values({ name, email: storedEmail, role: selectedRole, phone: normPhone, passwordHash, schoolId })
     .returning()
+  // A teacher who named their class + total kids gets that class created for the
+  // current season (with expectedTotal as the coverage denominator) and scoped to them.
+  if (selectedRole === 'teacher' && schoolId && (className ?? '').trim()) {
+    const total = typeof expectedTotal === 'number' && expectedTotal > 0 ? Math.floor(expectedTotal) : null
+    await ensureTeacherClass(db, { userId: user.id, schoolId, className: className as string, expectedTotal: total }).catch(() => null)
+  }
   if (linkChildKey && linkSchoolId) {
     await db.insert(parentChildLinks)
       .values({ userId: user.id, childKey: linkChildKey, schoolId: linkSchoolId, consentAt: new Date() })
