@@ -4,13 +4,10 @@ import { useTheme } from '@/lib/ThemeContext'
 type Props = { subtitle: string }
 
 const AuthBrand = ({ subtitle }: Props) => {
-  const { colors, dark } = useTheme()
-  // RN bundles static assets via require(); these are the only two app logo variants.
-  /* eslint-disable @typescript-eslint/no-require-imports */
-  const logo = dark
-    ? require('../../assets/logoGreen.png')
-    : require('../../assets/logoBlack.png')
-  /* eslint-enable @typescript-eslint/no-require-imports */
+  const { colors } = useTheme()
+  // RN bundles static assets via require(); the green mark works on both themes.
+  /* eslint-disable-next-line @typescript-eslint/no-require-imports */
+  const logo = require('../../assets/logoGreen.png')
   return (
     <View style={s.root}>
       <View style={s.nameCol}>

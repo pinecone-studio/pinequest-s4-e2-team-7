@@ -174,7 +174,7 @@ export default function EnvelopeReveal({
         />
         {/* brand stamp on the envelope front */}
         <img
-          src="/logoBlack.png"
+          src="/logoGreen.png"
           alt="ToothLings"
           className="pointer-events-none absolute left-1/2 -translate-x-1/2 select-none"
           style={{ bottom: '11%', width: 60, opacity: 0.8, zIndex: 5 }}
