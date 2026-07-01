@@ -7,22 +7,22 @@ const pct = (n: number) => `${(n * 100).toFixed(1)}%`
 const ConfidenceBar = ({ value, className }: { value: number; className?: string }) => (
   <div className={cn('h-2 w-full overflow-hidden rounded-full bg-surface-raised', className)}>
     <div
-      className="h-full rounded-full bg-[#52A075] transition-[width] duration-700 ease-out"
+      className="h-full rounded-full bg-[#0e9594] transition-[width] duration-700 ease-out"
       style={{ width: `${Math.min(100, Math.round(value * 100))}%` }}
     />
   </div>
 )
 
 const MaxConfidenceCard = ({ item }: { item: ConfidenceItem }) => (
-  <div className="rounded-2xl border border-[#52A075]/40 bg-[#52A075]/10 p-5">
-    <p className="text-[11px] font-bold uppercase tracking-wide text-[#3B8C5E] dark:text-primary">
+  <div className="rounded-2xl border border-[#0e9594]/40 bg-[#0e9594]/10 p-5">
+    <p className="text-[11px] font-bold uppercase tracking-wide text-[#0b7a79] dark:text-primary">
       Хамгийн өндөр магадлал
     </p>
     <p className="mt-1.5 font-mono text-[34px] font-bold leading-none tabular-nums text-text-base">
       {pct(item.confidence)}
     </p>
     <p className="mt-2 text-[14px] font-medium text-text-base">{item.label}</p>
-    <ConfidenceBar value={item.confidence} className="mt-3 bg-[#52A075]/20" />
+    <ConfidenceBar value={item.confidence} className="mt-3 bg-[#0e9594]/20" />
   </div>
 )
 

@@ -34,6 +34,8 @@ export const teacherClassCreateSchema = z.object({
   name: z.string().min(1),
   seasonId: z.string().min(1),
   gradeLevel: z.number().int().positive().optional(),
+  /** Planned class size — the coverage denominator (Хамрагдсан/Үлдсэн). */
+  expectedTotal: z.number().int().positive().optional(),
   scheduledAt: z.string().optional(),
   reminderPhone: z.string().min(6).optional(),
   students: z.array(teacherRosterRowSchema).max(100),

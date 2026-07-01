@@ -7,7 +7,7 @@
 // added, copy this file verbatim into apps/mobile and consume the same values.
 //
 // Palette intentionally stays on the shipping ToothLings system: brand green
-// (#52A075) accent on a deep warm-ink field — NOT a new orange/gold scale.
+// (#0e9594) accent on a deep warm-ink field — NOT a new orange/gold scale.
 // ─────────────────────────────────────────────────────────────────────────
 
 /** Closed-mouth field + glow + wordmark colors (mirror of the green brand). */
@@ -18,12 +18,12 @@ export const INTRO = {
   base2: '#1B1712',
   base3: '#241E14',
   // brand-green inner-lip glow (the deliberate accent — rim only, never a flood).
-  glow: '#52A075',
-  glowHi: '#62D094',
-  glowSoft: 'rgba(82, 160, 117, 0.55)',
+  glow: '#0e9594',
+  glowHi: '#15b8ab',
+  glowSoft: 'rgba(14, 149, 148, 0.55)',
   // revealed wordmark
   tooth: '#FFFFFF',
-  lings: '#52A075',
+  lings: '#0e9594',
   // next-screen surface — the landing field is already black, so the hand-off is seamless.
   next: '#000000',
 } as const

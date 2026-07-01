@@ -82,7 +82,7 @@ const RecentScreeningsTable = ({ screenings, loading }: Props) => {
                 ? <StatusPill tone="synced">Хадгалагдсан</StatusPill>
                 : <StatusPill tone="pending" pulse>Хүлээгдэж буй</StatusPill>}
               <div className="flex items-center gap-2">
-                {c === null ? <span className="text-[12px] text-text-muted">—</span> : (
+                {c === null ? <span className="rounded-full bg-surface-raised px-2 py-0.5 text-[11px] font-medium text-text-muted">0 илрэл</span> : (
                   <>
                     <span className="h-1.5 w-12 overflow-hidden rounded-full bg-surface-raised">
                       <span className="block h-full rounded-full" style={{ width: `${c}%`, background: 'linear-gradient(90deg, var(--color-primary), var(--color-brand-accent))' }} />

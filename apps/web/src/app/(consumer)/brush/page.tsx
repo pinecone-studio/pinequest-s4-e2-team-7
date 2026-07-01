@@ -64,7 +64,7 @@ const InstructionsPanel = () => (
           href={`https://youtu.be/${BRUSH_VIDEO_ID}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 inline-flex items-center gap-1 text-[12px] font-semibold text-[#3B8C5E] hover:underline"
+          className="mt-2 inline-flex items-center gap-1 text-[12px] font-semibold text-[#0b7a79] hover:underline"
         >
           YouTube дээр нээх <ArrowUpRightIcon className="size-3.5" />
         </a>
@@ -203,7 +203,7 @@ const MonitorPanel = () => {
           <p className="text-[13px] text-slate-500">Зорилт 02:00 (бодит хөдөлгөөн)</p>
           <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#E8E8E8]">
             <div
-              className="h-full rounded-full bg-[#52A075] transition-all"
+              className="h-full rounded-full bg-[#0e9594] transition-all"
               style={{ width: `${Math.min(100, (activeSeconds / SESSION_TARGET_SECONDS) * 100)}%` }}
             />
           </div>
@@ -218,7 +218,7 @@ const MonitorPanel = () => {
         {!running ? (
           <Button
             size="lg"
-            className="w-full rounded-full bg-[#52A075] text-slate-900 hover:bg-[#3B8C5E]"
+            className="w-full rounded-full bg-[#0e9594] text-white hover:bg-[#0b7a79]"
             onClick={start}
           >
             Эхлэх
@@ -231,7 +231,7 @@ const MonitorPanel = () => {
 
         <Link
           href={ROUTES.profile.history}
-          className="flex items-center justify-center gap-1 text-center text-[12px] font-semibold text-[#3B8C5E] hover:underline"
+          className="flex items-center justify-center gap-1 text-center text-[12px] font-semibold text-[#0b7a79] hover:underline"
         >
           Түүх <ArrowRightIcon className="size-3.5" />
         </Link>

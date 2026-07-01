@@ -12,7 +12,9 @@ const fmtDate = (iso: string) =>
   new Date(iso).toLocaleString('mn-MN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 
 const ClassListRow = ({ row, onSchedule }: Props) => {
-  const pct = row.enrolled > 0 ? Math.round((row.screened / row.enrolled) * 100) : 0
+  // Denominator = planned class size (Нийт хүүхэд), falling back to roster size.
+  const total = row.expectedTotal ?? row.enrolled
+  const pct = total > 0 ? Math.round((row.screened / total) * 100) : 0
 
   return (
     <li className="grow flex items-center gap-3 blob border border-border bg-surface px-4 py-3 shadow-(--shadow-card) hover:shadow-(--shadow-card-lg)">
@@ -22,7 +24,7 @@ const ClassListRow = ({ row, onSchedule }: Props) => {
         </span>
         <span className="flex flex-wrap items-center gap-2 text-[11px] text-text-muted">
           <span className="inline-flex items-center gap-1">
-            <UsersIcon className="size-3.5" /> {row.screened}/{row.enrolled} хамрагдсан ({pct}%)
+            <UsersIcon className="size-3.5" /> {row.screened}/{total} хамрагдсан ({pct}%)
           </span>
           {row.scheduledAt && (
             <span className="inline-flex items-center gap-1 rounded-full bg-primary-subtle px-2 py-0.5 font-medium text-primary">

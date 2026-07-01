@@ -20,7 +20,7 @@ export const PageHeader = ({ title, subtitle, backHref, breadcrumbs, eyebrow }: 
             <span key={i} className="flex items-center gap-1">
               {i > 0 ? <ChevronRightIcon className="size-3" /> : null}
               {crumb.href ? (
-                <Link href={crumb.href} className="transition-colors hover:text-[#52A075]">
+                <Link href={crumb.href} className="transition-colors hover:text-[#0e9594]">
                   {crumb.label}
                 </Link>
               ) : (
@@ -87,7 +87,7 @@ export const FlowCard = ({
     accent === 'dark'
       ? 'bg-slate-900 text-white hover:opacity-95'
       : accent === 'gold'
-        ? 'bg-[#52A075] text-slate-900 hover:bg-[#3B8C5E]'
+        ? 'bg-[#0e9594] text-white hover:bg-[#0b7a79]'
         : 'bg-surface text-text-base hover:bg-surface-raised'
 
   const descCls = accent === 'default' ? 'text-text-muted' : 'opacity-80'
@@ -147,7 +147,7 @@ export const StatCard = ({
     {progress !== undefined ? (
       <div className="mt-4 h-2 overflow-hidden rounded-full bg-consumer-chrome">
         <div
-          className="h-full rounded-full bg-[#52A075] transition-all"
+          className="h-full rounded-full bg-[#0e9594] transition-all"
           style={{ width: `${Math.min(100, progress)}%` }}
         />
       </div>

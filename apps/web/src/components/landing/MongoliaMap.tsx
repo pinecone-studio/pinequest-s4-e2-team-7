@@ -5,12 +5,12 @@ import { AIMAGS, type Aimag } from './mongoliaAimags'
 
 // Three-tier encoding by dental-clinic count — all on the brand green scale:
 // light mint = 5+ clinics, brand green = 1-4 (limited — referral target), deep green = none.
-const HAS = '#7BDDA8'
-const FEW = '#4DAA7C'
-const NONE = '#2C684A'
+const HAS = '#5cd6cf'
+const FEW = '#0e9594'
+const NONE = '#0a4f4e'
 const tier = (c: number): 'has' | 'few' | 'none' => (c >= 5 ? 'has' : c > 0 ? 'few' : 'none')
 const COLOR = { has: HAS, few: FEW, none: NONE }
-const TINT = { has: 'rgba(123,221,168,0.18)', few: 'rgba(77,170,124,0.18)', none: 'rgba(44,104,74,0.18)' }
+const TINT = { has: 'rgba(92,214,207,0.18)', few: 'rgba(14,149,148,0.18)', none: 'rgba(10,79,78,0.18)' }
 const BADGE = { has: 'Хангалттай тооны эмнэлэг', few: 'Цөөн тооны эмнэлэг', none: 'Шүдний эмнэлэг байхгүй' }
 const fmt = (n: number) => n.toLocaleString('en-US')
 
@@ -53,7 +53,7 @@ export const MongoliaMap = () => {
         className="relative overflow-hidden bg-[#050505] py-10"
         onMouseMove={(e) => setPos({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY })}
       >
-        <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(70% 90% at 50% 35%, rgba(82,160,117,0.16), transparent 70%)' }} />
+        <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(70% 90% at 50% 35%, rgba(14,149,148,0.16), transparent 70%)' }} />
         <svg viewBox="0 0 1000 480" className="relative mx-auto block w-full max-w-[1600px]" role="img" aria-label="Монгол улсын аймаг бүрийн шүдний эмчийн хүртээмж ба шүд цоорлын тархалт">
           <defs>
             <linearGradient id="relief" x1="0" y1="0" x2="0" y2="1">

@@ -56,8 +56,8 @@ export const ScanUploader = ({
           className={cn(
             'flex min-h-[320px] w-full flex-1 flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed p-10 text-center transition-all duration-200',
             dragOver
-              ? 'border-[#52A075] bg-[#52A075]/10'
-              : 'border-border bg-surface-raised hover:border-[#52A075]/50 hover:bg-[#52A075]/5',
+              ? 'border-[#0e9594] bg-[#0e9594]/10'
+              : 'border-border bg-surface-raised hover:border-[#0e9594]/50 hover:bg-[#0e9594]/5',
           )}
         >
           <span className="flex size-14 items-center justify-center rounded-full bg-surface shadow-[0_4px_20px_rgba(0,0,0,0.04)]">

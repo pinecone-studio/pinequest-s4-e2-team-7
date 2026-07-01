@@ -61,6 +61,13 @@ export const addStudent = (token: string | null, classId: string, student: NewSt
     { token, method: 'POST', body: { students: [student] } },
   )
 
+/** Update a class's "total kids to evaluate" (expectedTotal) — the coverage denominator. */
+export const updateClassTotal = (token: string | null, classId: string, expectedTotal: number) =>
+  apiFetch<{ id: string; expectedTotal: number | null }>(
+    `/api/teacher/classes/${classId}`,
+    { token, method: 'PATCH', body: { expectedTotal } },
+  )
+
 /** Persist a completed screening (findings + triage + image bytes + AI summary). */
 export const saveScreening = (token: string | null, payload: ScreeningCreateInput) =>
   apiFetch<{ id: string }>('/api/screenings', { token, method: 'POST', body: payload })
