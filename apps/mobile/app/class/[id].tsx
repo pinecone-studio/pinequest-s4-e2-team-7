@@ -67,7 +67,6 @@ const ClassDetailScreen = () => {
 
   // The red child a teacher tapped to see/join their booked video call.
   const [callChild, setCallChild] = useState<RosterStatusRow | null>(null)
-  const [now, setNow] = useState(Date.now())
 
   const load = useCallback((id: string) => {
     setError(null)
@@ -78,13 +77,9 @@ const ClassDetailScreen = () => {
       .catch((err) => setError(toMongolian(err)))
   }, [])
 
-  // While the call sheet is open, tick so the "join" button flips on at the booked time.
-  useEffect(() => {
-    if (!callChild) return
-    const t = setInterval(() => setNow(Date.now()), 15_000)
-    setNow(Date.now())
-    return () => clearInterval(t)
-  }, [callChild])
+  // NOTE (testing): the 15s "now" ticker + time-gating were temporarily removed so the
+  // call button is always active. To restore, re-add a `now` state ticking here and set
+  // `canJoin` back to `!!at && now >= at.getTime()`.
 
   // Latest booked (non-cancelled) call for a child, by childKey.
   const apptFor = useCallback(
@@ -235,7 +230,9 @@ const ClassDetailScreen = () => {
               if (!callChild) return null
               const appt = apptFor(callChild.childKey)
               const at = appt ? new Date(appt.scheduledAt) : null
-              const canJoin = !!at && now >= at.getTime()
+              // TEMP (testing): always active when booked, ignoring the scheduled time.
+              // Revert to `!!at && now >= at.getTime()` to re-enable time-gating.
+              const canJoin = !!appt
               return (
                 <View style={s.callBody}>
                   <Text style={[s.callName, { color: colors.textBase }]}>
