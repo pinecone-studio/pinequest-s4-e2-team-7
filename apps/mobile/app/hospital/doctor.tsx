@@ -3,25 +3,25 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/lib/ThemeContext'
-import BackButton from '@/components/BackButton'
+import ScreenHeader from '@/components/teacher/ScreenHeader'
 
 const DoctorScreen = () => {
   const { colors } = useTheme()
-  const { name, specialty, clinic, area, avatarUrl, phone } =
-    useLocalSearchParams<{ id: string; name: string; specialty: string; clinic: string; area: string; avatarUrl: string; phone: string }>()
+  const { name, specialty, clinic, area, avatarUrl, phone, call: callParam } =
+    useLocalSearchParams<{ id: string; name: string; specialty: string; clinic: string; area: string; avatarUrl: string; phone: string; call?: string }>()
+  // Direct contact is only offered for a red (яаралтай) child; otherwise this is a
+  // browse-only profile.
+  const canCall = callParam === '1'
 
   const initials = (name ?? '?').split(' ').map((w) => w[0] ?? '').join('').toUpperCase().slice(0, 2)
   const badges = [clinic, area].filter(Boolean)
 
   const call = () => { if (phone) void Linking.openURL(`tel:${phone}`) }
-  const sms = () => { if (phone) void Linking.openURL(`sms:${phone}`) }
 
   return (
     <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
-      <View style={[s.header, { borderBottomColor: colors.border }]}>
-        <BackButton />
-        <Text style={[s.headerTitle, { color: colors.textBase }]}>Эмчийн мэдээлэл</Text>
-        <View style={s.placeholder} />
+      <View style={s.header}>
+        <ScreenHeader title="Эмчийн мэдээлэл" />
       </View>
       <ScrollView contentContainerStyle={s.content}>
         <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -45,31 +45,33 @@ const DoctorScreen = () => {
           )}
         </View>
 
-        <View style={s.actions}>
-          <TouchableOpacity
-            style={[s.btn, { backgroundColor: colors.surface, borderColor: colors.border }]}
-            onPress={sms}
-            activeOpacity={0.8}
-            disabled={!phone}
-          >
-            <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.primary} />
-            <Text style={[s.btnText, { color: colors.textBase }]}>SMS</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[s.btn, { backgroundColor: colors.primary }]}
-            onPress={call}
-            activeOpacity={0.8}
-            disabled={!phone}
-          >
-            <Ionicons name="call-outline" size={22} color={colors.primaryText} />
-            <Text style={[s.btnText, { color: colors.primaryText }]}>Утасдах</Text>
-          </TouchableOpacity>
-        </View>
-
-        {!phone && (
-          <Text style={[s.noPhone, { color: colors.textMuted }]}>
-            Энэ эмчийн утасны дугаар бүртгэгдээгүй байна.
-          </Text>
+        {canCall ? (
+          <>
+            <View style={s.actions}>
+              <TouchableOpacity
+                style={[s.btn, { backgroundColor: colors.primary }]}
+                onPress={call}
+                activeOpacity={0.8}
+                disabled={!phone}
+              >
+                <Ionicons name="call-outline" size={22} color={colors.primaryText} />
+                <Text style={[s.btnText, { color: colors.primaryText }]}>Утасдах</Text>
+              </TouchableOpacity>
+            </View>
+            {!phone && (
+              <Text style={[s.noPhone, { color: colors.textMuted }]}>
+                Энэ эмчийн утасны дугаар бүртгэгдээгүй байна.
+              </Text>
+            )}
+          </>
+        ) : (
+          <View style={[s.notice, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Ionicons name="information-circle-outline" size={20} color={colors.textMuted} />
+            <Text style={[s.noticeText, { color: colors.textMuted }]}>
+              Эмчтэй видео дуудлагаар холбогдох нь зөвхөн яаралтай эмчилгээ шаардлагатай
+              (улаан) тохиолдолд боломжтой.
+            </Text>
+          </View>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -78,9 +80,7 @@ const DoctorScreen = () => {
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1 },
-  headerTitle: { fontFamily: 'Inter_600SemiBold', fontSize: 17 },
-  placeholder: { width: 40 },
+  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 4 },
   content: { padding: 16, gap: 16 },
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 20, alignItems: 'center', gap: 10 },
   avatar: { width: 80, height: 80, borderRadius: 40 },
@@ -95,6 +95,8 @@ const s = StyleSheet.create({
   btn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 9999, borderWidth: StyleSheet.hairlineWidth },
   btnText: { fontFamily: 'Inter_600SemiBold', fontSize: 15 },
   noPhone: { textAlign: 'center', fontSize: 13, fontFamily: 'Inter_400Regular' },
+  notice: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth, padding: 14 },
+  noticeText: { flex: 1, fontSize: 13, fontFamily: 'Inter_400Regular', lineHeight: 19 },
 })
 
 export default DoctorScreen

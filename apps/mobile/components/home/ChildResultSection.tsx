@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { useTheme } from '@/lib/ThemeContext'
 import { getBoardStudents, type BoardStudent, type TriageLevel } from '@/lib/api'
+import { shortChildName } from '@/lib/childName'
 import LastScreeningCard from './LastScreeningCard'
 
 // SCREENING-not-diagnosis wording: green never claims "healthy" / "no cavities".
@@ -44,12 +45,12 @@ const ChildResultSection = () => {
         <LastScreeningCard
           date={child.screenedAt ? new Date(child.screenedAt).toLocaleDateString('mn-MN') : ''}
           triageLevel={child.latestLevel}
-          summary={`${child.lastName} ${child.firstName} · ${TRIAGE_SUMMARY[child.latestLevel]}`}
-          onPress={() => router.push('/(tabs)/history' as never)}
+          summary={`${shortChildName(child.lastName, child.firstName)} · ${TRIAGE_SUMMARY[child.latestLevel]}`}
+          onPress={() => router.push('/history' as never)}
         />
       ) : (
         <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[s.name, { color: colors.textBase }]}>{child.lastName} {child.firstName}</Text>
+          <Text style={[s.name, { color: colors.textBase }]}>{shortChildName(child.lastName, child.firstName)}</Text>
           <Text style={[s.empty, { color: colors.textDisabled }]}>Одоогоор скрининг хийгдээгүй байна</Text>
         </View>
       )}

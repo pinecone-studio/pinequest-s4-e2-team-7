@@ -22,6 +22,7 @@ const LoginScreen = () => {
   const { colors } = useTheme()
   const [mode, setMode] = useState<Mode>('login')
   const [tabsW, setTabsW] = useState(0)
+  const [sheetH, setSheetH] = useState(0)
   const slide = useRef(new Animated.Value(height)).current
   // 0 = login (left), 1 = register (right) — drives the sliding pill.
   const pill = useRef(new Animated.Value(0)).current
@@ -46,7 +47,7 @@ const LoginScreen = () => {
     <View style={[s.root, { backgroundColor: colors.bg }]}>
       {/* Fixed brand backdrop — stays put; the sheet slides up over it when the keyboard opens. */}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <SafeAreaView style={[StyleSheet.absoluteFill, s.brandWrap]}>
+        <SafeAreaView style={[StyleSheet.absoluteFill, s.brandWrap, { paddingBottom: sheetH }]}>
           <AuthBrand subtitle={'Хүүхдийн амны хөндийн байдлын хяналт ба чиглүүлэг'} />
         </SafeAreaView>
       </TouchableWithoutFeedback>
@@ -57,7 +58,12 @@ const LoginScreen = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         pointerEvents="box-none"
       >
-        <Animated.View style={[s.sheet, { backgroundColor: colors.surface, transform: [{ translateY: slide }] }]}>
+        <Animated.View
+          style={[s.sheet, { backgroundColor: colors.surface, transform: [{ translateY: slide }] }]}
+          // Anchor the brand to the login sheet only; the taller register sheet then just
+          // overlays the fixed brand (like the keyboard overlay) instead of shoving it up.
+          onLayout={(e) => mode === 'login' && setSheetH(e.nativeEvent.layout.height)}
+        >
           <View style={[s.grabber, { backgroundColor: colors.border }]} />
           <ScrollView
             contentContainerStyle={s.scroll}

@@ -6,7 +6,7 @@ import { useTheme } from '@/lib/ThemeContext'
 import { useFloatingTabBarPad } from '@/lib/tabBarLayout'
 import DoctorCard from './DoctorCard'
 
-const DoctorList = () => {
+const DoctorList = ({ canCall = false }: { canCall?: boolean }) => {
   const router = useRouter()
   const { colors } = useTheme()
   const tabBarPad = useFloatingTabBarPad()
@@ -51,6 +51,7 @@ const DoctorList = () => {
                 area: item.area ?? '',
                 avatarUrl: item.avatarUrl ?? '',
                 phone: item.phone ?? '',
+                call: canCall ? '1' : '',
               },
             })
           }

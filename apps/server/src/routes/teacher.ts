@@ -6,6 +6,7 @@ import type { LongitudinalFlag, TriageLevel } from '@pinequest/types'
 import { authorize } from '../middleware/auth.js'
 import { inChunks } from '../lib/chunk.js'
 import { hasClassScope, resolveScope } from '../lib/scopeFilter.js'
+import { findPreviousChildKey, collectAncestorKeys } from '../lib/transfer.js'
 import type { AppEnv } from '../types.js'
 
 export const teacherRoutes = new Hono<AppEnv>()
@@ -106,15 +107,20 @@ teacherRoutes.post('/classes/:classId/students', authorize('teacher', 'admin'), 
   const existing = await db.select({ rosterSlot: children.rosterSlot }).from(children).where(eq(children.classId, classId))
   let slot = existing.reduce((m, r) => Math.max(m, r.rosterSlot), 0)
 
-  const rows = body.students.map((s) => {
+  // A newly added student may be a transfer-in from another class/school. Match by a
+  // reliable guardian identifier so their prior screening history follows them.
+  const rows = await Promise.all(body.students.map(async (s) => {
     slot += 1
     return {
       classId, schoolId: klass.schoolId,
       childKey: childKey({ schoolId: klass.schoolId, className: klass.name, rosterSlot: slot, birthYear: s.birthYear }),
       firstName: s.firstName, lastName: s.lastName, birthYear: s.birthYear, rosterSlot: slot,
       gender: s.gender ?? null, guardianPhone: s.guardianPhone ?? null, guardianEmail: s.guardianEmail ?? null,
+      previousChildKey: await findPreviousChildKey(db, {
+        birthYear: s.birthYear, guardianEmail: s.guardianEmail, guardianPhone: s.guardianPhone, excludeClassId: classId,
+      }),
     }
-  })
+  }))
   await inChunks(rows, (b) => db.insert(children).values(b))
   // Return the created rows (incl. childKey + rosterSlot) so the web screening flow
   // can immediately screen a just-added child without a roster re-fetch.
@@ -137,20 +143,45 @@ teacherRoutes.get('/classes/:classId/roster-status', authorize('teacher', 'admin
   const kids = await db.select().from(children)
     .where(and(eq(children.classId, classId), eq(children.isActive, true))).orderBy(asc(children.rosterSlot))
   const keys = kids.map((k) => k.childKey)
+
+  // Current-class screenings only — this keeps carried-forward children (same childKey,
+  // new season) correctly un-screened until they're actually screened this term.
   const scr = keys.length
     ? await db.select({ childKey: screenings.childKey, triageLevel: screenings.triageLevel, capturedAt: screenings.capturedAt })
         .from(screenings).where(and(eq(screenings.classId, classId), inArray(screenings.childKey, keys)))
         .orderBy(desc(screenings.capturedAt))
     : []
+  const current = new Map<string, { level: string; capturedAt: Date }>()
+  for (const s of scr) if (!current.has(s.childKey)) current.set(s.childKey, { level: s.triageLevel, capturedAt: s.capturedAt })
 
-  const latest = new Map<string, { level: string; capturedAt: Date }>()
-  for (const s of scr) if (!latest.has(s.childKey)) latest.set(s.childKey, { level: s.triageLevel, capturedAt: s.capturedAt })
+  // Transfer-ins carry their history: walk each transferred child's lineage and pull
+  // the latest screening across ANY class for those ancestor keys.
+  const kidAncestors = new Map<string, string[]>()
+  for (const k of kids) {
+    if (k.previousChildKey) kidAncestors.set(k.id, await collectAncestorKeys(db, [k.previousChildKey]))
+  }
+  const ancestorKeys = [...new Set([...kidAncestors.values()].flat())]
+  const hist = new Map<string, { level: string; capturedAt: Date }>()
+  if (ancestorKeys.length) {
+    const rows = await db.select({ childKey: screenings.childKey, triageLevel: screenings.triageLevel, capturedAt: screenings.capturedAt })
+      .from(screenings).where(inArray(screenings.childKey, ancestorKeys)).orderBy(desc(screenings.capturedAt))
+    for (const r of rows) if (!hist.has(r.childKey)) hist.set(r.childKey, { level: r.triageLevel, capturedAt: r.capturedAt })
+  }
 
-  const data = kids.map((k) => ({
-    id: k.id, childKey: k.childKey, rosterSlot: k.rosterSlot, firstName: k.firstName, lastName: k.lastName,
-    birthYear: k.birthYear, guardianEmail: k.guardianEmail, guardianPhone: k.guardianPhone,
-    latestLevel: latest.get(k.childKey)?.level ?? null, screenedAt: latest.get(k.childKey)?.capturedAt ?? null,
-  }))
+  const data = kids.map((k) => {
+    // Best (most recent) of the current-class screening and any inherited lineage history.
+    let best = current.get(k.childKey) ?? null
+    for (const a of kidAncestors.get(k.id) ?? []) {
+      const h = hist.get(a)
+      if (h && (!best || h.capturedAt > best.capturedAt)) best = h
+    }
+    return {
+      id: k.id, childKey: k.childKey, rosterSlot: k.rosterSlot, firstName: k.firstName, lastName: k.lastName,
+      birthYear: k.birthYear, guardianEmail: k.guardianEmail, guardianPhone: k.guardianPhone,
+      latestLevel: best?.level ?? null, screenedAt: best?.capturedAt ?? null,
+      transferredIn: !!k.previousChildKey,
+    }
+  })
   return c.json({ success: true, data })
 })
 
@@ -166,11 +197,21 @@ teacherRoutes.get('/classes/:classId/history-cache', authorize('teacher', 'admin
     return c.json({ success: false, data: null, message: 'forbidden' }, 403)
   }
 
-  const kids = await db.select({ childKey: children.childKey })
+  const kids = await db.select({ childKey: children.childKey, previousChildKey: children.previousChildKey })
     .from(children).where(and(eq(children.classId, classId), eq(children.isActive, true)))
   if (!kids.length) return c.json({ success: true, data: [] })
 
-  const keys = kids.map((k) => k.childKey)
+  // Attribute every lineage key (own + transferred-in ancestors) back to the current
+  // child's childKey, so the device — which knows the child only by their current key —
+  // still sees prior-season history that happened under a different class/school.
+  const keyToChild = new Map<string, string>()
+  for (const k of kids) {
+    keyToChild.set(k.childKey, k.childKey)
+    if (k.previousChildKey) {
+      for (const a of await collectAncestorKeys(db, [k.previousChildKey])) keyToChild.set(a, k.childKey)
+    }
+  }
+  const keys = [...keyToChild.keys()]
 
   // Prior screenings only — exclude current season if specified.
   const scrConds = [inArray(screenings.childKey, keys)]
@@ -188,11 +229,12 @@ teacherRoutes.get('/classes/:classId/history-cache', authorize('teacher', 'admin
     .where(and(...scrConds))
     .orderBy(desc(screenings.capturedAt))
 
-  // Latest screening per (child, season).
-  const seasonMap = new Map<string, (typeof scrRows)[number]>()
+  // Latest screening per (current child, season) — remapping lineage keys forward.
+  const seasonMap = new Map<string, (typeof scrRows)[number] & { mappedChildKey: string }>()
   for (const r of scrRows) {
-    const k = `${r.childKey}__${r.seasonId}`
-    if (!seasonMap.has(k)) seasonMap.set(k, r)
+    const mappedChildKey = keyToChild.get(r.childKey) ?? r.childKey
+    const k = `${mappedChildKey}__${r.seasonId}`
+    if (!seasonMap.has(k)) seasonMap.set(k, { ...r, mappedChildKey })
   }
   const latestPerSeason = [...seasonMap.values()]
   if (!latestPerSeason.length) return c.json({ success: true, data: [] })
@@ -211,7 +253,7 @@ teacherRoutes.get('/classes/:classId/history-cache', authorize('teacher', 'admin
   }
 
   const data = latestPerSeason.map((r) => ({
-    childKey: r.childKey,
+    childKey: r.mappedChildKey,
     seasonId: r.seasonId,
     triageLevel: (r.confirmed ?? r.level) as TriageLevel,
     // Date-only ISO string reduces fingerprinting risk

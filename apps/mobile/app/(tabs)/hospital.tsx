@@ -21,9 +21,12 @@ const HospitalScreen = () => {
   const tabBarPad = useFloatingTabBarPad()
   const { activeRole } = useSession()
   const config = roleConfigFor(activeRole)
-  const { segment: initialSegment } = useLocalSearchParams<{ segment?: string }>()
+  const { segment: initialSegment, call } = useLocalSearchParams<{ segment?: string; call?: string }>()
   const [segment, setSegment] = useState<Segment>(initialSegment === 'map' ? 'map' : 'doctors')
   const [coords, setCoords] = useState<Coords | null>(null)
+  // Calling/chatting a doctor is allowed only for a red (яаралтай) child — the red
+  // result routes here with call=1. Otherwise the doctors are browse-only.
+  const canCall = call === '1'
 
   const requestLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync()
@@ -49,7 +52,7 @@ const HospitalScreen = () => {
       <Text style={[s.pageTitle, { color: colors.textBase }]}>{config.tabs.hospitalLabel}</Text>
       <SegmentTabs active={segment} onChange={setSegment} />
       {segment === 'doctors' ? (
-        <DoctorList />
+        <DoctorList canCall={canCall} />
       ) : coords ? (
         <ClinicMapView userLat={coords.lat} userLng={coords.lng} />
       ) : (

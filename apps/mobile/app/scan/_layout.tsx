@@ -12,18 +12,12 @@ export default function ScanLayout() {
         headerShadowVisible: true,
       }}
     >
-      <Stack.Screen
-        name="index"
-        options={{ title: 'Хэрэглэгчийн мэдээлэл', headerBackTitle: 'Буцах' }}
-      />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen
         name="consent"
         options={{ title: 'Зөвшөөрөл', headerBackTitle: 'Буцах' }}
       />
-      <Stack.Screen
-        name="questionnaire"
-        options={{ title: 'Асуумж', headerBackTitle: 'Буцах' }}
-      />
+      <Stack.Screen name="questionnaire" options={{ headerShown: false }} />
       <Stack.Screen
         name="camera"
         options={{ title: 'Зураг авах', headerShown: false }}

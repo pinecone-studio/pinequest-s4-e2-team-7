@@ -8,6 +8,7 @@ import {
   RefreshControl,
   Modal,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   StyleSheet,
 } from 'react-native'
@@ -16,8 +17,10 @@ import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams, useFocusEffect } from 'expo-router'
 import { seasonLabelMn } from '@pinequest/core'
 import { useTheme } from '@/lib/ThemeContext'
-import { getClass, getRosterStatus, addStudents, type ClassMeta, type RosterStatusRow, type RosterAppendInput } from '@/lib/api'
+import { getClass, getRosterStatus, addStudents, getAppointments, type ClassMeta, type RosterStatusRow, type RosterAppendInput, type AppointmentListItem } from '@/lib/api'
 import { toMongolian } from '@/lib/errorMessages'
+import { shortChildName } from '@/lib/childName'
+import { slotLabel } from '@/lib/appointmentSlots'
 import ScreenHeader from '@/components/teacher/ScreenHeader'
 import CoverageBar from '@/components/teacher/CoverageBar'
 import TriageBadge from '@/components/teacher/TriageBadge'
@@ -53,6 +56,7 @@ const ClassDetailScreen = () => {
   const { id, add } = useLocalSearchParams<{ id: string; add?: string }>()
   const [meta, setMeta] = useState<ClassMeta | null>(null)
   const [roster, setRoster] = useState<RosterStatusRow[] | null>(null)
+  const [appts, setAppts] = useState<AppointmentListItem[]>([])
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
@@ -61,12 +65,35 @@ const ClassDetailScreen = () => {
   const [saving, setSaving] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
 
+  // The red child a teacher tapped to see/join their booked video call.
+  const [callChild, setCallChild] = useState<RosterStatusRow | null>(null)
+  const [now, setNow] = useState(Date.now())
+
   const load = useCallback((id: string) => {
     setError(null)
+    // Appointments are best-effort (the join card); don't fail the roster on them.
+    getAppointments().then(setAppts).catch(() => setAppts([]))
     return Promise.all([getClass(id), getRosterStatus(id)])
       .then(([m, r]) => { setMeta(m); setRoster(r) })
       .catch((err) => setError(toMongolian(err)))
   }, [])
+
+  // While the call sheet is open, tick so the "join" button flips on at the booked time.
+  useEffect(() => {
+    if (!callChild) return
+    const t = setInterval(() => setNow(Date.now()), 15_000)
+    setNow(Date.now())
+    return () => clearInterval(t)
+  }, [callChild])
+
+  // Latest booked (non-cancelled) call for a child, by childKey.
+  const apptFor = useCallback(
+    (childKey: string): AppointmentListItem | null =>
+      appts
+        .filter((a) => a.childKey === childKey && a.status !== 'cancelled')
+        .sort((a, b) => b.scheduledAt.localeCompare(a.scheduledAt))[0] ?? null,
+    [appts],
+  )
 
   useFocusEffect(useCallback(() => { void load(id); return () => {} }, [id, load]))
 
@@ -143,13 +170,29 @@ const ClassDetailScreen = () => {
           {roster && roster.length === 0 ? (
             <Text style={[s.muted, { color: colors.textMuted }]}>Энэ ангид сурагч бүртгэгдээгүй байна.</Text>
           ) : (
-            roster?.map((r) => (
-              <View key={r.id} style={[s.row, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                <Text style={[s.slot, { color: colors.textMuted }]}>{r.rosterSlot}</Text>
-                <Text style={[s.name, { color: colors.textBase }]} numberOfLines={1}>{r.lastName} {r.firstName}</Text>
-                <TriageBadge level={r.latestLevel} />
-              </View>
-            ))
+            roster?.map((r) => {
+              const isRed = r.latestLevel === 'red'
+              return (
+                <TouchableOpacity
+                  key={r.id}
+                  style={[s.row, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                  activeOpacity={isRed ? 0.7 : 1}
+                  onPress={isRed ? () => setCallChild(r) : undefined}
+                  disabled={!isRed}
+                >
+                  <Text style={[s.slot, { color: colors.textMuted }]}>{r.rosterSlot}</Text>
+                  <Text style={[s.name, { color: colors.textBase }]} numberOfLines={1}>{shortChildName(r.lastName, r.firstName)}</Text>
+                  {r.transferredIn ? (
+                    <View style={[s.transferTag, { backgroundColor: colors.primary + '22' }]}>
+                      <Ionicons name="swap-horizontal" size={12} color={colors.primary} />
+                      <Text style={[s.transferTagText, { color: colors.primary }]}>Шилжсэн</Text>
+                    </View>
+                  ) : null}
+                  {isRed ? <Ionicons name="videocam" size={16} color={colors.triageRedText} /> : null}
+                  <TriageBadge level={r.latestLevel} />
+                </TouchableOpacity>
+              )
+            })
           )}
         </ScrollView>
       )}
@@ -176,6 +219,64 @@ const ClassDetailScreen = () => {
               </ScrollView>
             </View>
           </KeyboardAvoidingView>
+        </View>
+      </Modal>
+
+      <Modal visible={!!callChild} transparent animationType="slide" onRequestClose={() => setCallChild(null)}>
+        <View style={s.backdrop}>
+          <View style={[s.callSheet, { backgroundColor: colors.bg }]}>
+            <View style={s.sheetHead}>
+              <Text style={[s.sheetTitle, { color: colors.textBase }]}>Яаралтай эмчилгээ</Text>
+              <TouchableOpacity onPress={() => setCallChild(null)} hitSlop={8}>
+                <Ionicons name="close" size={24} color={colors.textMuted} />
+              </TouchableOpacity>
+            </View>
+            {(() => {
+              if (!callChild) return null
+              const appt = apptFor(callChild.childKey)
+              const at = appt ? new Date(appt.scheduledAt) : null
+              const canJoin = !!at && now >= at.getTime()
+              return (
+                <View style={s.callBody}>
+                  <Text style={[s.callName, { color: colors.textBase }]}>
+                    {shortChildName(callChild.lastName, callChild.firstName)}
+                  </Text>
+                  {appt && at ? (
+                    <>
+                      <View style={[s.timeRow, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                        <Ionicons name="time-outline" size={18} color={colors.textMuted} />
+                        <View style={s.timeInfo}>
+                          <Text style={[s.timeLabel, { color: colors.textMuted }]}>Товлосон цаг</Text>
+                          <Text style={[s.timeValue, { color: colors.textBase }]}>{slotLabel(at)}</Text>
+                        </View>
+                        {appt.dentistName ? (
+                          <Text style={[s.dentist, { color: colors.textMuted }]} numberOfLines={1}>{appt.dentistName}</Text>
+                        ) : null}
+                      </View>
+                      <TouchableOpacity
+                        style={[s.callBtn, { backgroundColor: canJoin ? colors.triageRedText : colors.surfaceRaised, borderColor: colors.border }]}
+                        onPress={() => canJoin && Linking.openURL(appt.roomUrl)}
+                        disabled={!canJoin}
+                        activeOpacity={0.85}
+                      >
+                        <Ionicons name="videocam" size={18} color={canJoin ? '#fff' : colors.textDisabled} />
+                        <Text style={[s.callBtnText, { color: canJoin ? '#fff' : colors.textDisabled }]}>Дуудлага хийх</Text>
+                      </TouchableOpacity>
+                      {!canJoin ? (
+                        <Text style={[s.callHint, { color: colors.textMuted }]}>
+                          Товлосон цаг болмогц “Дуудлага хийх” идэвхжинэ.
+                        </Text>
+                      ) : null}
+                    </>
+                  ) : (
+                    <Text style={[s.callHint, { color: colors.textMuted }]}>
+                      Энэ хүүхдэд видео дуудлагын цаг захиалаагүй байна. Скрининг дуусмагц эмчтэй цаг захиална.
+                    </Text>
+                  )}
+                </View>
+              )
+            })()}
+          </View>
         </View>
       </Modal>
     </SafeAreaView>
@@ -206,6 +307,8 @@ const s = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14, paddingVertical: 12 },
   slot: { fontSize: 13, fontFamily: 'Inter_600SemiBold', width: 22 },
   name: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium' },
+  transferTag: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 9999 },
+  transferTagText: { fontSize: 11, fontFamily: 'Inter_600SemiBold' },
   muted: { fontSize: 14, fontFamily: 'Inter_400Regular', textAlign: 'center' },
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
   sheetWrap: { maxHeight: '88%' },
@@ -214,6 +317,17 @@ const s = StyleSheet.create({
   sheetTitle: { fontSize: 18, fontFamily: 'Inter_700Bold' },
   sheetScroll: { padding: 20, paddingTop: 4, gap: 16, paddingBottom: 32 },
   error: { fontSize: 13, fontFamily: 'Inter_500Medium' },
+  callSheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingTop: 18, paddingBottom: 32 },
+  callBody: { paddingHorizontal: 20, paddingTop: 4, gap: 14 },
+  callName: { fontSize: 20, fontFamily: 'Inter_700Bold' },
+  timeRow: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth, padding: 14 },
+  timeInfo: { flex: 1, gap: 2 },
+  timeLabel: { fontSize: 11, fontFamily: 'Inter_500Medium' },
+  timeValue: { fontSize: 16, fontFamily: 'Inter_700Bold' },
+  dentist: { fontSize: 12, fontFamily: 'Inter_500Medium', flexShrink: 1 },
+  callBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 50, borderRadius: 9999, borderWidth: StyleSheet.hairlineWidth },
+  callBtnText: { fontSize: 15, fontFamily: 'Inter_700Bold' },
+  callHint: { fontSize: 13, fontFamily: 'Inter_400Regular', textAlign: 'center', lineHeight: 19 },
 })
 
 export default ClassDetailScreen

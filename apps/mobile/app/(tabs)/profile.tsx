@@ -59,7 +59,7 @@ const ProfileScreen = () => {
               date={new Date(latest.capturedAt).toLocaleDateString('mn-MN')}
               triageLevel={level}
               summary={TRIAGE_SUMMARY[level]}
-              onPress={() => router.push('/(tabs)/history' as never)}
+              onPress={() => router.push('/history' as never)}
             />
           )
         })()}

@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { and, asc, count, desc, eq, inArray } from 'drizzle-orm'
 import { childKey } from '@pinequest/core'
-import { schoolClasses, children, screenings } from '@pinequest/db/d1'
+import { schoolClasses, children, screenings, userScopes } from '@pinequest/db/d1'
 import { authenticate, authorize } from '../middleware/auth.js'
 import { hasClassScope } from '../lib/scopeFilter.js'
 import { inChunks } from '../lib/chunk.js'
@@ -66,21 +66,41 @@ classRoutes.patch('/classes/:classId/schedule', authorize('teacher', 'screener',
   return c.json({ success: true, data: updated })
 })
 
-classRoutes.post('/classes/:classId/carry-forward', authorize('screener', 'admin'), async (c) => {
+classRoutes.post('/classes/:classId/carry-forward', authorize('teacher', 'screener', 'admin'), async (c) => {
   const db = c.get('db')
+  const payload = c.get('jwtPayload')
   const source = await db.query.schoolClasses.findFirst({ where: eq(schoolClasses.id, c.req.param('classId')) })
   if (!source) return c.json({ success: false, data: null }, 404)
-  const { newSeasonId, newName, scheduledAt, reminderPhone } =
-    await c.req.json<{ newSeasonId: string; newName?: string; scheduledAt?: string | null; reminderPhone?: string | null }>()
+  // Teachers may only carry forward a class they own.
+  if (payload.role === 'teacher' && !(await hasClassScope(db, payload, source.id))) {
+    return c.json({ success: false, data: null, message: 'forbidden' }, 403)
+  }
+  const { newSeasonId, newName, scheduledAt, reminderPhone, excludeChildKeys } =
+    await c.req.json<{ newSeasonId: string; newName?: string; scheduledAt?: string | null; reminderPhone?: string | null; excludeChildKeys?: string[] }>()
 
-  const sourceChildren = await db.select().from(children)
+  const allChildren = await db.select().from(children)
     .where(and(eq(children.classId, source.id), eq(children.isActive, true)))
+  // Children the teacher marked transferred-out don't roll forward; their record is
+  // kept (history preserved) and stamped transferredAt — never deleted.
+  const excluded = new Set(excludeChildKeys ?? [])
+  const sourceChildren = allChildren.filter((ch) => !excluded.has(ch.childKey))
+  if (excluded.size) {
+    await db.update(children).set({ transferredAt: new Date() })
+      .where(and(eq(children.classId, source.id), inArray(children.childKey, [...excluded])))
+  }
 
   const [created] = await db.insert(schoolClasses).values({
     schoolId: source.schoolId, name: newName ?? source.name, seasonId: newSeasonId, gradeLevel: source.gradeLevel,
     expectedTotal: source.expectedTotal, sourceClassId: source.id,
     scheduledAt: scheduledAt ? new Date(scheduledAt) : null, reminderPhone: reminderPhone ?? null,
   }).returning()
+
+  // The teacher owns the carried-forward class too, so grant class scope.
+  if (payload.role === 'teacher') {
+    await db.insert(userScopes)
+      .values({ userId: payload.sub, scopeKind: 'class', scopeId: created.id, grantedBy: payload.sub })
+      .onConflictDoNothing()
+  }
 
   await inChunks(sourceChildren.map((ch) => ({
     classId: created.id, schoolId: source.schoolId,

@@ -42,6 +42,16 @@ export const children = sqliteTable('Child', {
   gender: text('gender'),
   guardianPhone: text('guardianPhone'),
   guardianEmail: text('guardianEmail'),
+  /**
+   * When this child is the same person as a prior record in another class/school
+   * (a transfer-in, matched by guardian contact + birth year), this links to that
+   * record's childKey so their screening history follows them. Chains across
+   * multiple transfers. childKey itself is unchanged (Fixed Decision #2).
+   */
+  previousChildKey: text('previousChildKey'),
+  /** Set when a child is marked transferred-out during carry-forward: the record is
+   *  kept (history preserved) but is NOT copied into the next season. */
+  transferredAt: ts('transferredAt'),
   consentObtained: integer('consentObtained', { mode: 'boolean' }).notNull().default(false),
   consentAt: ts('consentAt'),
   isActive: integer('isActive', { mode: 'boolean' }).notNull().default(true),
@@ -51,4 +61,5 @@ export const children = sqliteTable('Child', {
   uniqueIndex('Child_class_childKey_key').on(t.classId, t.childKey),
   index('Child_childKey_idx').on(t.childKey),
   index('Child_schoolId_idx').on(t.schoolId),
+  index('Child_previousChildKey_idx').on(t.previousChildKey),
 ])

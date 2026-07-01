@@ -20,7 +20,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "org.name.PineQuest",
       "infoPlist": {
-        "NSCameraUsageDescription": "Хүүхдийн шүдийг скрининг хийхэд камер ашиглана."
+        "NSCameraUsageDescription": "Хүүхдийн шүдийг скрининг хийхэд камер ашиглана.",
+        "NSMicrophoneUsageDescription": "Эмчтэй видео дуудлага хийхэд микрофон ашиглана."
       }
     },
     "android": {

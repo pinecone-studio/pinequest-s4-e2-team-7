@@ -60,7 +60,7 @@ const NewClassScreen = () => {
         scheduledAt: date ? date.toISOString() : undefined,
         students: students ?? [],
       })
-      router.replace('/(tabs)/classes')
+      router.replace('/classes')
     } catch (err) {
       setError(toMongolian(err))
     } finally {

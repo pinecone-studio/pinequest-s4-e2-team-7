@@ -1,29 +1,27 @@
 import { useState } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { seasonsForYear, seasonLabelMn } from '@pinequest/core'
 import { useTheme } from '@/lib/ThemeContext'
 
+export type DropdownOption = { value: string; label: string }
+
 type Props = {
-  value: string
-  onChange: (seasonId: string) => void
-  /** Fallback option source: this year + next. Ignored when `options` is given. */
-  year?: number
-  /** Explicit season list (e.g. distinct seasons from the server), newest first. */
-  options?: string[]
+  value: string | null
+  options: DropdownOption[]
+  onChange: (value: string) => void
+  icon?: React.ComponentProps<typeof Ionicons>['name']
+  placeholder?: string
 }
 
-/** Inline dropdown of seasons. Tapping the field floats the options directly below it
- *  (no separate dialog) and overlays the content instead of pushing it down. Uses the
- *  server-provided `options` when given, otherwise the screenable seasons for `year`. */
-const SeasonPicker = ({ value, onChange, year, options: optionsProp }: Props) => {
+/** A compact inline dropdown: tapping the pill floats the options right below it,
+ *  overlaying content (no separate dialog). Shared by the season/class selectors. */
+const InlineDropdown = ({ value, options, onChange, icon, placeholder }: Props) => {
   const { colors } = useTheme()
   const [open, setOpen] = useState(false)
-  const fallbackYear = year ?? new Date().getFullYear()
-  const options = optionsProp ?? [...seasonsForYear(fallbackYear), ...seasonsForYear(fallbackYear + 1)]
+  const current = options.find((o) => o.value === value)
 
-  const select = (id: string) => {
-    onChange(id)
+  const select = (v: string) => {
+    onChange(v)
     setOpen(false)
   }
 
@@ -34,19 +32,21 @@ const SeasonPicker = ({ value, onChange, year, options: optionsProp }: Props) =>
         onPress={() => setOpen((v) => !v)}
         activeOpacity={0.7}
       >
-        <Ionicons name="calendar-outline" size={16} color={colors.textMuted} />
-        <Text style={[s.fieldLabel, { color: colors.textBase }]}>{seasonLabelMn(value)}</Text>
+        {icon ? <Ionicons name={icon} size={16} color={colors.textMuted} /> : null}
+        <Text style={[s.fieldLabel, { color: current ? colors.textBase : colors.textMuted }]} numberOfLines={1}>
+          {current?.label ?? placeholder ?? ''}
+        </Text>
         <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color={colors.textMuted} />
       </TouchableOpacity>
 
       {open ? (
         <View style={[s.menu, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          {options.map((id) => {
-            const active = id === value
+          {options.map((o) => {
+            const active = o.value === value
             return (
-              <TouchableOpacity key={id} style={s.item} onPress={() => select(id)} activeOpacity={0.7}>
-                <Text style={[s.itemLabel, { color: active ? colors.primary : colors.textBase }]}>
-                  {seasonLabelMn(id)}
+              <TouchableOpacity key={o.value} style={s.item} onPress={() => select(o.value)} activeOpacity={0.7}>
+                <Text style={[s.itemLabel, { color: active ? colors.primary : colors.textBase }]} numberOfLines={1}>
+                  {o.label}
                 </Text>
                 {active ? <Ionicons name="checkmark" size={18} color={colors.primary} /> : null}
               </TouchableOpacity>
@@ -59,7 +59,7 @@ const SeasonPicker = ({ value, onChange, year, options: optionsProp }: Props) =>
 }
 
 const s = StyleSheet.create({
-  wrap: { alignSelf: 'flex-start', minWidth: 200, zIndex: 100 },
+  wrap: { flex: 1, zIndex: 100 },
   field: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -71,7 +71,6 @@ const s = StyleSheet.create({
   },
   fieldLabel: { flex: 1, fontSize: 14, fontFamily: 'Inter_600SemiBold' },
   menu: {
-    // Float below the field, overlaying content rather than pushing it down.
     position: 'absolute',
     top: '100%',
     left: 0,
@@ -95,7 +94,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  itemLabel: { fontSize: 15, fontFamily: 'Inter_500Medium' },
+  itemLabel: { flex: 1, fontSize: 15, fontFamily: 'Inter_500Medium' },
 })
 
-export default SeasonPicker
+export default InlineDropdown

@@ -133,7 +133,14 @@ const Stat = ({
 }) => (
   <View style={[s.stat, { backgroundColor: tile }]}>
     <Text style={[s.statValue, { color: text }]}>{value}</Text>
-    <Text style={[s.statLabel, { color: text }]}>{label}</Text>
+    <Text
+      style={[s.statLabel, { color: text }]}
+      numberOfLines={2}
+      adjustsFontSizeToFit
+      minimumFontScale={0.7}
+    >
+      {label}
+    </Text>
   </View>
 )
 

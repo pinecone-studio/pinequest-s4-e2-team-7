@@ -18,12 +18,16 @@ export const apiFetch = async <T>(path: string, opts?: RequestInit): Promise<T> 
   const extra = await authHeader()
   const res = await fetch(`${BASE}${path}`, {
     ...opts,
+    // Never serve a cached GET on web (Safari caches them): after a mutation the
+    // refetch must return fresh data, or the UI shows stale values. `cache` isn't in
+    // React Native's RequestInit typing, so widen it.
+    cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
       ...extra,
       ...(opts?.headers as Record<string, string> | undefined),
     },
-  })
+  } as RequestInit & { cache: string })
   const json = (await res.json()) as { success: boolean; data: T; message?: string }
   if (!res.ok) throw new Error(json.message ?? String(res.status))
   return json.data
@@ -56,6 +60,8 @@ export type RosterStatusRow = {
   guardianPhone: string | null
   latestLevel: TriageLevel | null
   screenedAt: string | null
+  /** True when this child was matched as a transfer-in — prior history follows them. */
+  transferredIn?: boolean
 }
 
 export type RosterStudentInput = {
@@ -188,6 +194,18 @@ export const addStudents = (classId: string, students: RosterAppendInput[]) =>
 export const getRosterStatus = (classId: string) =>
   apiFetch<RosterStatusRow[]>(`/api/teacher/classes/${classId}/roster-status`)
 
+/** Carry a class's roster into a new season as a fresh, un-screened class.
+ *  `excludeChildKeys` are transferred-out students who don't roll forward. */
+export const carryForwardClass = (
+  classId: string,
+  newSeasonId: string,
+  opts?: { newName?: string; excludeChildKeys?: string[] },
+) =>
+  apiFetch<TeacherClass>(`/api/classes/${classId}/carry-forward`, {
+    method: 'POST',
+    body: JSON.stringify({ newSeasonId, newName: opts?.newName, excludeChildKeys: opts?.excludeChildKeys }),
+  })
+
 export const updateSchedule = (classId: string, scheduledAt: string | null, reminderPhone?: string | null) =>
   apiFetch<TeacherClass>(`/api/classes/${classId}/schedule`, {
     method: 'PATCH',
@@ -319,6 +337,23 @@ export const createAppointment = (
     method: 'POST',
     body: JSON.stringify({ dentistId, childKey, scheduledAt, level }),
   })
+
+/** Appointments the current user booked (or, for a dentist, booked with them),
+ *  including the dentist's post-call note. Powers the note shown in Дүгнэлт. */
+export type AppointmentListItem = {
+  id: string
+  childKey: string
+  childName: string | null
+  dentistId: string
+  dentistName: string | null
+  level: 'red' | 'yellow'
+  scheduledAt: string
+  status: 'scheduled' | 'completed' | 'cancelled'
+  note: string | null
+  roomUrl: string
+}
+
+export const getAppointments = () => apiFetch<AppointmentListItem[]>('/api/appointments')
 
 export type AnalyzeMeta = {
   childKey: string

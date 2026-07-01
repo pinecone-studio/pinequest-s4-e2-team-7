@@ -42,21 +42,15 @@ export const isModelCached = async (): Promise<boolean> => {
   return info.exists && (info as { size?: number }).size! > 1_000_000
 }
 
-export const downloadModel = async (
-  modelUrl: string,
-  onProgress?: (pct: number) => void,
-): Promise<void> => {
+export const downloadModel = async (modelUrl: string): Promise<void> => {
   // No native runtime to load the file into (e.g. Expo Go) — skip the download.
   if (!isOnnxAvailable) return
   if (await isModelCached()) return
-  const dl = FileSystem.createDownloadResumable(
-    modelUrl,
-    MODEL_PATH,
-    {},
-    ({ totalBytesWritten, totalBytesExpectedToWrite }) =>
-      onProgress?.(totalBytesWritten / (totalBytesExpectedToWrite || 1)),
-  )
-  await dl.downloadAsync()
+  // Plain downloadAsync (no progress callback): passing a progress callback wires up
+  // expo-file-system's native download-progress event emitter, which floods the log
+  // with "Unable to send an event 'expo-file-system.downloadProgress' … runtime is
+  // not available" for every chunk. No caller uses progress, so we skip it.
+  await FileSystem.downloadAsync(modelUrl, MODEL_PATH)
   // Reset session so next run loads the new file
   _session = null
 }

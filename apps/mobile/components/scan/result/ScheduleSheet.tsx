@@ -1,8 +1,19 @@
 import { useMemo, useState } from 'react'
-import { Modal, View, Text, TouchableOpacity, ActivityIndicator, Linking, StyleSheet } from 'react-native'
+import { Modal, View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/lib/ThemeContext'
+import type { ColorTokens } from '@/lib/theme'
 import { buildSlots, slotLabel } from '@/lib/appointmentSlots'
 import { createAppointment, type VolunteerDentist, type Appointment } from '@/lib/api'
+
+const Step = ({ colors, icon, text }: { colors: ColorTokens; icon: React.ComponentProps<typeof Ionicons>['name']; text: string }) => (
+  <View style={s.step}>
+    <View style={[s.stepIcon, { backgroundColor: colors.primarySoft }]}>
+      <Ionicons name={icon} size={18} color={colors.primary} />
+    </View>
+    <Text style={[s.stepText, { color: colors.textBase }]}>{text}</Text>
+  </View>
+)
 
 type Props = { dentist: VolunteerDentist | null; childKey: string; onClose: () => void }
 
@@ -65,18 +76,24 @@ const ScheduleSheet = ({ dentist, childKey, onClose }: Props) => {
           )}
           {appt && (
             <>
-              <Text style={[s.title, { color: colors.textBase }]}>Цаг баталгаажлаа ✅</Text>
-              <Text style={[s.sub, { color: colors.textMuted }]}>
+              <View style={[s.successIcon, { backgroundColor: colors.triageGreenBg }]}>
+                <Ionicons name="checkmark" size={30} color={colors.triageGreenText} />
+              </View>
+              <Text style={[s.title, s.centered, { color: colors.textBase }]}>Амжилттай цаг захиаллаа</Text>
+              <Text style={[s.sub, s.centered, { color: colors.textMuted }]}>
                 {dentist?.displayName} · {slotLabel(new Date(appt.scheduledAt))}
               </Text>
-              <TouchableOpacity style={[s.cta, { backgroundColor: colors.triageRedText }]} onPress={() => Linking.openURL(appt.roomUrl)}>
-                <Text style={[s.ctaText, { color: '#fff' }]}>🎥 Видео дуудлага эхлүүлэх</Text>
-              </TouchableOpacity>
-              <Text style={[s.note, { color: colors.textMuted }]}>Дуудлага шифрлэгдсэн. Эмчид зургаа хуваалцана.</Text>
+
+              <Text style={[s.onboardLead, { color: colors.textMuted }]}>Эмчтэй дуудлага хийхийн тулд:</Text>
+              <View style={s.steps}>
+                <Step colors={colors} icon="school-outline" text="Анги хэсэг рүү буцна" />
+                <Step colors={colors} icon="finger-print-outline" text="Сурагчийнхаа нэрэн дээр дарна" />
+                <Step colors={colors} icon="videocam-outline" text="Товлосон цаг болмогц “Дуудлага хийх” идэвхжиж, эмчтэй шууд холбогдоно" />
+              </View>
             </>
           )}
           <TouchableOpacity style={s.closeBtn} onPress={close}>
-            <Text style={[s.closeText, { color: colors.textMuted }]}>Хаах</Text>
+            <Text style={[s.closeText, { color: colors.textMuted }]}>{appt ? 'Ойлголоо' : 'Хаах'}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -96,7 +113,13 @@ const s = StyleSheet.create({
   err: { fontFamily: 'Inter_400Regular', fontSize: 12, marginVertical: 4 },
   cta: { borderRadius: 9999, padding: 16, alignItems: 'center', marginTop: 10 },
   ctaText: { fontFamily: 'Inter_700Bold', fontSize: 15 },
-  note: { fontFamily: 'Inter_400Regular', fontSize: 11, textAlign: 'center', marginTop: 8 },
+  centered: { textAlign: 'center' },
+  successIcon: { alignSelf: 'center', width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+  onboardLead: { fontFamily: 'Inter_600SemiBold', fontSize: 13, marginTop: 14, marginBottom: 2 },
+  steps: { gap: 10, marginTop: 4 },
+  step: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  stepIcon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  stepText: { flex: 1, fontFamily: 'Inter_500Medium', fontSize: 14, lineHeight: 20 },
   closeBtn: { alignItems: 'center', paddingVertical: 12, marginTop: 4 },
   closeText: { fontFamily: 'Inter_500Medium', fontSize: 14 },
 })
