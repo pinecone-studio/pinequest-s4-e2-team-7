@@ -18,7 +18,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pinequest.app",
+      "bundleIdentifier": "org.name.PineQuest",
       "infoPlist": {
         "NSCameraUsageDescription": "Хүүхдийн шүдийг скрининг хийхэд камер ашиглана."
       }
