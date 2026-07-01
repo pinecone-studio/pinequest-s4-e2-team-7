@@ -321,7 +321,7 @@ export default function InformationPage() {
     <div className="page-in-wrap flex flex-col bg-transparent md:h-[100dvh] md:overflow-hidden">
       {/* Header */}
       <div className="shrink-0 border-b border-border-muted bg-transparent px-4 py-5 sm:px-6 sm:py-6 md:px-8 md:py-7">
-        <div className="mx-auto max-w-7xl">
+        <div className="max-w-7xl">
           <div className="mb-1.5 flex items-baseline gap-2">
             <h1 className="text-3xl font-bold text-text-base">Мэдээлэл</h1>
           </div>
@@ -334,8 +334,8 @@ export default function InformationPage() {
       {/* Body */}
       <div className="flex flex-1 flex-col gap-0 overflow-hidden md:flex-row">
         {/* Left: Age selector and detail */}
-        <section className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto border-b border-border-muted px-4 py-5 sm:px-6 md:border-b-0 md:border-r md:px-8 md:py-6">
-          <div className="sticky top-0 z-10 -mx-4 -my-5 space-y-4 bg-transparent px-4 py-5 sm:px-6 md:-mx-8 md:-my-6 md:px-8 md:py-6">
+        <section className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto border-b border-border-muted px-4 sm:px-6 md:border-b-0 md:border-r md:px-8">
+          <div className="sticky top-0 z-10 -mx-4 -mt-5 space-y-4 bg-transparent px-4 py-5 sm:px-6 md:-mx-8 md:-mt-6 md:px-8 md:py-6">
             <div className="flex items-center gap-2.5">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-primary-subtle)] text-[var(--color-primary)]">
                 <Baby size={16} strokeWidth={2.25} />
