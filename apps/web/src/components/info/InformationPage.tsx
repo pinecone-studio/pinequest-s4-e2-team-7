@@ -45,8 +45,49 @@ const STAGE_ICONS: Record<string, LucideIcon> = {
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   UI primitives
+   Micro-interaction sound — soft synthesized "pop" played on stage
+   switch (igloo.inc-style: short, round, no harsh attack). Built with
+   Web Audio API so there's no audio file to ship or load.
+   Single shared AudioContext, lazily created on first user gesture
+   (browsers block autoplay before any interaction anyway).
    ───────────────────────────────────────────────────────────────── */
+let sharedAudioCtx: AudioContext | null = null
+
+function getAudioCtx(): AudioContext | null {
+  if (typeof window === 'undefined') return null
+  if (!sharedAudioCtx) {
+    const Ctx = window.AudioContext || (window as any).webkitAudioContext
+    if (!Ctx) return null
+    sharedAudioCtx = new Ctx()
+  }
+  if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume()
+  return sharedAudioCtx
+}
+
+function playStagePop() {
+  const ctx = getAudioCtx()
+  if (!ctx) return
+
+  const now = ctx.currentTime
+  const osc = ctx.createOscillator()
+  const gain = ctx.createGain()
+
+  // quick downward pitch glide — gives it that soft "pop" instead of a flat beep
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(620, now)
+  osc.frequency.exponentialRampToValueAtTime(280, now + 0.09)
+
+  // fast attack, smooth exponential decay — short and unobtrusive
+  gain.gain.setValueAtTime(0.0001, now)
+  gain.gain.exponentialRampToValueAtTime(0.18, now + 0.012)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16)
+
+  osc.connect(gain)
+  gain.connect(ctx.destination)
+  osc.start(now)
+  osc.stop(now + 0.17)
+}
+
 function ToneBadge({ tone, children }: { tone: CariesTone; children: React.ReactNode }) {
   const map = {
     green: 'text-[var(--color-triage-green)] bg-[var(--color-triage-green-bg)]',
@@ -111,7 +152,10 @@ function StageSelector({
             <button
               key={s.id}
               type="button"
-              onClick={() => onSelect(s.id)}
+              onClick={() => {
+                playStagePop()
+                onSelect(s.id)
+              }}
               aria-pressed={active}
               className="btn group relative z-10 flex flex-col items-center gap-2 px-1 pt-1"
             >
