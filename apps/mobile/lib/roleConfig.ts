@@ -45,10 +45,10 @@ const TEACHER: RoleConfig = {
   showScanHero: true,
   sections: ['history'],
   quickActions: [
-    { id: 'classes', icon: 'school-outline', label: 'Анги', route: '/(tabs)/classes' },
-    { id: 'stats', icon: 'stats-chart-outline', label: 'Статистик', route: '/stats' },
-    { id: 'calendar', icon: 'calendar-outline', label: 'Хуанли', route: '/(tabs)/calendar' },
-    { id: 'history', icon: 'list-outline', label: 'Түүх', route: '/(tabs)/history' },
+    { id: 'classes', icon: 'school', label: 'Анги', route: '/(tabs)/classes' },
+    { id: 'stats', icon: 'stats-chart', label: 'Статистик', route: '/stats' },
+    { id: 'calendar', icon: 'calendar', label: 'Хуанли', route: '/(tabs)/calendar' },
+    { id: 'history', icon: 'bar-chart', label: 'Дүгнэлт', route: '/(tabs)/history' },
   ],
   tabs: { camera: true, hospital: true, hospitalLabel: 'Тусламж', hospitalMode: 'find-doctor' },
 }
@@ -58,10 +58,10 @@ const PARENT: RoleConfig = {
   showScanHero: true,
   sections: ['childResult'],
   quickActions: [
-    { id: 'result', icon: 'document-text-outline', label: 'Хүүхэд', route: '/(tabs)/history' },
-    { id: 'dentist', icon: 'medkit-outline', label: 'Эмч хайх', route: '/(tabs)/hospital' },
-    { id: 'guide', icon: 'book-outline', label: 'Сойз заавар', route: '/(tabs)/guide' },
-    { id: 'history', icon: 'list-outline', label: 'Түүх', route: '/(tabs)/history' },
+    { id: 'result', icon: 'person', label: 'Хүүхэд', route: '/(tabs)/history' },
+    { id: 'dentist', icon: 'medkit', label: 'Эмч хайх', route: '/(tabs)/hospital' },
+    { id: 'guide', icon: 'book', label: 'Сойз заавар', route: '/(tabs)/guide' },
+    { id: 'history', icon: 'list', label: 'Түүх', route: '/(tabs)/history' },
   ],
   tabs: { camera: true, hospital: true, hospitalLabel: 'Эмч хайх', hospitalMode: 'find-doctor' },
 }
@@ -71,10 +71,10 @@ const SCHOOL_DOCTOR: RoleConfig = {
   showScanHero: true,
   sections: ['schoolOverview', 'redStudents'],
   quickActions: [
-    { id: 'stats', icon: 'stats-chart-outline', label: 'Статистик', route: '/stats' },
-    { id: 'history', icon: 'list-outline', label: 'Хяналт', route: '/(tabs)/history' },
-    { id: 'calendar', icon: 'calendar-outline', label: 'Хуанли', route: '/(tabs)/calendar' },
-    { id: 'dentist', icon: 'medkit-outline', label: 'Тусламж', route: '/(tabs)/hospital' },
+    { id: 'stats', icon: 'stats-chart', label: 'Статистик', route: '/stats' },
+    { id: 'history', icon: 'clipboard', label: 'Хяналт', route: '/(tabs)/history' },
+    { id: 'calendar', icon: 'calendar', label: 'Хуанли', route: '/(tabs)/calendar' },
+    { id: 'dentist', icon: 'medkit', label: 'Тусламж', route: '/(tabs)/hospital' },
   ],
   tabs: { camera: true, hospital: true, hospitalLabel: 'Тусламж', hospitalMode: 'find-doctor' },
 }
@@ -84,9 +84,9 @@ const DENTIST: RoleConfig = {
   showScanHero: false,
   sections: ['helpRequests'],
   quickActions: [
-    { id: 'requests', icon: 'medkit-outline', label: 'Хүсэлтүүд', route: '/(tabs)/hospital' },
-    { id: 'stats', icon: 'stats-chart-outline', label: 'Статистик', route: '/stats' },
-    { id: 'history', icon: 'list-outline', label: 'Хяналт', route: '/(tabs)/history' },
+    { id: 'requests', icon: 'hand-left', label: 'Хүсэлтүүд', route: '/(tabs)/hospital' },
+    { id: 'stats', icon: 'stats-chart', label: 'Статистик', route: '/stats' },
+    { id: 'history', icon: 'clipboard', label: 'Хяналт', route: '/(tabs)/history' },
   ],
   tabs: { camera: false, hospital: true, hospitalLabel: 'Хүсэлтүүд', hospitalMode: 'help-requests' },
 }

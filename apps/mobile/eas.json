@@ -6,16 +6,33 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "ios": { "simulator": true }
+      "ios": { "simulator": true },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://screener-api.ariunzul.workers.dev",
+        "EXPO_PUBLIC_MODEL_URL": "https://nerunnee-toothlings-inference.hf.space/model.onnx"
+      }
     },
     "development-device": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://screener-api.ariunzul.workers.dev",
+        "EXPO_PUBLIC_MODEL_URL": "https://nerunnee-toothlings-inference.hf.space/model.onnx"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://screener-api.ariunzul.workers.dev",
+        "EXPO_PUBLIC_MODEL_URL": "https://nerunnee-toothlings-inference.hf.space/model.onnx"
+      }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://screener-api.ariunzul.workers.dev",
+        "EXPO_PUBLIC_MODEL_URL": "https://nerunnee-toothlings-inference.hf.space/model.onnx"
+      }
+    }
   },
   "submit": {
     "production": {}

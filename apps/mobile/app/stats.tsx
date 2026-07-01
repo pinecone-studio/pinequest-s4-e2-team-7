@@ -58,7 +58,10 @@ const StatsScreen = () => {
       getSeasons()
         .then((list) => {
           setSeasons(list)
-          const latest = list[list.length - 1]
+          // Server returns seasons newest-first, so [0] is the latest — mirrors
+          // the web SeasonProvider default. (Was list.length-1 = oldest, which
+          // opened on a season with no screening, so nothing showed.)
+          const latest = list[0]
           setSeasonId(latest)
           loadData(latest)
         })

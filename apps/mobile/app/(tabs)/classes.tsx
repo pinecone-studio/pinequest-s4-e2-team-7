@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   View,
   Text,
@@ -11,24 +11,35 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter, useFocusEffect } from 'expo-router'
+import { seasonForDate, seasonsForYear } from '@pinequest/core'
 import { useTheme } from '@/lib/ThemeContext'
 import { useFloatingTabBarPad } from '@/lib/tabBarLayout'
-import { getMyClasses, type TeacherClass } from '@/lib/api'
+import { getMyClasses, getSeasons, type TeacherClass } from '@/lib/api'
 import { toMongolian } from '@/lib/errorMessages'
 import ClassCard from '@/components/teacher/ClassCard'
+import SeasonPicker from '@/components/teacher/SeasonPicker'
+
+const THIS_YEAR = new Date().getFullYear()
 
 const ClassesScreen = () => {
   const { colors } = useTheme()
   const tabBarPad = useFloatingTabBarPad()
   const router = useRouter()
   const [classes, setClasses] = useState<TeacherClass[] | null>(null)
+  const [seasons, setSeasons] = useState<string[] | null>(null)
+  const [season, setSeason] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
   const load = useCallback((silent = false) => {
     if (!silent) setError(null)
-    return getMyClasses()
-      .then(setClasses)
+    // Season list mirrors the web board: distinct seasons from the server,
+    // newest first. Classes come back across all seasons; we filter client-side.
+    return Promise.all([getMyClasses(), getSeasons().catch(() => [])])
+      .then(([cls, ssn]) => {
+        setClasses(cls)
+        setSeasons(ssn)
+      })
       .catch((err) => setError(toMongolian(err)))
   }, [])
 
@@ -37,6 +48,26 @@ const ClassesScreen = () => {
       void load()
       return () => {}
     }, [load]),
+  )
+
+  // Default to the latest season once the list loads (web SeasonProvider parity);
+  // a brand-new teacher with no seasons yet falls back to the current season.
+  useEffect(() => {
+    if (season || seasons === null) return
+    setSeason(seasons[0] ?? seasonForDate(new Date()))
+  }, [seasons, season])
+
+  // Selector options: server seasons ∪ existing class seasons ∪ the screenable
+  // seasons (this year + next), so a new season can still be picked to create in.
+  const seasonOptions = useMemo(() => {
+    const generated = [...seasonsForYear(THIS_YEAR), ...seasonsForYear(THIS_YEAR + 1)]
+    const fromClasses = classes?.map((k) => k.seasonId) ?? []
+    return [...new Set([...(seasons ?? []), ...fromClasses, ...generated])].sort().reverse()
+  }, [seasons, classes])
+
+  const visibleClasses = useMemo(
+    () => classes?.filter((k) => k.seasonId === season) ?? null,
+    [classes, season],
   )
 
   const onRefresh = useCallback(() => {
@@ -64,6 +95,12 @@ const ClassesScreen = () => {
         </TouchableOpacity>
       </View>
 
+      {classes !== null && !error && season ? (
+        <View style={s.seasonBar}>
+          <SeasonPicker value={season} onChange={setSeason} options={seasonOptions} />
+        </View>
+      ) : null}
+
       {classes === null && !error ? (
         <View style={s.center}>
           <ActivityIndicator color={colors.primary} />
@@ -72,11 +109,13 @@ const ClassesScreen = () => {
         <View style={s.center}>
           <Text style={[s.muted, { color: colors.textMuted }]}>{error}</Text>
         </View>
-      ) : classes && classes.length === 0 ? (
+      ) : visibleClasses && visibleClasses.length === 0 ? (
         <View style={s.center}>
           <Ionicons name="school-outline" size={40} color={colors.textDisabled} />
           <Text style={[s.muted, { color: colors.textMuted }]}>
-            Анги бүртгээгүй байна.{'\n'}“+” дарж эхний ангиа нэмнэ үү.
+            {classes && classes.length === 0
+              ? 'Анги бүртгээгүй байна.\n“+” дарж эхний ангиа нэмнэ үү.'
+              : 'Энэ улиралд анги алга.\n“+” дарж энэ улиралд анги нэмнэ үү.'}
           </Text>
         </View>
       ) : (
@@ -91,7 +130,7 @@ const ClassesScreen = () => {
             />
           }
         >
-          {classes?.map((k) => (
+          {visibleClasses?.map((k) => (
             <ClassCard
               key={k.id}
               klass={k}
@@ -116,6 +155,7 @@ const s = StyleSheet.create({
   },
   title: { fontSize: 24, fontFamily: 'Inter_700Bold', letterSpacing: -0.4 },
   add: { width: 42, height: 42, borderRadius: 9999, alignItems: 'center', justifyContent: 'center' },
+  seasonBar: { paddingHorizontal: 20, paddingBottom: 12 },
   list: { paddingHorizontal: 20, gap: 14 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 30 },
   muted: { fontSize: 14, fontFamily: 'Inter_400Regular', textAlign: 'center', lineHeight: 21 },

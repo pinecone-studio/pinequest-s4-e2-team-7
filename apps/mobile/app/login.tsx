@@ -43,65 +43,71 @@ const LoginScreen = () => {
   const pillX = pill.interpolate({ inputRange: [0, 1], outputRange: [0, pillW] })
 
   return (
-    <KeyboardAvoidingView
-      style={[s.root, { backgroundColor: colors.bg }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <View style={[s.root, { backgroundColor: colors.bg }]}>
+      {/* Fixed brand backdrop — stays put; the sheet slides up over it when the keyboard opens. */}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <SafeAreaView style={s.brandWrap}>
-          <AuthBrand subtitle={'Хүүхдийн амны хөндийн хяналт ба чиглүүлэг'} />
+        <SafeAreaView style={[StyleSheet.absoluteFill, s.brandWrap]}>
+          <AuthBrand subtitle={'Хүүхдийн амны хөндийн байдлын хяналт ба чиглүүлэг'} />
         </SafeAreaView>
       </TouchableWithoutFeedback>
 
-      <Animated.View style={[s.sheet, { backgroundColor: colors.surface, transform: [{ translateY: slide }] }]}>
-        <View style={[s.grabber, { backgroundColor: colors.border }]} />
-        <ScrollView
-          contentContainerStyle={s.scroll}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="interactive"
-          showsVerticalScrollIndicator={false}
-        >
-          <View
-            style={[s.tabs, { backgroundColor: colors.surfaceRaised, borderColor: colors.border }]}
-            onLayout={(e) => setTabsW(e.nativeEvent.layout.width)}
+      {/* Only the sheet reacts to the keyboard, so it overlays the brand instead of pushing it. */}
+      <KeyboardAvoidingView
+        style={s.kav}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        pointerEvents="box-none"
+      >
+        <Animated.View style={[s.sheet, { backgroundColor: colors.surface, transform: [{ translateY: slide }] }]}>
+          <View style={[s.grabber, { backgroundColor: colors.border }]} />
+          <ScrollView
+            contentContainerStyle={s.scroll}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="interactive"
+            showsVerticalScrollIndicator={false}
           >
-            {pillW > 0 && (
-              <Animated.View
-                style={[
-                  s.pill,
-                  { width: pillW, backgroundColor: colors.primary, transform: [{ translateX: pillX }] },
-                ]}
-              />
-            )}
-            {TABS.map(({ mode: m, label }) => (
-              <TouchableOpacity
-                key={m}
-                style={s.tab}
-                onPress={() => setMode(m)}
-                activeOpacity={0.8}
-              >
-                <Text
+            <View
+              style={[s.tabs, { backgroundColor: colors.surfaceRaised, borderColor: colors.border }]}
+              onLayout={(e) => setTabsW(e.nativeEvent.layout.width)}
+            >
+              {pillW > 0 && (
+                <Animated.View
                   style={[
-                    s.tabLabel,
-                    { color: mode === m ? colors.primaryText : colors.textMuted },
+                    s.pill,
+                    { width: pillW, backgroundColor: colors.primary, transform: [{ translateX: pillX }] },
                   ]}
+                />
+              )}
+              {TABS.map(({ mode: m, label }) => (
+                <TouchableOpacity
+                  key={m}
+                  style={s.tab}
+                  onPress={() => setMode(m)}
+                  activeOpacity={0.8}
                 >
-                  {label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+                  <Text
+                    style={[
+                      s.tabLabel,
+                      { color: mode === m ? colors.primaryText : colors.textMuted },
+                    ]}
+                  >
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
-          {mode === 'login' ? <LoginForm /> : <RegisterForm />}
-        </ScrollView>
-      </Animated.View>
-    </KeyboardAvoidingView>
+            {mode === 'login' ? <LoginForm /> : <RegisterForm />}
+          </ScrollView>
+        </Animated.View>
+      </KeyboardAvoidingView>
+    </View>
   )
 }
 
 const s = StyleSheet.create({
   root: { flex: 1 },
-  brandWrap: { flex: 1, justifyContent: 'center', paddingHorizontal: 24 },
+  brandWrap: { justifyContent: 'center', paddingHorizontal: 24 },
+  kav: { flex: 1, justifyContent: 'flex-end' },
   sheet: {
     maxHeight: '88%',
     borderTopLeftRadius: 28,
