@@ -55,6 +55,20 @@ export const seasonOrdinal = (seasonId: SeasonId): number => {
   return Number(year) * 3 + TERM_ORDINAL[term]
 }
 
+/**
+ * The next screening season after `seasonId`, following the term cycle
+ * fall → winter → spring → (next year) fall. Summer is never a season, so
+ * spring rolls into the following year's fall. Unrecognised ids pass through.
+ */
+export const nextSeason = (seasonId: SeasonId): SeasonId => {
+  const { year, term } = parseSeason(seasonId)
+  if (!term) return seasonId
+  const i = SCREENING_TERMS.indexOf(term)
+  return i === SCREENING_TERMS.length - 1
+    ? `${Number(year) + 1}-${SCREENING_TERMS[0]}`
+    : `${year}-${SCREENING_TERMS[i + 1]}`
+}
+
 export type SeasonGap = 'consecutive' | 'one_skip' | 'large_gap'
 
 /** How many screening opportunities were missed between two season ids. */

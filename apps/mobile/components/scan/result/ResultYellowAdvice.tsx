@@ -14,8 +14,11 @@ export default function ResultYellowAdvice() {
           7–14 хоногийн дотор эмчид үзүүлэхийг зөвлөж байна
         </Text>
       </View>
-      <TouchableOpacity style={[s.btn, { backgroundColor: colors.primary }]} onPress={() => router.push('/(tabs)/hospital' as never)}>
-        <Text style={[s.btnText, { color: colors.primaryText }]}>Ойр эмнэлэг хайх</Text>
+      <TouchableOpacity
+        style={[s.btn, { backgroundColor: colors.primary }]}
+        onPress={() => router.push({ pathname: '/(tabs)/hospital', params: { segment: 'map' } } as never)}
+      >
+        <Text style={[s.btnText, { color: colors.primaryText }]}>Ойролцоох эмнэлэг санал болгох</Text>
       </TouchableOpacity>
     </View>
   )

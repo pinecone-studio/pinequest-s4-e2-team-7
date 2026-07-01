@@ -41,7 +41,7 @@ const s = StyleSheet.create({
     shadowOpacity: 0.04, shadowRadius: 3, elevation: 1,
   },
   iconWrap: {
-    width: 40, height: 40, borderRadius: 10,
+    width: 40, height: 40, borderRadius: 20,
     alignItems: 'center', justifyContent: 'center',
   },
   label: { fontSize: 14, fontFamily: 'Inter_600SemiBold', lineHeight: 18 },

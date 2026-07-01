@@ -12,6 +12,7 @@ import ResultDetectionList from '@/components/scan/result/ResultDetectionList'
 import ResultSummary from '@/components/scan/result/ResultSummary'
 import ResultYellowAdvice from '@/components/scan/result/ResultYellowAdvice'
 import ResultRedAdvice from '@/components/scan/result/ResultRedAdvice'
+import VolunteerDentistPanel from '@/components/scan/result/VolunteerDentistPanel'
 import ResultDisclaimer from '@/components/scan/result/ResultDisclaimer'
 import ResultLongitudinalCard from '@/components/scan/result/ResultLongitudinalCard'
 import ResultBottomActions from '@/components/scan/result/ResultBottomActions'
@@ -108,6 +109,7 @@ export default function ResultScreen() {
         <ResultSummary summary={summary} level={level} advice={advice} guidance={guidance} />
         {level === 'yellow' && <ResultYellowAdvice />}
         {level === 'red' && <ResultRedAdvice guardianPhone={params.guardianPhone} childKey={params.childKey} />}
+        {level === 'red' && !!params.childKey && <VolunteerDentistPanel childKey={params.childKey} />}
         <ResultBottomActions
           screeningId={screeningId}
           onRetake={() => router.replace({

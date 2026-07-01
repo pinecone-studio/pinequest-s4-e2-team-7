@@ -3,16 +3,16 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useFocusEffect } from 'expo-router'
-import { seasonLabelMn } from '@pinequest/core'
 import { useTheme } from '@/lib/ThemeContext'
 import { getStats, getTimeseries, getSeasons, type Stats, type Timeseries } from '@/lib/api'
 import { toMongolian } from '@/lib/errorMessages'
+import ScreenHeader from '@/components/teacher/ScreenHeader'
+import SeasonPicker from '@/components/teacher/SeasonPicker'
 import TriageBar from '@/components/charts/TriageBar'
 import TrendBars from '@/components/charts/TrendBars'
 
@@ -58,7 +58,10 @@ const StatsScreen = () => {
       getSeasons()
         .then((list) => {
           setSeasons(list)
-          const latest = list[list.length - 1]
+          // Server returns seasons newest-first, so [0] is the latest — mirrors
+          // the web SeasonProvider default. (Was list.length-1 = oldest, which
+          // opened on a season with no screening, so nothing showed.)
+          const latest = list[0]
           setSeasonId(latest)
           loadData(latest)
         })
@@ -73,45 +76,18 @@ const StatsScreen = () => {
 
   return (
     <SafeAreaView
-      edges={['left', 'right', 'bottom']}
+      edges={['top', 'left', 'right', 'bottom']}
       style={[s.safe, { backgroundColor: colors.bg }]}
     >
       <View style={s.header}>
-        <Text style={[s.title, { color: colors.textBase }]}>Улирал</Text>
+        <ScreenHeader title="Статистик" />
       </View>
 
-      {seasons.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={s.seasonScroll}
-          contentContainerStyle={s.seasonRow}
-        >
-          {seasons.map((sid) => (
-            <TouchableOpacity
-              key={sid}
-              onPress={() => changeSeason(sid)}
-              activeOpacity={0.85}
-              style={[
-                s.seasonBtn,
-                {
-                  backgroundColor: sid === seasonId ? colors.primary : colors.surface,
-                  borderColor: colors.border,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  s.seasonText,
-                  { color: sid === seasonId ? colors.primaryText : colors.textBase },
-                ]}
-              >
-                {seasonLabelMn(sid)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      )}
+      {seasons.length > 0 && seasonId ? (
+        <View style={s.seasonRow}>
+          <SeasonPicker value={seasonId} onChange={changeSeason} options={seasons} />
+        </View>
+      ) : null}
 
       {loading ? (
         <View style={s.center}>
@@ -182,16 +158,12 @@ const StatsScreen = () => {
 
 const s = StyleSheet.create({
   safe: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 4 },
-  title: { fontSize: 24, fontFamily: 'Inter_700Bold', letterSpacing: -0.4 },
-  seasonScroll: { flexGrow: 0 },
-  seasonRow: { paddingHorizontal: 20, paddingVertical: 10, gap: 8, alignItems: 'center' },
-  seasonBtn: { borderRadius: 9999, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14, paddingVertical: 7 },
-  seasonText: { fontSize: 13, fontFamily: 'Inter_600SemiBold' },
+  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
+  seasonRow: { paddingHorizontal: 20, paddingBottom: 12, zIndex: 10 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20 },
   err: { color: '#ef4444', textAlign: 'center' },
   scrollView: { flex: 1 },
-  scroll: { padding: 20, gap: 14, paddingBottom: 24 },
+  scroll: { paddingHorizontal: 20, paddingTop: 0, gap: 12, paddingBottom: 24 },
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 16, gap: 12 },
   sectionLabel: { fontSize: 11, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.8 },
   bigNum: { fontSize: 32, fontFamily: 'Inter_700Bold', letterSpacing: -0.5 },

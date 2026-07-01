@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { View, Animated, ActivityIndicator, Text, TouchableOpacity, StyleSheet, Image } from 'react-native'
+import { View, Animated, ActivityIndicator, Text, TouchableOpacity, Pressable, StyleSheet, Image, type GestureResponderEvent } from 'react-native'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams } from 'expo-router'
@@ -26,6 +26,21 @@ export default function CameraScreen() {
   const [torchOn, setTorchOn] = useState(false)
   const [showTransition, setShowTransition] = useState(false)
   const transitionOpacity = useRef(new Animated.Value(0)).current
+
+  // Tap-to-focus: expo-camera has no point-focus API, so re-trigger autofocus by
+  // toggling it off→on, and show a focus ring where the user tapped.
+  const [autofocus, setAutofocus] = useState<'on' | 'off'>('on')
+  const [focusPoint, setFocusPoint] = useState<{ x: number; y: number } | null>(null)
+  const focusRing = useRef(new Animated.Value(0)).current
+
+  const onFocusTap = (e: GestureResponderEvent) => {
+    const { locationX, locationY } = e.nativeEvent
+    setFocusPoint({ x: locationX, y: locationY })
+    setAutofocus('off')
+    setTimeout(() => setAutofocus('on'), 100)
+    focusRing.setValue(1)
+    Animated.timing(focusRing, { toValue: 0, duration: 700, delay: 500, useNativeDriver: true }).start()
+  }
 
   const { cameraRef, mode, photos, analyzing, capturing, error, capture, retry, toggleMode } = useCameraCapture(params)
   const priorLevel = usePriorLevel(params.childKey)
@@ -108,8 +123,14 @@ export default function CameraScreen() {
   }
 
   return (
-    <View style={s.root}>
-      <CameraView ref={cameraRef} style={s.camera} facing="back" enableTorch={torchOn} onCameraReady={() => setCameraReady(true)} />
+    <Pressable style={s.root} onPress={onFocusTap}>
+      <CameraView ref={cameraRef} style={s.camera} facing="back" autofocus={autofocus} enableTorch={torchOn} onCameraReady={() => setCameraReady(true)} />
+      {focusPoint && (
+        <Animated.View
+          pointerEvents="none"
+          style={[ts.focusRing, { left: focusPoint.x - 36, top: focusPoint.y - 36, opacity: focusRing }]}
+        />
+      )}
       {!cameraReady && (
         <View style={s.camLoading}>
           <ActivityIndicator size="large" color="#fff" />
@@ -150,7 +171,7 @@ export default function CameraScreen() {
           <Ionicons name={torchOn ? 'flashlight' : 'flashlight-outline'} size={22} color="#fff" />
         </TouchableOpacity>
       </View>
-    </View>
+    </Pressable>
   )
 }
 
@@ -163,6 +184,7 @@ const PILL_LABEL: Record<(typeof QUADRANTS)[number], string> = {
 }
 
 const ts = StyleSheet.create({
+  focusRing: { position: 'absolute', width: 72, height: 72, borderRadius: 12, borderWidth: 2, borderColor: 'rgba(255,220,0,0.95)' },
   stepPill: { paddingHorizontal: 8, paddingVertical: 6, borderRadius: 14, minWidth: 52, alignItems: 'center' },
   pillActive: { backgroundColor: 'rgba(255,200,0,0.85)' },
   pillDone: { backgroundColor: '#22c55e' },

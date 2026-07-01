@@ -19,7 +19,7 @@ const TAB_PAD = 3
 const SegmentTabs = ({ active, onChange }: Props) => {
   const { colors } = useTheme()
   const [rowW, setRowW] = useState(0)
-  // 0 = doctors (left), 1 = map (right) — drives the sliding yellow pill.
+  // Tab index drives the sliding pill across the N segments.
   const pill = useRef(new Animated.Value(0)).current
 
   const activeIndex = TABS.findIndex((t) => t.value === active)
@@ -34,7 +34,10 @@ const SegmentTabs = ({ active, onChange }: Props) => {
   }, [activeIndex, pill])
 
   const pillW = rowW ? (rowW - TAB_PAD * 2) / TABS.length : 0
-  const pillX = pill.interpolate({ inputRange: [0, 1], outputRange: [0, pillW] })
+  const pillX = pill.interpolate({
+    inputRange: TABS.map((_, i) => i),
+    outputRange: TABS.map((_, i) => i * pillW),
+  })
 
   return (
     <View style={[s.container, { borderBottomColor: colors.border }]}>

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'rea
 import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/lib/ThemeContext'
 import { getHelpRequests, connectHelpRequest, type HelpRequestRow } from '@/lib/api'
+import { shortChildName } from '@/lib/childName'
 
 const STATUS_LABEL: Record<HelpRequestRow['status'], string> = {
   open: 'Шинэ',
@@ -63,7 +64,7 @@ const HelpRequestsSection = ({ limit, onSeeMore }: Props) => {
             <View style={[s.dot, { backgroundColor: dotColor(r.level) }]} />
             <View style={s.info}>
               <Text style={[s.name, { color: colors.textBase }]} numberOfLines={1}>
-                {r.child ? `${r.child.lastName} ${r.child.firstName}` : 'Хүүхэд'}
+                {r.child ? shortChildName(r.child.lastName, r.child.firstName) : 'Хүүхэд'}
               </Text>
               <Text style={[s.meta, { color: colors.textMuted }]} numberOfLines={1}>
                 {STATUS_LABEL[r.status]}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Text,
   TouchableOpacity,
@@ -11,9 +11,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
+import { seasonLabelMn, seasonOrdinal } from '@pinequest/core'
 import { useTheme } from '@/lib/ThemeContext'
 import { getMyClasses, getRosterStatus, type TeacherClass, type RosterStatusRow } from '@/lib/api'
 import { toMongolian } from '@/lib/errorMessages'
+import { shortChildName } from '@/lib/childName'
+import ScreenHeader from '@/components/teacher/ScreenHeader'
+import InlineDropdown from '@/components/teacher/InlineDropdown'
 
 const CONSENT_VERSION = '1.0'
 
@@ -30,7 +34,10 @@ export default function TeacherChildForm() {
 
   const [classes, setClasses] = useState<TeacherClass[] | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [selectedClass, setSelectedClass] = useState<TeacherClass | null>(null)
+  // Pick a class (by name — one class per name), then a season; that resolves the
+  // specific class instance to screen against.
+  const [className, setClassName] = useState<string | null>(null)
+  const [season, setSeason] = useState<string | null>(null)
   const [roster, setRoster] = useState<RosterStatusRow[] | null>(null)
   const [rosterLoading, setRosterLoading] = useState(false)
   const [pendingChild, setPendingChild] = useState<RosterStatusRow | null>(null)
@@ -39,10 +46,31 @@ export default function TeacherChildForm() {
     getMyClasses()
       .then((cs) => {
         setClasses(cs)
-        if (cs.length === 1) setSelectedClass(cs[0])
+        const names = [...new Set(cs.map((c) => c.name))]
+        if (names.length === 1) setClassName(names[0])
       })
       .catch((err) => setError(toMongolian(err)))
   }, [])
+
+  const classNames = useMemo(() => [...new Set((classes ?? []).map((c) => c.name))], [classes])
+  const seasonOptions = useMemo(
+    () =>
+      className
+        ? [...new Set((classes ?? []).filter((c) => c.name === className).map((c) => c.seasonId))]
+            .sort((a, b) => seasonOrdinal(b) - seasonOrdinal(a))
+        : [],
+    [classes, className],
+  )
+  const selectedClass = useMemo(
+    () => (classes ?? []).find((c) => c.name === className && c.seasonId === season) ?? null,
+    [classes, className, season],
+  )
+
+  // Keep the season valid for the chosen class (default to newest).
+  useEffect(() => {
+    if (!seasonOptions.length) { if (season) setSeason(null); return }
+    if (!season || !seasonOptions.includes(season)) setSeason(seasonOptions[0])
+  }, [seasonOptions, season])
 
   useEffect(() => {
     if (!selectedClass) {
@@ -79,7 +107,8 @@ export default function TeacherChildForm() {
 
   if (classes === null && !error) {
     return (
-      <SafeAreaView edges={['bottom']} style={[s.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={['top', 'left', 'right', 'bottom']} style={[s.root, { backgroundColor: colors.bg }]}>
+      <View style={s.header}><ScreenHeader title="Хэрэглэгчийн мэдээлэл" /></View>
         <View style={s.center}>
           <ActivityIndicator color={colors.primary} />
         </View>
@@ -89,7 +118,8 @@ export default function TeacherChildForm() {
 
   if (classes !== null && classes.length === 0) {
     return (
-      <SafeAreaView edges={['bottom']} style={[s.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={['top', 'left', 'right', 'bottom']} style={[s.root, { backgroundColor: colors.bg }]}>
+      <View style={s.header}><ScreenHeader title="Хэрэглэгчийн мэдээлэл" /></View>
         <View style={s.center}>
           <Ionicons name="school-outline" size={40} color={colors.textDisabled} />
           <Text style={[s.empty, { color: colors.textMuted }]}>
@@ -107,28 +137,27 @@ export default function TeacherChildForm() {
   }
 
   return (
-    <SafeAreaView edges={['bottom']} style={[s.root, { backgroundColor: colors.bg }]}>
+    <SafeAreaView edges={['top', 'left', 'right', 'bottom']} style={[s.root, { backgroundColor: colors.bg }]}>
+      <View style={s.header}><ScreenHeader title="Хэрэглэгчийн мэдээлэл" /></View>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {error ? <Text style={[s.error, { color: colors.triageRedText }]}>{error}</Text> : null}
 
-        <Text style={[s.sectionLabel, { color: colors.textMuted }]}>АНГИ СОНГОХ</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.chipRow}>
-          {classes?.map((k) => {
-            const active = selectedClass?.id === k.id
-            return (
-              <TouchableOpacity
-                key={k.id}
-                style={[
-                  s.chip,
-                  { borderColor: active ? colors.primary : colors.border, backgroundColor: active ? colors.primary : colors.surface },
-                ]}
-                onPress={() => setSelectedClass(k)}
-              >
-                <Text style={[s.chipText, { color: active ? colors.primaryText : colors.textBase }]}>{k.name}</Text>
-              </TouchableOpacity>
-            )
-          })}
-        </ScrollView>
+        <View style={s.selectors}>
+          <InlineDropdown
+            value={className}
+            options={classNames.map((name) => ({ value: name, label: name }))}
+            onChange={setClassName}
+            icon="school-outline"
+            placeholder="Анги"
+          />
+          <InlineDropdown
+            value={season}
+            options={seasonOptions.map((sid) => ({ value: sid, label: seasonLabelMn(sid) }))}
+            onChange={setSeason}
+            icon="calendar-outline"
+            placeholder="Улирал"
+          />
+        </View>
 
         {selectedClass ? (
           <>
@@ -148,7 +177,7 @@ export default function TeacherChildForm() {
                     activeOpacity={0.8}
                   >
                     <Text style={[s.slot, { color: colors.textMuted }]}>{r.rosterSlot}</Text>
-                    <Text style={[s.name, { color: colors.textBase }]} numberOfLines={1}>{r.lastName} {r.firstName}</Text>
+                    <Text style={[s.name, { color: colors.textBase }]} numberOfLines={1}>{shortChildName(r.lastName, r.firstName)}</Text>
                     {screened ? (
                       <Ionicons name="checkmark-circle" size={18} color={colors.triageGreenText} />
                     ) : (
@@ -173,7 +202,7 @@ export default function TeacherChildForm() {
             <Ionicons name="document-text-outline" size={40} color={colors.primary} style={s.sheetIcon} />
             <Text style={[s.sheetTitle, { color: colors.textBase }]}>Зөвшөөрөл</Text>
             <Text style={[s.sheetSub, { color: colors.textMuted }]}>
-              {pendingChild ? `${pendingChild.lastName} ${pendingChild.firstName}` : ''}
+              {pendingChild ? shortChildName(pendingChild.lastName, pendingChild.firstName) : ''}
             </Text>
 
             <View style={[s.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -205,6 +234,7 @@ export default function TeacherChildForm() {
 
 const s = StyleSheet.create({
   root: { flex: 1 },
+  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
   content: { padding: 20, paddingTop: 12, paddingBottom: 40 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14, padding: 30 },
   error: { fontSize: 13, fontFamily: 'Inter_500Medium', marginBottom: 8 },
@@ -212,9 +242,7 @@ const s = StyleSheet.create({
   linkBtn: { borderRadius: 9999, paddingHorizontal: 20, paddingVertical: 12, marginTop: 4 },
   linkBtnText: { fontFamily: 'Inter_700Bold', fontSize: 15 },
   sectionLabel: { fontSize: 11, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.8, marginBottom: 10 },
-  chipRow: { gap: 8, paddingRight: 8 },
-  chip: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10 },
-  chipText: { fontSize: 14, fontFamily: 'Inter_600SemiBold' },
+  selectors: { flexDirection: 'row', gap: 10, zIndex: 10 },
   rosterLoading: { paddingVertical: 24, alignItems: 'center' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 14, paddingVertical: 13, marginBottom: 10 },
   slot: { fontSize: 13, fontFamily: 'Inter_600SemiBold', width: 22 },

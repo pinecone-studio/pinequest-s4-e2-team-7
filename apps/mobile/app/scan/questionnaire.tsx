@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTheme } from '@/lib/ThemeContext'
 import { QUESTIONS } from '@/lib/questionnaire'
+import ScreenHeader from '@/components/teacher/ScreenHeader'
 
 export default function QuestionnaireScreen() {
   const router = useRouter()
@@ -27,7 +28,11 @@ export default function QuestionnaireScreen() {
   }
 
   return (
-    <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
+    <SafeAreaView edges={['top', 'left', 'right', 'bottom']} style={[s.root, { backgroundColor: colors.bg }]}>
+      <View style={s.header}>
+        <ScreenHeader title="Асуумж" onBack={() => (step > 0 ? setStep((v) => v - 1) : router.back())} />
+      </View>
+      <View style={s.body}>
       <View style={[s.progressTrack, { backgroundColor: colors.border }]}>
         <View style={[s.fill, { flex: progress, backgroundColor: colors.primary }]} />
         <View style={{ flex: 1 - progress }} />
@@ -54,17 +59,15 @@ export default function QuestionnaireScreen() {
           ))}
         </View>
       )}
-      {step > 0 && (
-        <TouchableOpacity style={s.backBtn} onPress={() => setStep(s => s - 1)}>
-          <Text style={[s.backBtnText, { color: colors.textMuted }]}>Буцах</Text>
-        </TouchableOpacity>
-      )}
+      </View>
     </SafeAreaView>
   )
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, padding: 20 },
+  root: { flex: 1 },
+  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
+  body: { flex: 1, paddingHorizontal: 20, paddingTop: 4 },
   progressTrack: { flexDirection: 'row', height: 4, borderRadius: 2, marginBottom: 20, overflow: 'hidden' },
   fill: { borderRadius: 2 },
   stepLabel: { fontSize: 13, fontFamily: 'Inter_400Regular', textAlign: 'right', marginBottom: 10 },
@@ -78,6 +81,4 @@ const s = StyleSheet.create({
   choiceList: { gap: 10 },
   choiceBtn: { borderRadius: 9999, padding: 16, borderWidth: 1.5 },
   choiceText: { fontSize: 16, fontFamily: 'Inter_500Medium' },
-  backBtn: { marginTop: 24, alignItems: 'center' },
-  backBtnText: { fontSize: 15, fontFamily: 'Inter_400Regular' },
 })

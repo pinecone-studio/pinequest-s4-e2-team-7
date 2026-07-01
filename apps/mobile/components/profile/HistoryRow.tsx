@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/lib/ThemeContext'
+import { shortChildNameFromFull } from '@/lib/childName'
 import type { ScreeningRow } from '@/lib/profileData'
 
 
@@ -18,7 +19,7 @@ type Props = {
 const HistoryRow = ({ row, showName }: Props) => {
   const { colors } = useTheme()
   const levelText = LEVEL_LABEL[row.triageLevel] ?? row.triageLevel
-  const label = showName ? `${row.childName} · ${levelText}` : levelText
+  const label = showName ? `${shortChildNameFromFull(row.childName)} · ${levelText}` : levelText
 
   const dotColor =
     row.triageLevel === 'green'  ? colors.badgeGreen :

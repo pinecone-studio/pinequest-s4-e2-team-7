@@ -95,31 +95,22 @@ const HistorySection = ({ userId, role }: Props) => {
             </View>
             <View style={s.breakdown}>
               <Stat
-                dot={colors.badgeGreen}
-                label="Эрүүл"
+                label="Харьцангуй эрүүл"
                 value={green}
-                color={colors.textBase}
-                muted={colors.textMuted}
-                tile={colors.bg}
-                border={colors.border}
+                tile={colors.triageGreenBg}
+                text={colors.triageGreenText}
               />
               <Stat
-                dot={colors.primary}
-                label="Анхааруул"
+                label="Эмчилгээ шаардлагатай"
                 value={yellow}
-                color={colors.textBase}
-                muted={colors.textMuted}
-                tile={colors.bg}
-                border={colors.border}
+                tile={colors.triageYellowBg}
+                text={colors.triageYellowText}
               />
               <Stat
-                dot={colors.badgeRed}
-                label="Яаралтай"
+                label="Яаралтай эмчилгээ"
                 value={red}
-                color={colors.textBase}
-                muted={colors.textMuted}
-                tile={colors.bg}
-                border={colors.border}
+                tile={colors.triageRedBg}
+                text={colors.triageRedText}
               />
             </View>
           </View>
@@ -130,28 +121,26 @@ const HistorySection = ({ userId, role }: Props) => {
 }
 
 const Stat = ({
-  dot,
   label,
   value,
-  color,
-  muted,
   tile,
-  border,
+  text,
 }: {
-  dot: string
   label: string
   value: number
-  color: string
-  muted: string
   tile: string
-  border: string
+  text: string
 }) => (
-  <View style={[s.stat, { backgroundColor: tile, borderColor: border }]}>
-    <View style={s.statTop}>
-      <View style={[s.statDot, { backgroundColor: dot }]} />
-      <Text style={[s.statValue, { color }]}>{value}</Text>
-    </View>
-    <Text style={[s.statLabel, { color: muted }]}>{label}</Text>
+  <View style={[s.stat, { backgroundColor: tile }]}>
+    <Text style={[s.statValue, { color: text }]}>{value}</Text>
+    <Text
+      style={[s.statLabel, { color: text }]}
+      numberOfLines={2}
+      adjustsFontSizeToFit
+      minimumFontScale={0.7}
+    >
+      {label}
+    </Text>
   </View>
 )
 
@@ -184,11 +173,9 @@ const s = StyleSheet.create({
   lastLabel: { fontFamily: 'Inter_400Regular', fontSize: 11 },
   lastDate: { fontFamily: 'Inter_500Medium', fontSize: 14, marginTop: 2 },
   breakdown: { flexDirection: 'row', gap: 8 },
-  stat: { flex: 1, gap: 6, borderWidth: StyleSheet.hairlineWidth, borderRadius: 12, padding: 12, alignItems: 'center' },
-  statTop: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  statDot: { width: 10, height: 10, borderRadius: 5 },
+  stat: { flex: 1, gap: 4, borderRadius: 12, padding: 12, alignItems: 'center' },
   statValue: { fontFamily: 'Inter_700Bold', fontSize: 20 },
-  statLabel: { fontFamily: 'Inter_400Regular', fontSize: 12 },
+  statLabel: { fontFamily: 'Inter_500Medium', fontSize: 11, textAlign: 'center' },
 })
 
 export default HistorySection

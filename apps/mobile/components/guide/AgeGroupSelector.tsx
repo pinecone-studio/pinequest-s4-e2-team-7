@@ -36,9 +36,7 @@ export default function AgeGroupSelector({ selected, onSelect }: Props) {
             activeOpacity={0.8}
           >
             <Text style={[s.label, { color: colors.textBase }]}>{label}</Text>
-            <Text style={[s.sub, { color: colors.textMuted }]}>
-              {subtitle}
-            </Text>
+            <Text style={[s.sub, { color: colors.textMuted }]}>{subtitle}</Text>
           </TouchableOpacity>
         )
       })}

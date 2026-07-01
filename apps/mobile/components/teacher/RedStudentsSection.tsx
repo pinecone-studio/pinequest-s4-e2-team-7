@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/lib/ThemeContext'
 import { getChildSummary, type RosterStatusRow } from '@/lib/api'
 import { openParentEmail } from '@/lib/parentEmail'
+import { shortChildName } from '@/lib/childName'
 import TriageBadge from './TriageBadge'
 
 // Flagged (red/yellow) students with their ID data + a per-child "email the parent"
@@ -33,7 +34,7 @@ const RedStudentsSection = ({ roster }: { roster: RosterStatusRow[] }) => {
       {flagged.map((r) => (
         <View key={r.id} style={[s.row, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={s.info}>
-            <Text style={[s.name, { color: colors.textBase }]} numberOfLines={1}>{r.lastName} {r.firstName}</Text>
+            <Text style={[s.name, { color: colors.textBase }]} numberOfLines={1}>{shortChildName(r.lastName, r.firstName)}</Text>
             <Text style={[s.meta, { color: colors.textMuted }]} numberOfLines={1}>№{r.rosterSlot} · {r.guardianEmail ?? 'и-мэйл бүртгэлгүй'}</Text>
           </View>
           <TriageBadge level={r.latestLevel} />

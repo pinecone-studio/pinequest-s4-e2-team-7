@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useRouter } from 'expo-router'
-import { seasonForDate } from '@pinequest/core'
+import { useRouter, useLocalSearchParams } from 'expo-router'
+import { seasonForDate, seasonLabelMn } from '@pinequest/core'
 import { useTheme } from '@/lib/ThemeContext'
 import { createClass, type RosterStudentInput } from '@/lib/api'
 import { toMongolian } from '@/lib/errorMessages'
-import SeasonPicker from '@/components/teacher/SeasonPicker'
 import MonthCalendar from '@/components/teacher/MonthCalendar'
 import RosterEditor, { emptyStudent } from '@/components/teacher/RosterEditor'
 import TextField from '@/components/auth/TextField'
@@ -38,8 +37,10 @@ const buildRoster = (rows: EditableStudent[]): { students?: RosterStudentInput[]
 const NewClassScreen = () => {
   const { colors } = useTheme()
   const router = useRouter()
+  // Season is chosen on the Анги screen and passed through — not re-picked here.
+  const params = useLocalSearchParams<{ seasonId?: string }>()
+  const seasonId = params.seasonId ?? seasonForDate(new Date())
   const [name, setName] = useState('')
-  const [seasonId, setSeasonId] = useState(seasonForDate(new Date()))
   const [date, setDate] = useState<Date | null>(null)
   const [showCal, setShowCal] = useState(false)
   const [rows, setRows] = useState<EditableStudent[]>([emptyStudent()])
@@ -59,7 +60,7 @@ const NewClassScreen = () => {
         scheduledAt: date ? date.toISOString() : undefined,
         students: students ?? [],
       })
-      router.replace('/(tabs)/classes')
+      router.replace('/classes')
     } catch (err) {
       setError(toMongolian(err))
     } finally {
@@ -80,7 +81,9 @@ const NewClassScreen = () => {
        
         <View style={s.block}>
           <Text style={[s.label, { color: colors.textMuted }]}>Улирал</Text>
-          <SeasonPicker value={seasonId} onChange={setSeasonId} year={THIS_YEAR} />
+          <View style={[s.seasonRow, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+            <Text style={[s.seasonText, { color: colors.textBase }]}>{seasonLabelMn(seasonId)}</Text>
+          </View>
         </View>
 
         <View style={s.block}>
@@ -114,6 +117,8 @@ const s = StyleSheet.create({
   label: { fontSize: 11, fontFamily: 'Inter_600SemiBold', letterSpacing: 0.8 },
   dateRow: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 9999, paddingHorizontal: 14, height: 52, justifyContent: 'center' },
   dateText: { fontSize: 15, fontFamily: 'Inter_400Regular' },
+  seasonRow: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 9999, paddingHorizontal: 14, height: 52, justifyContent: 'center' },
+  seasonText: { fontSize: 15, fontFamily: 'Inter_500Medium' },
   error: { fontSize: 13, color: '#ef4444' },
 })
 

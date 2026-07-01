@@ -13,8 +13,9 @@ import { useLocalSearchParams } from 'expo-router'
 import * as Print from 'expo-print'
 import { seasonLabelMn } from '@pinequest/core'
 import { useTheme } from '@/lib/ThemeContext'
-import { getScreening, type ScreeningDetail } from '@/lib/api'
+import { getScreening, getAppointments, type ScreeningDetail } from '@/lib/api'
 import { toMongolian } from '@/lib/errorMessages'
+import { shortChildNameFromFull } from '@/lib/childName'
 import ScreenHeader from '@/components/teacher/ScreenHeader'
 
 const LEVEL_LABEL: Record<string, string> = {
@@ -118,12 +119,28 @@ export default function ScreeningDetailScreen() {
   const [detail, setDetail] = useState<ScreeningDetail | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [sharing, setSharing] = useState(false)
+  const [callNote, setCallNote] = useState<{ note: string; dentistName: string | null } | null>(null)
 
   useEffect(() => {
     getScreening(id)
       .then(setDetail)
       .catch((e: unknown) => setError(toMongolian(e)))
   }, [id])
+
+  // The dentist's post-call note (from the booked video appointment) surfaces here,
+  // in the child's report. Matched by childKey; newest note wins.
+  const childKey = detail?.childKey
+  useEffect(() => {
+    if (!childKey) return
+    getAppointments()
+      .then((appts) => {
+        const noted = appts
+          .filter((a) => a.childKey === childKey && a.note)
+          .sort((a, b) => b.scheduledAt.localeCompare(a.scheduledAt))[0]
+        setCallNote(noted ? { note: noted.note as string, dentistName: noted.dentistName } : null)
+      })
+      .catch(() => {})
+  }, [childKey])
 
   const onShare = async () => {
     if (!detail) return
@@ -138,7 +155,7 @@ export default function ScreeningDetailScreen() {
   }
 
   const shownLevel = detail?.triageLevel ?? level ?? 'green'
-  const shownName = detail?.childName || childName || 'Нэр тодорхойгүй'
+  const shownName = shortChildNameFromFull(detail?.childName || childName) || 'Нэр тодорхойгүй'
   const levelColor =
     shownLevel === 'green'
       ? colors.triageGreenText
@@ -242,6 +259,19 @@ export default function ScreeningDetailScreen() {
               </View>
             ) : null}
 
+            {callNote ? (
+              <View style={[s.reviewBox, { borderColor: colors.primary }]}>
+                <View style={s.noteHead}>
+                  <Ionicons name="videocam" size={16} color={colors.primary} />
+                  <Text style={[s.label, { color: colors.primary }]}>Эмчийн тэмдэглэл (видео дуудлага)</Text>
+                </View>
+                {callNote.dentistName ? (
+                  <Text style={[s.reviewLevel, { color: colors.textBase }]}>{callNote.dentistName}</Text>
+                ) : null}
+                <Text style={[s.reviewNote, { color: colors.textBase }]}>{callNote.note}</Text>
+              </View>
+            ) : null}
+
             <Text style={[s.foot, { color: colors.textDisabled, borderColor: colors.border }]}>
               Асуумж болон зурагт үндэслэсэн дүгнэлт нь шүд цоорох өвчний үндсэн онoш биш юм.
 
@@ -319,6 +349,7 @@ const s = StyleSheet.create({
   symRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
   symText: { fontSize: 14, fontFamily: 'Inter_400Regular' },
   reviewBox: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 10, padding: 14, marginTop: 18, gap: 4 },
+  noteHead: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 },
   reviewLevel: { fontSize: 15, fontFamily: 'Inter_700Bold' },
   reviewNote: { fontSize: 14, fontFamily: 'Inter_400Regular', lineHeight: 20 },
   foot: {

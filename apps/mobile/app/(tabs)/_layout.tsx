@@ -80,7 +80,7 @@ const TabLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="history"
+        name="scan-tab"
         options={
           config.tabs.camera
             ? {
@@ -106,8 +106,6 @@ const TabLayout = () => {
           tabBarIcon: ({ color }) => <TabIcon name="settings-outline" color={color} />,
         }}
       />
-      <Tabs.Screen name="classes" options={{ href: null }} />
-      <Tabs.Screen name="calendar" options={{ href: null }} />
     </Tabs>
   )
 }

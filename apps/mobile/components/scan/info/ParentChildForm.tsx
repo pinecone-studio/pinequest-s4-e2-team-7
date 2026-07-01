@@ -16,6 +16,8 @@ import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/lib/ThemeContext'
 import { getBoardStudents, type BoardStudent } from '@/lib/api'
 import { toMongolian } from '@/lib/errorMessages'
+import { shortChildName } from '@/lib/childName'
+import ScreenHeader from '@/components/teacher/ScreenHeader'
 
 const SEASON_ID = '2026-spring'
 
@@ -84,7 +86,8 @@ export default function ParentChildForm({ userId }: Props) {
 
   if (children === null) {
     return (
-      <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={['top', 'left', 'right', 'bottom']} style={[s.root, { backgroundColor: colors.bg }]}>
+        <View style={s.header}><ScreenHeader title="Хэрэглэгчийн мэдээлэл" /></View>
         <View style={s.center}>
           <ActivityIndicator color={colors.primary} />
         </View>
@@ -95,7 +98,8 @@ export default function ParentChildForm({ userId }: Props) {
   // Pick from already-registered children — auto-filled, like the class roster.
   if (mode === 'list' && children.length > 0) {
     return (
-      <SafeAreaView style={[s.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={['top', 'left', 'right', 'bottom']} style={[s.root, { backgroundColor: colors.bg }]}>
+        <View style={s.header}><ScreenHeader title="Хэрэглэгчийн мэдээлэл" /></View>
         <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
           <Text style={[s.sectionLabel, { color: colors.textMuted }]}>ШАЛГУУЛАГЧ СОНГОХ</Text>
           {children.map((c) => (
@@ -106,7 +110,7 @@ export default function ParentChildForm({ userId }: Props) {
               activeOpacity={0.8}
             >
               <View style={s.rowText}>
-                <Text style={[s.name, { color: colors.textBase }]} numberOfLines={1}>{c.lastName} {c.firstName}</Text>
+                <Text style={[s.name, { color: colors.textBase }]} numberOfLines={1}>{shortChildName(c.lastName, c.firstName)}</Text>
                 <Text style={[s.meta, { color: colors.textMuted }]}>Төрсөн он: {c.birthYear}</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.textDisabled} />
@@ -155,6 +159,7 @@ export default function ParentChildForm({ userId }: Props) {
 
 const s = StyleSheet.create({
   root: { flex: 1 },
+  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
   flex: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { padding: 20, gap: 6, paddingBottom: 40 },
