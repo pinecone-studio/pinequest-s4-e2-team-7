@@ -1,22 +1,21 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { InboxIcon, BarsArrowDownIcon, BarsArrowUpIcon, FireIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid'
 import type { ScreeningRow } from '@/hooks/useScreenings'
 import { SkeletonTable } from '@/components/ui/Skeleton'
 import EmptyState from '@/components/ui/EmptyState'
 import StatusPill, { type Tone } from '@/components/ui/StatusPill'
 import Dropdown, { type DropdownOption } from '@/components/ui/Dropdown'
+import { TRIAGE_SHORT } from '@/lib/triage'
 
-type Props = { screenings: ScreeningRow[] | undefined; loading?: boolean }
+type Props = { screenings: ScreeningRow[] | undefined; loading?: boolean; onSelect: (childKey: string) => void }
 type Sort  = 'recent' | 'oldest' | 'level'
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = 5
 
 const AVA:   Record<string, string> = { green: 'bg-triage-green-bg text-triage-green', yellow: 'bg-triage-yellow-bg text-triage-yellow', red: 'bg-triage-red-bg text-triage-red' }
 const TONE:  Record<string, Tone>   = { green: 'safe', yellow: 'check', red: 'danger' }
-const LABEL: Record<string, string> = { green: 'Дараагийн хяналт', yellow: 'Эмчилгээ', red: 'Яаралтай' }
 const SORT_OPTS: DropdownOption<Sort>[] = [
   { value: 'level',  label: 'Эрэмбэ',  Icon: FireIcon },
   { value: 'recent', label: 'Сүүлийн', Icon: BarsArrowDownIcon },
@@ -28,14 +27,21 @@ const COLS = 'grid grid-cols-[1.5fr_1.1fr_1.2fr_1fr] items-center gap-3'
 
 const conf = (s: ScreeningRow) => (s.findings.length ? Math.round(Math.max(...s.findings.map((f) => f.confidence)) * 100) : null)
 
-const RecentScreeningsTable = ({ screenings, loading }: Props) => {
+const RecentScreeningsTable = ({ screenings, loading, onSelect }: Props) => {
   const [sort, setSort] = useState<Sort>('level')
   const [page, setPage] = useState(0)
   const [showAll, setShowAll] = useState(false)
 
   if (loading) return <SkeletonTable />
 
-  const sorted = [...(screenings ?? [])].sort((a, b) => {
+  // One row per student — keep each child's LATEST screening. Otherwise a child
+  // screened several times shows up once per screening, flooding the list.
+  const byChild = new Map<string, ScreeningRow>()
+  for (const s of screenings ?? []) {
+    const prev = byChild.get(s.childKey)
+    if (!prev || new Date(s.capturedAt).getTime() > new Date(prev.capturedAt).getTime()) byChild.set(s.childKey, s)
+  }
+  const sorted = [...byChild.values()].sort((a, b) => {
     if (sort === 'oldest') return new Date(a.capturedAt).getTime() - new Date(b.capturedAt).getTime()
     if (sort === 'level')  return (RANK[a.triageLevel] ?? 9) - (RANK[b.triageLevel] ?? 9)
     return new Date(b.capturedAt).getTime() - new Date(a.capturedAt).getTime()
@@ -69,15 +75,15 @@ const RecentScreeningsTable = ({ screenings, loading }: Props) => {
         visibleRows.map((s) => {
           const c = conf(s)
           return (
-            <Link key={s.id} href={`/dashboard/dentist/screenings/${s.id}`}
-              className={`group ${COLS} border-t border-border-muted px-6 py-3.5 transition-all duration-150 hover:bg-surface-raised`}>
+            <button key={s.id} type="button" onClick={() => onSelect(s.childKey)}
+              className={`group ${COLS} w-full border-t border-border-muted px-6 py-3.5 text-left transition-all duration-150 hover:bg-surface-raised`}>
               <div className="flex min-w-0 items-center gap-3">
                 <div className={`flex size-8 shrink-0 items-center justify-center rounded-2xl text-[10px] font-bold transition-transform duration-200 group-hover:scale-110 ${AVA[s.triageLevel] ?? 'bg-surface-raised text-text-muted'}`}>
                   {s.childKey.slice(0, 3).toUpperCase()}
                 </div>
                 <span className="truncate font-mono text-[12.5px] text-text-base">{s.childKey.slice(0, 16)}</span>
               </div>
-              <StatusPill tone={TONE[s.triageLevel] ?? 'neutral'}>{LABEL[s.triageLevel] ?? s.triageLevel}</StatusPill>
+              <StatusPill tone={TONE[s.triageLevel] ?? 'neutral'}>{TRIAGE_SHORT[s.triageLevel] ?? s.triageLevel}</StatusPill>
               {s.syncedAt
                 ? <StatusPill tone="synced">Хадгалагдсан</StatusPill>
                 : <StatusPill tone="pending" pulse>Хүлээгдэж буй</StatusPill>}
@@ -91,7 +97,7 @@ const RecentScreeningsTable = ({ screenings, loading }: Props) => {
                   </>
                 )}
               </div>
-            </Link>
+            </button>
           )
         })
       )}

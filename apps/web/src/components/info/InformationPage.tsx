@@ -13,7 +13,6 @@ import {
   UserRound,
   AlarmClock,
   AlertTriangle,
-  ShieldCheck,
   CalendarClock,
   Eye,
   HeartHandshake,
@@ -46,7 +45,7 @@ let sharedAudioCtx: AudioContext | null = null
 function getAudioCtx(): AudioContext | null {
   if (typeof window === 'undefined') return null
   if (!sharedAudioCtx) {
-    const Ctx = window.AudioContext || (window as any).webkitAudioContext
+    const Ctx = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
     if (!Ctx) return null
     sharedAudioCtx = new Ctx()
   }

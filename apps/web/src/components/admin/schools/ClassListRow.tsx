@@ -5,11 +5,11 @@ import { CalendarDaysIcon, UsersIcon } from '@heroicons/react/24/solid'
 import type { SchoolClassRow } from '@pinequest/types'
 import Button from '@/components/ui/Button'
 import { formatSeason } from '@/lib/season'
+import { formatDateTimeMn } from '@/lib/dateMn'
 
 type Props = { row: SchoolClassRow; onSchedule: (row: SchoolClassRow) => void }
 
-const fmtDate = (iso: string) =>
-  new Date(iso).toLocaleString('mn-MN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+const fmtDate = (iso: string) => formatDateTimeMn(iso)
 
 const ClassListRow = ({ row, onSchedule }: Props) => {
   // Denominator = planned class size (Нийт хүүхэд), falling back to roster size.

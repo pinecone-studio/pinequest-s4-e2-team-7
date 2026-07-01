@@ -10,6 +10,7 @@ import {
   type MyClass,
   type RosterChild,
 } from '@/lib/screeningApi'
+import { formatChildName } from '@pinequest/core'
 import Dropdown, { type DropdownOption } from '@/components/ui/Dropdown'
 import { formatSeason } from '@/lib/season'
 import { ScreeningProgress } from './ScreeningProgress'
@@ -30,7 +31,14 @@ const selectCls =
   'rounded-full border border-border bg-surface-raised px-4 py-2 text-[13px] text-text-base outline-none transition-colors placeholder:text-text-muted focus:border-[#0e9594] disabled:cursor-not-allowed disabled:opacity-50'
 
 /** Улирал → анги → хүүхэд гэсэн тусдаа шүүлтүүрээр сонгоно. Улирал/ангийн шинжилсэн-үлдсэн прогрессийг харуулна. */
-export const ClassChildPicker = ({ onChange }: { onChange: (t: ScreenTarget | null) => void }) => {
+export const ClassChildPicker = ({
+  onChange,
+  resetSignal = 0,
+}: {
+  onChange: (t: ScreenTarget | null) => void
+  /** Скрининг хадгалмагц нэмэгддэг — сонголтыг цэвэрлэж, хамрагдалтыг DB-ээс дахин уншина. */
+  resetSignal?: number
+}) => {
   const { token } = useSession()
   const [classes, setClasses] = useState<MyClass[]>([])
   const [seasonId, setSeasonId] = useState('')
@@ -76,6 +84,16 @@ export const ClassChildPicker = ({ onChange }: { onChange: (t: ScreenTarget | nu
     getRosterStatus(token, classId).then(setRoster).catch(() => setRoster([]))
   }, [classId, token])
 
+  // Скрининг хадгалсны дараа: сонгосон хүүхдийг цэвэрлээд анги + ростерын хамрагдалтыг
+  // DB-ээс дахин уншина → прогресс баар, ✓ тэмдэг шинэ бүртгэлийг тусгана.
+  useEffect(() => {
+    if (!resetSignal) return
+    setChildKey('')
+    onChange(null)
+    getMyClasses(token).then(setClasses).catch(() => {})
+    if (classId) getRosterStatus(token, classId).then(setRoster).catch(() => {})
+  }, [resetSignal])
+
   const cls = classes.find((c) => c.id === classId)
   const screenedInClass = roster.filter((r) => r.screenedAt).length
   // Persist the teacher-set total locally so both the class + season bars recompute.
@@ -93,7 +111,7 @@ export const ClassChildPicker = ({ onChange }: { onChange: (t: ScreenTarget | nu
   ]
   const childOptions: DropdownOption[] = [
     { value: '', label: 'Хүүхэд сонгох…', Icon: UserIcon },
-    ...roster.map((r) => ({ value: r.childKey, label: `${r.screenedAt ? '✓ ' : ''}${r.lastName} ${r.firstName}`, Icon: UserIcon })),
+    ...roster.map((r) => ({ value: r.childKey, label: `${r.screenedAt ? '✓ ' : ''}${formatChildName(r)}`, Icon: UserIcon })),
   ]
 
   const emit = (kid: { childKey: string; firstName: string; lastName: string; birthYear: number }) => {

@@ -76,7 +76,7 @@ childRoutes.get('/children/:id/summary', authenticate, async (c) => {
   const child = await db.query.children.findFirst({ where: eq(children.id, c.req.param('id')) })
   if (!child) return c.json({ success: false, data: null }, 404)
   if (!(await hasChildAccess(db, c.get('jwtPayload'), child))) return c.json({ success: false, data: null, message: 'forbidden' }, 403)
-  const data = await loadChildSummary(db, c.req.param('id'))
+  const data = await loadChildSummary(db, c.req.param('id'), c.req.query('screeningId') || undefined)
   if (!data) return c.json({ success: false, data: null }, 404)
   return c.json({ success: true, data })
 })

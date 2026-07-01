@@ -12,17 +12,19 @@ type Props = {
   dentist: VolunteerDentist | null
   student?: { childKey: string; name: string } | null
   level?: 'red' | 'yellow'
+  /** Preselect a slot (e.g. tapped straight from the roster card's time table). */
+  initialSlot?: Date | null
   onClose: () => void
 }
 
 // Shows the dentist's availability (booked slots disabled). A user can book a free
 // time (if a student is picked) OR call the dentist directly — no admin step needed.
-const ScheduleDentistModal = ({ dentist, student, level = 'red', onClose }: Props) => {
+const ScheduleDentistModal = ({ dentist, student, level = 'red', initialSlot, onClose }: Props) => {
   const slots = useMemo(() => buildSlots(), [])
   const { data: booked = [] } = useDentistSlots(dentist?.id ?? null)
   const { startCall } = useCall()
   const create = useCreateAppointment()
-  const [picked, setPicked] = useState<Date | null>(null)
+  const [picked, setPicked] = useState<Date | null>(initialSlot ?? null)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState<string | null>(null)
   const unavail = useMemo(() => new Map(booked.map((b) => [b.scheduledAt, b.kind])), [booked])

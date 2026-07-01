@@ -6,6 +6,7 @@ import { useSchedule } from '@/hooks/useSchedule'
 import { useMyAppointments } from '@/hooks/useAppointments'
 import { useMe } from '@/hooks/useMe'
 import { downloadICS } from '@/lib/calendar'
+import { formatDateTimeMn } from '@/lib/dateMn'
 
 const SEEN_KEY = 'toothlings.seenNotifs'
 type Tone = 'call' | 'visit' | 'followup'
@@ -78,7 +79,7 @@ const NotificationBell = () => {
                 <span className={`size-2 shrink-0 rounded-full ${seen.has(e.id) ? 'bg-border' : dot(e.tone)}`} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[12px] font-medium text-text-base">{e.title}</p>
-                  <p className="text-[10px] text-text-muted">{new Date(e.date).toLocaleDateString('mn-MN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                  <p className="text-[10px] text-text-muted">{formatDateTimeMn(e.date)}</p>
                 </div>
                 <button onClick={() => remind(e)} className="btn shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold text-primary hover:bg-primary-subtle">Сануулга</button>
               </div>

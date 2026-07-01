@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { UserIcon } from '@heroicons/react/24/solid'
+import { formatChildName } from '@pinequest/core'
 import type { BoardStudent } from '@/hooks/useBoard'
 import { useAllVolunteerDentists, type VolunteerDentist } from '@/hooks/useHelp'
 import { DentistRosterCard } from './DentistRosterCard'
@@ -17,20 +18,24 @@ const BoardDentistPanel = ({ students }: Props) => {
   const { data: dentists = [], isLoading } = useAllVolunteerDentists()
   const [childKey, setChildKey] = useState('')
   const [picked, setPicked] = useState<VolunteerDentist | null>(null)
+  const [pickedSlot, setPickedSlot] = useState<Date | null>(null)
+
+  const pick = (d: VolunteerDentist, slot?: Date) => { setPicked(d); setPickedSlot(slot ?? null) }
+  const closeModal = () => { setPicked(null); setPickedSlot(null) }
 
   // Volunteer-dentist calls are for RED (emergency) students only.
   const redStudents = students.filter((s) => s.latestLevel === 'red')
   const selected = redStudents.find((s) => s.childKey === childKey) ?? null
-  const student = selected ? { childKey: selected.childKey, name: `${selected.lastName} ${selected.firstName}` } : null
+  const student = selected ? { childKey: selected.childKey, name: formatChildName(selected) } : null
 
   // Same shared Dropdown every other admin picker uses → consistent look.
   const studentOptions: DropdownOption[] = [
     { value: '', label: 'Сурагчийн нэрс сонгох', Icon: UserIcon },
-    ...redStudents.map((s) => ({ value: s.childKey, label: `${s.lastName} ${s.firstName} · ${s.className}`, Icon: UserIcon })),
+    ...redStudents.map((s) => ({ value: s.childKey, label: `${formatChildName(s)} · ${s.className}`, Icon: UserIcon })),
   ]
 
   return (
-    <aside className="flex w-full shrink-0 flex-col gap-3 self-start rounded-2xl border border-border bg-surface-raised p-4 lg:w-[440px]">
+    <aside className="flex w-full shrink-0 flex-col gap-3 rounded-2xl border border-border bg-surface-raised p-4 lg:sticky lg:top-4 lg:h-[calc(100dvh-8rem)] lg:w-110">
       <div>
         <h3 className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-text-base">
           Танд туслах боломжтой шүдний эмч
@@ -50,9 +55,9 @@ const BoardDentistPanel = ({ students }: Props) => {
       {isLoading ? (
         <PageSpinner />
       ) : dentists.length > 0 ? (
-        <div className="flex max-h-[60vh] flex-col gap-2 overflow-y-auto pr-0.5">
+        <div className="flex max-h-[70vh] flex-col gap-2.5 overflow-y-auto pr-0.5 lg:max-h-none lg:min-h-0 lg:flex-1">
           {dentists.map((d) => (
-            <DentistRosterCard key={d.id} dentist={d} onPick={() => setPicked(d)} />
+            <DentistRosterCard key={d.id} dentist={d} onPick={(slot) => pick(d, slot)} />
           ))}
         </div>
       ) : (
@@ -66,7 +71,7 @@ const BoardDentistPanel = ({ students }: Props) => {
       )}
 
       {picked && (
-        <ScheduleDentistModal dentist={picked} student={student} level="red" onClose={() => setPicked(null)} />
+        <ScheduleDentistModal dentist={picked} student={student} level="red" initialSlot={pickedSlot} onClose={closeModal} />
       )}
     </aside>
   )

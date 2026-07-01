@@ -6,6 +6,8 @@ import { useSession } from '@/components/providers'
 export type ScreeningRow = {
   id: string
   childKey: string
+  /** Roster child DB id (null for non-roster screenings) — links to the child summary. */
+  childId: string | null
   seasonId: string
   triageLevel: TriageLevel
   triageReason: string | null

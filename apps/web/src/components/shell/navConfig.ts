@@ -5,7 +5,6 @@ import {
   ChartBarIcon,
   UsersIcon,
   HandRaisedIcon,
-  ArrowTrendingUpIcon,
 } from '@heroicons/react/24/solid'
 import { Camera, ToothBrush } from '@/lib/icons'
 import type { ComponentType, SVGProps } from 'react'
@@ -39,7 +38,6 @@ const FOLLOWUP: NavItem = {
   badgeKey: 'followup',
 }
 const SUMMARY: NavItem = { href: '/dashboard/summary', label: 'Дүгнэлт', Icon: ChartBarIcon }
-const TRENDS: NavItem = { href: '/dashboard/trends', label: 'Динамик', Icon: ArrowTrendingUpIcon }
 const TEACHERS: NavItem = { href: '/dashboard/users', label: 'Хэрэглэгчид', Icon: UsersIcon }
 const INFORMATION: NavItem = {
   href: '/dashboard/information',
@@ -48,9 +46,9 @@ const INFORMATION: NavItem = {
 }
 
 export const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
-  admin: [OVERVIEW, SCREENING, BRUSH_NAV, FOLLOWUP, SUMMARY, TRENDS, TEACHERS, INFORMATION],
-  school_doctor: [OVERVIEW, SCREENING, BRUSH_NAV, FOLLOWUP, SUMMARY, TRENDS, TEACHERS],
-  teacher: [OVERVIEW, SCREENING, BRUSH_NAV, FOLLOWUP, SUMMARY, TRENDS],
+  admin: [OVERVIEW, SCREENING, BRUSH_NAV, FOLLOWUP, SUMMARY, TEACHERS, INFORMATION],
+  school_doctor: [OVERVIEW, SCREENING, BRUSH_NAV, FOLLOWUP, SUMMARY, TEACHERS],
+  teacher: [OVERVIEW, SCREENING, BRUSH_NAV, FOLLOWUP, SUMMARY],
   parent: [{ href: '/dashboard/child', label: 'Дүгнэлт', Icon: UserIcon }],
   dentist: [{ href: '/dashboard/dentist/help', label: 'Дуудлага', Icon: HandRaisedIcon }],
   follow_up: [

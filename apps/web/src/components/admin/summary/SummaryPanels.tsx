@@ -18,9 +18,8 @@ export const TRIAGE_BADGE: Record<string, string> = {
 export const TRIAGE_BLOCK: Record<string, string> = {
   red: 'border-triage-red/20 bg-triage-red-bg', yellow: 'border-triage-yellow/20 bg-triage-yellow-bg', green: 'border-triage-green/20 bg-triage-green-bg',
 }
-export const TRIAGE_LABEL: Record<string, string> = {
-  red: 'Яаралтай эмчилгээ шаардлагатай', yellow: 'Эмчилгээ шаардлагатай', green: 'Дараагийн хяналтанд хамруулах',
-}
+// Canonical status wording lives in one place; re-exported for existing importers.
+export { TRIAGE_LABEL } from '@/lib/triage'
 
 const SYMPTOMS: { key: keyof QuestionnaireAnswers; mn: string }[] = [
   { key: 'swelling',                    mn: 'Хавдар / хавдсан байдал' },
@@ -51,7 +50,7 @@ export const ImageGallery = ({ refs, screeningId }: { refs: string[]; screeningI
       <AuthImage
         path={`/api/screenings/${screeningId}/image/${idx}`}
         alt={`Үзүүлэлт зураг ${idx + 1}/${refs.length}`}
-        className="h-72 w-full object-cover"
+        className="h-72 w-full bg-black/40 object-contain"
       />
       {refs.length > 1 && <>
         <button onClick={() => setIdx((i) => Math.max(0, i - 1))} disabled={idx === 0} aria-label="Өмнөх" className={`${navBtn} left-2`}><ChevronLeftIcon className="size-4" /></button>

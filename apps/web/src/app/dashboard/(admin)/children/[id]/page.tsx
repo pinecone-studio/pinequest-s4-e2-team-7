@@ -6,6 +6,8 @@ import { TriageBadge } from '@/components/ui/TriageBadge'
 import ChildSummaryCard from '@/components/admin/child/ChildSummaryCard'
 import { useChild, useChildSummary } from '@/hooks/useChildren'
 import { useScreenings } from '@/hooks/useScreenings'
+import { formatChildName } from '@pinequest/core'
+import { formatSeason } from '@/lib/season'
 
 const ChildDetailPage = () => {
   const id = useParams().id as string
@@ -13,7 +15,7 @@ const ChildDetailPage = () => {
   const { data: payload } = useChildSummary(id)
   const { data: screenings } = useScreenings({ childKey: child?.childKey })
 
-  const fullName = child ? `${child.lastName} ${child.firstName}` : '…'
+  const fullName = child ? formatChildName(child) : '…'
 
   return (
     <section className="flex flex-col gap-5">
@@ -61,7 +63,7 @@ const ChildDetailPage = () => {
               <li key={s.id} className="flex items-center gap-3 px-5 py-3 text-sm">
                 <TriageBadge level={s.triageLevel} />
                 <span className="text-text-base">{new Date(s.capturedAt).toLocaleDateString('mn-MN')}</span>
-                <span className="text-text-muted">{s.seasonId}</span>
+                <span className="text-text-muted">{formatSeason(s.seasonId)}</span>
                 <span className="text-text-muted">{s.findings.length} тэмдэглэгээ</span>
                 <Link href={`/dashboard/dentist/screenings/${s.id}`} className="btn ml-auto text-xs text-primary transition-all duration-150 hover:underline">
                   Дэлгэрэнгүй

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid'
 import type { Child, TriageLevel } from '@pinequest/types'
+import { formatChildName } from '@pinequest/core'
 
 type Props = { rows: Child[]; levelByKey?: Record<string, TriageLevel> }
 
@@ -59,7 +60,7 @@ export const RosterTable = ({ rows, levelByKey = {} }: Props) => {
                     className="btn cursor-pointer border-b border-border-muted transition-colors last:border-0 hover:bg-surface-raised"
                   >
                     <td className="px-4 py-3 text-text-muted">{c.rosterSlot}</td>
-                    <td className="px-4 py-3 font-medium text-text-base">{c.lastName} {c.firstName}</td>
+                    <td className="px-4 py-3 font-medium text-text-base">{formatChildName(c)}</td>
                     <td className="px-4 py-3 text-text-muted">{c.birthYear}</td>
                     <td className="px-4 py-3">
                       {level ? (

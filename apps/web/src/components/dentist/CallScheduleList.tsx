@@ -14,11 +14,13 @@ type Props = {
   nextId: string | null
   onSelect: (a: AppointmentRow) => void
   onJoin: (a: AppointmentRow) => void
+  /** Admin view: hide the dentist-only Join button. */
+  readOnly?: boolean
 }
 
 // The selected day's booked calls — each row opens its clinical summary on the right
 // and carries a Join button. The nearest upcoming call is flagged "Удахгүй".
-const CallScheduleList = ({ title, appts, selectedId, nextId, onSelect, onJoin }: Props) => (
+const CallScheduleList = ({ title, appts, selectedId, nextId, onSelect, onJoin, readOnly = false }: Props) => (
   <div className="rounded-2xl border border-border bg-surface p-4 shadow-(--shadow-card)">
     <div className="mb-3 flex items-center justify-between">
       <h3 className="text-[14px] font-bold text-text-base">{title}</h3>
@@ -52,10 +54,12 @@ const CallScheduleList = ({ title, appts, selectedId, nextId, onSelect, onJoin }
               ) : (
                 <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${red ? 'bg-triage-red-bg text-triage-red' : 'bg-triage-yellow-bg text-triage-yellow'}`}>{red ? 'Яаралтай' : 'Эмчилгээ'}</span>
               )}
-              <button onClick={(e) => { e.stopPropagation(); onJoin(a) }} aria-label={`${name}-тэй дуудлага хийх`}
-                className="btn flex shrink-0 items-center gap-1 rounded-full bg-triage-red px-3 py-1.5 text-[11.5px] font-semibold text-white transition hover:opacity-90">
-                <VideoCameraIcon className="size-3.5" /> Нэгдэх
-              </button>
+              {!readOnly && (
+                <button onClick={(e) => { e.stopPropagation(); onJoin(a) }} aria-label={`${name}-тэй дуудлага хийх`}
+                  className="btn flex shrink-0 items-center gap-1 rounded-full bg-triage-red px-3 py-1.5 text-[11.5px] font-semibold text-white transition hover:opacity-90">
+                  <VideoCameraIcon className="size-3.5" /> Нэгдэх
+                </button>
+              )}
             </div>
           )
         })}

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { getQuestionnaire, questionnaireSymptoms, type ScanResult } from '@/lib/consumerState'
+import { getQuestionnaire, questionnaireSymptoms, questionnaireRawAnswers, type ScanResult } from '@/lib/consumerState'
 import { useSession } from '@/components/providers'
 import { saveScreening } from '@/lib/screeningApi'
 import type { ScreenTarget } from '@/components/consumer/caries/ClassChildPicker'
@@ -25,6 +25,7 @@ const toPayload = (scan: ScanResult, target: ScreenTarget, persistUrl: string) =
     imageData: [base64],
     findings: scan.findings ?? [],
     symptoms: questionnaireSymptoms(getQuestionnaire()),
+    rawAnswers: questionnaireRawAnswers(getQuestionnaire()),
     triage: { level: scan.triage, score: scan.triageScore ?? 0, confidentWording: scan.confidentWording ?? false },
     modelName: 'yolov8+gemini',
     contentVersionId: 'default',

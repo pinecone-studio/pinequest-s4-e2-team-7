@@ -1,39 +1,39 @@
 'use client'
 
-import type { ReactNode } from 'react'
-import { CheckCircleIcon, PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/solid'
+import { CheckCircleIcon } from '@heroicons/react/24/solid'
+import type { TriageLevel } from '@pinequest/types'
 import type { BoardStudent } from '@/hooks/useBoard'
 import type { ChildSummaryPayload } from '@/hooks/useChildSummary'
-import { childSummaryNarrative } from '@pinequest/core'
-import { ImageGallery, EmptyQuestionnairePanel, RawQuestionnairePanel, HospitalGuidePanel, TRIAGE_BADGE, TRIAGE_LABEL } from './SummaryPanels'
+import { childSummaryNarrative, formatChildName } from '@pinequest/core'
+import { ImageGallery, EmptyQuestionnairePanel, RawQuestionnairePanel, HospitalGuidePanel } from './SummaryPanels'
+import { ResultHeader, ContactPanel } from './SummaryHeader'
+import DentistCallPanel from './DentistCallPanel'
+import LongitudinalDeltaBar from './LongitudinalDeltaBar'
+import { formatDateMn } from '@/lib/dateMn'
+import { GuidanceSections } from '@/components/consumer/caries/GuidanceSections'
 import Skeleton from '@/components/ui/Skeleton'
-import { formatSeason } from '@/lib/season'
 
 type Props = {
   student: BoardStudent
   detail: ChildSummaryPayload | undefined
   isLoading: boolean
-  statusSlot?: ReactNode      // follow-up status control (FollowUpEditModal only)
+  // History tab passes a PAST season; omitted → the child's latest, derived from `student`.
+  view?: { level: TriageLevel; screenedAt: string; prior?: { level: TriageLevel; seasonId: string } }
 }
 
-// Gemini-ийн нас тохирсон зөвлөмжийн талбарууд (утас + эмчийн хяналттай ижил гарчиг).
-const GUIDANCE_FIELDS = [
-  { key: 'homeCare', label: 'Гэртээ' },
-  { key: 'brushing', label: 'Шүд угаах' },
-  { key: 'diet', label: 'Хоол хүнс' },
-  { key: 'prevention', label: 'Урьдчилан сэргийлэх' },
-  { key: 'nextStep', label: 'Дараагийн алхам' },
-] as const
-
-// Shared body for every student-summary modal — image, triage, questionnaire,
-// contact info, AI advice, hospital. One source of truth → both modals identical.
-const StudentSummaryBody = ({ student, detail, isLoading, statusSlot }: Props) => {
-  const level = student.latestLevel ?? 'none'
+// Shared body for every student-summary view. Everything is derived straight from ONE
+// screening event (the latest by default, or the `view` season from the history tab):
+// date, triage verdict, photos, the phone questionnaire, and the Gemini advice/guidance.
+const StudentSummaryBody = ({ student, detail, isLoading, view }: Props) => {
+  const level = view?.level ?? student.latestLevel ?? 'none'
   const summary = detail?.summary
-  const date = student.screenedAt
-    ? new Date(student.screenedAt).toLocaleDateString('mn-MN', { year: 'numeric', month: 'long', day: 'numeric' })
-    : '—'
-  const name = `${student.lastName} ${student.firstName}`.trim()
+  const screenedAt = view?.screenedAt ?? student.screenedAt
+  const date = screenedAt ? formatDateMn(screenedAt) : '—'
+  const name = formatChildName(student)
+
+  // Comparison strip: only shown on the history tab (a specific past season vs the one before it).
+  const compareLevel = view?.level
+  const priorSlot = view?.prior
 
   // Утсан дээр гарсан Gemini дүгнэлт. Урт текстийг өгүүлбэр бүрээр салгаж мөр болгоно (утастай ижил).
   const adviceText = detail?.advice?.trim() || ''
@@ -42,22 +42,21 @@ const StudentSummaryBody = ({ student, detail, isLoading, statusSlot }: Props) =
     .map((line) => line.trim())
     .filter(Boolean)
   const guidance = detail?.guidance
-  const guidanceSteps = guidance
-    ? GUIDANCE_FIELDS.filter((g) => guidance[g.key]?.trim()).map((g) => `${g.label}: ${guidance[g.key]}`)
-    : []
 
   return (
     <div className="flex flex-col gap-4">
-      <ImageGallery refs={detail?.imageRefs ?? []} screeningId={detail?.summary?.screeningId} />
+      {/* Өмнөх ↔ сонгосон дүгнэлтийн харьцуулалт — зөвхөн "Өмнөх дүгнэлтүүд" таб (view) дээр,
+          "Сүүлийн дүгнэлт" (латест) дээр харагдахгүй. */}
+      {view && compareLevel && <LongitudinalDeltaBar currentLevel={compareLevel} prior={priorSlot} />}
 
-      <div className="flex flex-wrap items-center gap-2">
-        <span className={`rounded-full px-3 py-1.5 text-[12px] font-semibold ${TRIAGE_BADGE[level] ?? 'border border-border bg-surface-raised text-text-muted'}`}>
-          {TRIAGE_LABEL[level] ?? 'Шалгаагүй'}
-        </span>
-        {(detail?.screeningCount ?? 0) > 1 && (
-          <span title={`${detail!.screeningCount} удаа шалгагдсан`} className="flex size-6 items-center justify-center rounded-full border border-border bg-surface-raised text-[12px] font-bold tabular-nums text-text-muted">{detail!.screeningCount}</span>
-        )}
-      </div>
+      {/* Огноо түрүүнд — дараа нь скринингийн дүгнэлт. Доорх бүх зүйл яг энэ скринингээс гарна. */}
+      <ResultHeader date={date} level={level} />
+
+      {/* Эмчтэй дуудлага хийсэн бол товлосон цаг + эмчийн дараах тэмдэглэлийг харуулна.
+          Зөвхөн сүүлийн дүгнэлт дээр (өмнөх улирлын `view` дээр биш). */}
+      {!view && <DentistCallPanel student={student} />}
+
+      <ImageGallery refs={detail?.imageRefs ?? []} screeningId={detail?.summary?.screeningId} />
 
       {isLoading && <Skeleton className="h-28 rounded-2xl" />}
       {/* Мобайл дата (questionnaireRaw) байвал утсан дээр асуусан яг хариултыг харуулна; web дээр
@@ -65,23 +64,6 @@ const StudentSummaryBody = ({ student, detail, isLoading, statusSlot }: Props) =
       {!isLoading && (detail?.questionnaireRaw?.length
         ? <RawQuestionnairePanel answers={detail.questionnaireRaw} />
         : <EmptyQuestionnairePanel />)}
-
-      <div className="rounded-2xl bg-surface-raised px-4">
-        {[['Хийсэн огноо', date], ['Анги', `${student.className} — ${formatSeason(student.seasonId)}`]].map(([l, v]) => (
-          <div key={l} className="flex items-start justify-between gap-4 border-b border-border py-2.5 last:border-0">
-            <span className="shrink-0 text-[12px] text-text-muted">{l}</span>
-            <span className="text-right text-[13px] font-medium text-text-base">{v}</span>
-          </div>
-        ))}
-        <div className="flex items-start justify-between gap-4 border-b border-border py-2.5">
-          <span className="shrink-0 text-[12px] text-text-muted">Эцэг эхийн утас</span>
-          <span>{student.guardianPhone ? <a href={`tel:${student.guardianPhone}`} className="flex items-center gap-1 text-[13px] font-medium text-primary hover:underline"><PhoneIcon className="size-3.5" />{student.guardianPhone}</a> : <span className="text-[13px] text-text-muted">—</span>}</span>
-        </div>
-        <div className="flex items-start justify-between gap-4 py-2.5">
-          <span className="shrink-0 text-[12px] text-text-muted">Эцэг эхийн имэйл</span>
-          <span>{student.guardianEmail ? <a href={`mailto:${student.guardianEmail}`} className="flex items-center gap-1 text-[13px] font-medium text-primary hover:underline"><EnvelopeIcon className="size-3.5" />{student.guardianEmail}</a> : <span className="text-[13px] text-text-muted">—</span>}</span>
-        </div>
-      </div>
 
       {/* Дүгнэлт + зөвлөгөө — утсан дээр гарсан Gemini-ийн advice/guidance-ийг яг тэр хэвээр харуулна.
           Gemini байхгүй (offline) бол core narrative + гэрийн алхмууд руу буцна. */}
@@ -98,13 +80,12 @@ const StudentSummaryBody = ({ student, detail, isLoading, statusSlot }: Props) =
                   <p className="text-[13px] font-semibold leading-snug text-text-base">{summary.headline}</p>
                 </>
               )}
-          {(guidanceSteps.length > 0 || (summary?.homeSteps.length ?? 0) > 0) && (
+          {/* Gemini guidance байхгүй (offline) үед л core-ийн гэрийн алхмуудыг энд харуулна. */}
+          {!guidance && (summary?.homeSteps.length ?? 0) > 0 && (
             <>
-              <p className="mb-2 mt-3 text-[11px] font-semibold uppercase tracking-wide text-text-muted">
-                {guidanceSteps.length > 0 ? 'Цаашид хэвшүүлэх арга хэмжээ' : 'Гэрийн нөхцөлд авах арга хэмжээ'}
-              </p>
+              <p className="mb-2 mt-3 text-[11px] font-semibold uppercase tracking-wide text-text-muted">Гэрийн нөхцөлд авах арга хэмжээ</p>
               <ul className="flex flex-col gap-2">
-                {(guidanceSteps.length > 0 ? guidanceSteps : (summary?.homeSteps ?? [])).map((step, i) => (
+                {(summary?.homeSteps ?? []).map((step, i) => (
                   <li key={i} className="flex items-start gap-2 text-[12px] leading-relaxed text-text-muted">
                     <CheckCircleIcon className="mt-0.5 size-3.5 shrink-0 text-triage-yellow/70" />{step}
                   </li>
@@ -114,13 +95,15 @@ const StudentSummaryBody = ({ student, detail, isLoading, statusSlot }: Props) =
           )}
         </div>
       )}
+      {/* Дэлгэрэнгүй зөвлөмж — скрининг дашбордтой ЯГ ИЖИЛ рендер (GuidanceSections). */}
+      {guidance && <GuidanceSections guidance={guidance} />}
       {!adviceText && !summary && !isLoading && (
         <p className="rounded-2xl border border-border bg-surface-raised p-4 text-[13px] text-text-muted">Энэ сурагч шалгагдаагүй байна.</p>
       )}
 
       {detail?.hospital && <HospitalGuidePanel h={detail.hospital} />}
 
-      {statusSlot}
+      <ContactPanel phone={student.guardianPhone} email={student.guardianEmail} />
     </div>
   )
 }

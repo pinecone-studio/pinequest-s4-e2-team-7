@@ -4,14 +4,19 @@ import { useState, useEffect } from 'react'
 import { VideoCameraIcon, CheckCircleIcon, UserCircleIcon } from '@heroicons/react/24/solid'
 import { childSummaryNarrative } from '@pinequest/core'
 import { ImageGallery, EmptyQuestionnairePanel, RawQuestionnairePanel, TRIAGE_BADGE, TRIAGE_LABEL } from '@/components/admin/summary/SummaryPanels'
+import { GuidanceSections } from '@/components/consumer/caries/GuidanceSections'
 import { useAppointmentSummary, useUpdateAppointmentNote, type AppointmentRow } from '@/hooks/useAppointments'
 import { useCall } from '@/context/IncomingCallContext'
 import { useToast } from '@/components/ui/Toast'
 import Skeleton from '@/components/ui/Skeleton'
+import { formatDateTimeMn } from '@/lib/dateMn'
 
-const fmt = (ms: number) => new Date(ms).toLocaleString('mn-MN', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-const countdown = (ms: number) => {
-  const diff = ms - Date.now()
+const fmt = (ms: number) => formatDateTimeMn(ms)
+// scheduledAt may arrive as an ISO string, so coerce (like fmt) before arithmetic —
+// `string - Date.now()` is NaN, which surfaced as "NaN өдрийн дараа".
+const countdown = (at: number | string) => {
+  const diff = new Date(at).getTime() - Date.now()
+  if (Number.isNaN(diff)) return { soon: false, text: '' }
   if (diff <= 0) return { soon: true, text: 'Товлосон цаг болсон' }
   const h = Math.floor(diff / 3.6e6), mn = Math.round((diff % 3.6e6) / 6e4)
   if (diff < 3.6e6) return { soon: true, text: `${mn} минутын дараа` }
@@ -22,16 +27,7 @@ const countdown = (ms: number) => {
 const TABS = [['summary', 'Дүгнэлт'], ['survey', 'Асуумж'], ['note', 'Зөвлөмж']] as const
 type Tab = (typeof TABS)[number][0]
 
-// Gemini-ийн нас тохирсон зөвлөмжийн талбарууд (утас + эмчийн хяналттай ижил гарчиг).
-const GUIDANCE_FIELDS = [
-  { key: 'homeCare', label: 'Гэртээ' },
-  { key: 'brushing', label: 'Шүд угаах' },
-  { key: 'diet', label: 'Хоол хүнс' },
-  { key: 'prevention', label: 'Урьдчилан сэргийлэх' },
-  { key: 'nextStep', label: 'Дараагийн алхам' },
-] as const
-
-const CallDetailPanel = ({ appt }: { appt: AppointmentRow | null }) => {
+const CallDetailPanel = ({ appt, readOnly = false }: { appt: AppointmentRow | null; readOnly?: boolean }) => {
   const { data: detail, isLoading } = useAppointmentSummary(appt?.id ?? null)
   const update = useUpdateAppointmentNote()
   const { startCall } = useCall()
@@ -55,12 +51,10 @@ const CallDetailPanel = ({ appt }: { appt: AppointmentRow | null }) => {
   const adviceText = detail?.advice?.trim() || ''
   const adviceConclusion = adviceText.split(/(?<=[.!?])\s+/).map((l) => l.trim()).filter(Boolean)
   const guidance = detail?.guidance
-  const guidanceSteps = guidance
-    ? GUIDANCE_FIELDS.filter((g) => guidance[g.key]?.trim()).map((g) => `${g.label}: ${guidance[g.key]}`)
-    : []
   const done = appt.status === 'completed'
   const cd = countdown(appt.scheduledAt)
-  const save = () => update.mutate({ id: appt.id, note: note.trim() }, { onSuccess: () => toast.success('Зөвлөмж хадгалагдлаа') })
+  const saveVerdict = (outcome: 'treatment_needed' | 'postponed') =>
+    update.mutate({ id: appt.id, note: note.trim(), outcome }, { onSuccess: () => toast.success('Дүгнэлт хадгалагдлаа') })
 
   return (
     <div className="flex h-full flex-col gap-4 rounded-2xl border border-border bg-surface p-5 shadow-(--shadow-card)">
@@ -98,24 +92,29 @@ const CallDetailPanel = ({ appt }: { appt: AppointmentRow | null }) => {
       <div className="min-h-[140px] flex-1">
         {isLoading && <Skeleton className="h-32 rounded-2xl" />}
         {!isLoading && tab === 'summary' && ((adviceText || summary) ? (
-          <div className="rounded-2xl border border-triage-yellow/20 bg-triage-yellow-bg p-4">
-            {adviceText
-              ? adviceConclusion.map((line, i) => (
-                  <p key={i} className="mb-1.5 text-[12px] leading-relaxed text-text-muted last:mb-0">{line}</p>
-                ))
-              : summary && (
-                  <>
-                    <p className="mb-2 text-[12px] leading-relaxed text-text-muted">{name}, {childSummaryNarrative(summary)}</p>
-                    <p className="text-[13px] font-semibold leading-snug text-text-base">{summary.headline}</p>
-                  </>
-                )}
-            {(guidanceSteps.length > 0 || (summary?.homeSteps.length ?? 0) > 0) && (
-              <ul className="mt-3 flex flex-col gap-2">
-                {(guidanceSteps.length > 0 ? guidanceSteps : (summary?.homeSteps ?? [])).map((step, i) => (
-                  <li key={i} className="flex items-start gap-2 text-[12px] leading-relaxed text-text-muted"><CheckCircleIcon className="mt-0.5 size-3.5 shrink-0 text-triage-yellow/70" />{step}</li>
-                ))}
-              </ul>
-            )}
+          <div className="flex flex-col gap-3">
+            <div className="rounded-2xl border border-triage-yellow/20 bg-triage-yellow-bg p-4">
+              {adviceText
+                ? adviceConclusion.map((line, i) => (
+                    <p key={i} className="mb-1.5 text-[12px] leading-relaxed text-text-muted last:mb-0">{line}</p>
+                  ))
+                : summary && (
+                    <>
+                      <p className="mb-2 text-[12px] leading-relaxed text-text-muted">{name}, {childSummaryNarrative(summary)}</p>
+                      <p className="text-[13px] font-semibold leading-snug text-text-base">{summary.headline}</p>
+                    </>
+                  )}
+              {/* Gemini guidance байхгүй (offline) үед л core-ийн гэрийн алхмуудыг энд харуулна. */}
+              {!guidance && (summary?.homeSteps.length ?? 0) > 0 && (
+                <ul className="mt-3 flex flex-col gap-2">
+                  {(summary?.homeSteps ?? []).map((step, i) => (
+                    <li key={i} className="flex items-start gap-2 text-[12px] leading-relaxed text-text-muted"><CheckCircleIcon className="mt-0.5 size-3.5 shrink-0 text-triage-yellow/70" />{step}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            {/* Дэлгэрэнгүй зөвлөмж — скрининг дашбордтой ЯГ ИЖИЛ рендер (GuidanceSections). */}
+            {guidance && <GuidanceSections guidance={guidance} />}
           </div>
         ) : <p className="rounded-2xl border border-border bg-surface-raised p-4 text-[13px] text-text-muted">Энэ сурагч шалгагдаагүй байна.</p>)}
 
@@ -125,21 +124,34 @@ const CallDetailPanel = ({ appt }: { appt: AppointmentRow | null }) => {
 
         {tab === 'note' && (
           <div className="flex flex-col gap-2">
-            <p className="text-[12px] text-text-muted">Дуудлага дууссаны дараа дараагийн алхмын зөвлөмжөө бичнэ үү.</p>
-            <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4}
-              placeholder="Жишээ: 36-р шүдийг 2 долоо хоногт эмчлүүлэх, фтор түрхэх…"
-              className="w-full resize-none rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary" />
-            <button onClick={save} disabled={update.isPending} className="btn self-end rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-text-on-primary hover:bg-primary-hover disabled:opacity-60">
-              {update.isPending ? 'Хадгалж байна…' : 'Зөвлөмж хадгалах'}
-            </button>
+            <p className="text-[12px] text-text-muted">
+              {readOnly ? 'Эмчийн бичсэн зөвлөмж (зөвхөн харах).' : 'Дуудлага дууссаны дараа зөвлөмжөө бичээд дүгнэлтээ сонгоно уу.'}
+            </p>
+            <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} readOnly={readOnly}
+              placeholder={readOnly ? 'Зөвлөмж бичигдээгүй байна.' : 'Жишээ: 36-р шүдийг 2 долоо хоногт эмчлүүлэх, фтор түрхэх…'}
+              className="w-full resize-none rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-base placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary read-only:opacity-80 read-only:focus:ring-0" />
+            {!readOnly && (
+              <div className="flex gap-2">
+                <button onClick={() => saveVerdict('treatment_needed')} disabled={update.isPending}
+                  className="btn flex-1 rounded-full bg-triage-yellow px-4 py-2.5 text-[13px] font-semibold text-white transition hover:opacity-90 disabled:opacity-60">
+                  Эмчилгээ хийлгэх
+                </button>
+                <button onClick={() => saveVerdict('postponed')} disabled={update.isPending}
+                  className="btn flex-1 rounded-full border border-border bg-surface-raised px-4 py-2.5 text-[13px] font-semibold text-text-base transition hover:bg-border disabled:opacity-60">
+                  Хойшлуулсан
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      <button onClick={() => startCall(appt.createdById, appt.childName ?? 'Сурагч')}
-        className="btn flex w-full items-center justify-center gap-2 rounded-full bg-triage-red py-3 text-[14px] font-bold text-white transition hover:opacity-90">
-        <VideoCameraIcon className="size-5" /> Видео дуудлага хийх
-      </button>
+      {!readOnly && (
+        <button onClick={() => startCall(appt.createdById, appt.childName ?? 'Сурагч')}
+          className="btn flex w-full items-center justify-center gap-2 rounded-full bg-triage-red py-3 text-[14px] font-bold text-white transition hover:opacity-90">
+          <VideoCameraIcon className="size-5" /> Видео дуудлага хийх
+        </button>
+      )}
     </div>
   )
 }

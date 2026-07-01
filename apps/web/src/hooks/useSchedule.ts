@@ -4,7 +4,7 @@ import { useSession } from '@/components/providers'
 
 export type ScheduleEvent = {
   id: string
-  kind: 'visit' | 'followup'
+  kind: 'visit' | 'followup' | 'appointment'
   date: string
   title: string
   subtitle: string | null

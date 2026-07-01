@@ -1,96 +1,66 @@
 'use client'
 
 import {
-  EnvelopeIcon, ArrowsPointingOutIcon,
-  ExclamationTriangleIcon, ExclamationCircleIcon,
+  EnvelopeIcon, ArrowsPointingOutIcon, ExclamationTriangleIcon,
+  CalendarDaysIcon, CheckBadgeIcon,
 } from '@heroicons/react/24/solid'
-import type { ComponentType, SVGProps } from 'react'
-import type { FollowUpStatus } from '@pinequest/types'
+import { formatChildName } from '@pinequest/core'
 import type { BoardStudent } from '@/hooks/useBoard'
-import StatusPicker from '@/components/ui/StatusPicker'
 import IconButton from '@/components/ui/IconButton'
 import SeasonDotRail from '@/components/admin/summary/SeasonDotRail'
+import { VERDICT_META } from '@/lib/followUp'
+import { TRIAGE_LABEL, TRIAGE_TEXT, TRIAGE_SOFT, TRIAGE_ICON, TRIAGE_NONE } from '@/lib/triage'
 
-// Triage is a STATUS accent ONLY — dot + icon + label + avatar initial. The
-// card surface itself stays neutral in BOTH themes; we never tint the whole
-// card. Soft tint is confined to the small avatar square.
-type Triage = { text: string; dot: string; soft: string; Icon: ComponentType<SVGProps<SVGSVGElement>>; label: string }
-const TRIAGE: Record<string, Triage> = {
-  red:    { text: 'text-triage-red',    dot: 'bg-triage-red',    soft: 'bg-triage-red-bg',    Icon: ExclamationTriangleIcon, label: 'Яаралтай эмчилгээ шаардлагатай' },
-  yellow: { text: 'text-triage-yellow', dot: 'bg-triage-yellow', soft: 'bg-triage-yellow-bg', Icon: ExclamationCircleIcon,   label: 'Эмчилгээ шаардлагатай' },
-}
-const FALLBACK: Triage = { text: 'text-text-muted', dot: 'bg-border', soft: 'bg-surface-raised', Icon: ExclamationCircleIcon, label: 'Шалгаагүй' }
-
-const GripDots = () => (
-  <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor">
-    <circle cx="2.5" cy="2.5" r="1.5"/><circle cx="7.5" cy="2.5" r="1.5"/>
-    <circle cx="2.5" cy="7" r="1.5"/><circle cx="7.5" cy="7" r="1.5"/>
-    <circle cx="2.5" cy="11.5" r="1.5"/><circle cx="7.5" cy="11.5" r="1.5"/>
-  </svg>
-)
+const fmtDay = (ms: number) => new Date(ms).toLocaleDateString('mn-MN', { month: 'numeric', day: 'numeric' })
+const fmtTime = (ms: number) => new Date(ms).toLocaleTimeString('mn-MN', { hour: '2-digit', minute: '2-digit' })
 
 type Props = {
   student: BoardStudent
   onSend?: () => void
-  onStatus: (s: FollowUpStatus) => void
   onEdit: () => void
-  dragging?: boolean
-  onDragStart?: () => void
-  onDragEnd?: () => void
 }
 
-const FollowUpCard = ({ student: s, onSend, onStatus, onEdit, dragging, onDragStart, onDragEnd }: Props) => {
-  const t = TRIAGE[s.latestLevel ?? ''] ?? FALLBACK
-  const date = s.screenedAt
-    ? new Date(s.screenedAt).toLocaleDateString('mn-MN', { month: 'numeric', day: 'numeric' })
-    : '—'
-
-  // Stop card-level click (open modal) when interacting with a control.
-  const stop = (e: { stopPropagation: () => void }) => e.stopPropagation()
+// Status is dentist-driven (set at the end of the video call), so the card is
+// read-only here: it shows the booked appointment + the dentist's verdict, and
+// clicking opens the detail modal to book / add notes. No manual status toggle.
+const FollowUpCard = ({ student: s, onSend, onEdit }: Props) => {
+  const level = s.latestLevel
+  const tone = level
+    ? { text: TRIAGE_TEXT[level], soft: TRIAGE_SOFT[level], Icon: TRIAGE_ICON[level], label: TRIAGE_LABEL[level] }
+    : { text: TRIAGE_NONE.text, soft: TRIAGE_NONE.soft, Icon: TRIAGE_NONE.Icon, label: TRIAGE_NONE.label }
+  const verdict = s.dentistVerdict ? VERDICT_META[s.dentistVerdict] : null
 
   return (
-    // Clicking the card opens the child's summary modal; only the grip drags.
     <div onClick={onEdit} role="button" tabIndex={0}
-      className={`group relative flex cursor-pointer flex-col gap-4 blob border border-border bg-surface p-5
-      shadow-(--shadow-card) transition-all duration-200
-      hover:-translate-y-1 hover:shadow-(--shadow-card-lg)
-      ${dragging ? 'scale-95 opacity-40' : ''}`}
-    >
-      {/* grip handle — the only draggable element */}
-      <div
-        draggable
-        onClick={stop}
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-        className="absolute left-2.5 top-1/2 -translate-y-1/2 cursor-grab p-2 text-text-muted/25 transition-colors hover:text-text-muted/60 active:cursor-grabbing"
-        title="Чирж зөөх"
-      >
-        <GripDots />
-      </div>
-
-      {/* doc button — top right */}
-      <div className="absolute right-4 top-4">
+      className="group relative flex cursor-pointer flex-col gap-4 blob border border-border bg-surface p-5 shadow-(--shadow-card) transition-all duration-200 hover:-translate-y-1 hover:shadow-(--shadow-card-lg)">
+      {/* action cluster — send to parents (brand-tinted) sits beside expand */}
+      <div className="absolute right-3.5 top-3.5 flex items-center gap-1">
+        {onSend && (
+          <IconButton
+            Icon={EnvelopeIcon} tone="plain" size="sm" label="Эцэг эхэд илгээх"
+            onClick={(e) => { e.stopPropagation(); onSend() }}
+            className="text-primary hover:bg-primary/10 hover:text-primary" />
+        )}
         <IconButton Icon={ArrowsPointingOutIcon} tone="plain" size="sm" label="Дэлгэрэнгүй харах" onClick={onEdit} />
       </div>
 
       {/* avatar + name (avatar carries the soft status tint) */}
-      <div className="flex items-center gap-3 pl-5 pr-10">
-        <div className={`flex size-11 shrink-0 items-center justify-center rounded-2xl text-[17px] font-black ${t.soft} ${t.text}`}>
+      <div className={`flex items-center gap-3 ${onSend ? 'pr-20' : 'pr-10'}`}>
+        <div className={`flex size-11 shrink-0 items-center justify-center rounded-2xl text-[17px] font-black ${tone.soft} ${tone.text}`}>
           {s.lastName.charAt(0)}
         </div>
         <div className="min-w-0">
-          <p className="text-[15px] font-bold leading-tight text-text-base">{s.lastName} {s.firstName}</p>
-          <p className="mt-0.5 text-[11px] font-medium text-text-muted">{s.className} · {date}</p>
+          <p className="text-[15px] font-bold leading-tight text-text-base">{formatChildName(s)}</p>
+          <p className="mt-0.5 text-[11px] font-medium text-text-muted">{s.className}</p>
         </div>
       </div>
 
-      {/* status — the ONLY coloured element: icon + label */}
-      <div className="flex items-start gap-2 pl-5">
-        <t.Icon className={`mt-px size-4.5 shrink-0 ${t.text}`} />
-        <p className={`text-[14px] font-bold leading-snug ${t.text}`}>{t.label}</p>
+      {/* triage status accent — the reason this child is in follow-up */}
+      <div className="flex items-start gap-2">
+        <tone.Icon className={`mt-px size-4.5 shrink-0 ${tone.text}`} />
+        <p className={`text-[14px] font-bold leading-snug ${tone.text}`}>{tone.label}</p>
       </div>
 
-      {/* escalation: prior treatment missed, now worsened */}
       {s.escalationFlag && (
         <div className="flex items-center gap-2 rounded-2xl bg-triage-red-bg px-3 py-2">
           <ExclamationTriangleIcon className="size-3.5 shrink-0 text-triage-red" />
@@ -98,13 +68,31 @@ const FollowUpCard = ({ student: s, onSend, onStatus, onEdit, dragging, onDragSt
         </div>
       )}
 
-      <SeasonDotRail history={s.seasonHistory ?? []} trend={s.trend ?? null} />
-
-      {/* action row — clicks here change status / send, never open the modal */}
-      <div className="flex items-center gap-2" onClick={stop}>
-        <StatusPicker value={s.followUpStatus ?? 'flagged'} onChange={onStatus} />
-        {onSend && <IconButton Icon={EnvelopeIcon} tone="plain" size="sm" label="Эцэг эхэд илгээх" onClick={onSend} />}
+      {/* appointment — booked date + which dentist */}
+      <div className="flex items-center gap-2 rounded-2xl bg-surface-raised px-3 py-2">
+        <CalendarDaysIcon className="size-4 shrink-0 text-text-muted" />
+        {s.appointmentAt ? (
+          <p className="min-w-0 flex-1 text-[12px] text-text-base">
+            <span className="font-semibold tabular-nums">{fmtDay(s.appointmentAt)}, {fmtTime(s.appointmentAt)}</span>
+            {s.appointmentDentistName && <span className="text-text-muted"> · {s.appointmentDentistName} эмч</span>}
+          </p>
+        ) : (
+          <p className="text-[12px] text-text-muted">Эмчтэй цаг товлоогүй</p>
+        )}
       </div>
+
+      {/* dentist finished the call → verdict + advice note */}
+      {verdict && (
+        <div className={`rounded-2xl border border-border ${verdict.bg} px-3 py-2.5`}>
+          <div className="flex items-center gap-1.5">
+            <CheckBadgeIcon className={`size-4 shrink-0 ${verdict.text}`} />
+            <span className={`text-[12px] font-bold ${verdict.text}`}>{verdict.label}</span>
+          </div>
+          {s.appointmentNote && <p className="mt-1.5 text-[12px] leading-relaxed text-text-base">{s.appointmentNote}</p>}
+        </div>
+      )}
+
+      <SeasonDotRail history={s.seasonHistory ?? []} trend={s.trend ?? null} />
     </div>
   )
 }

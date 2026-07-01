@@ -12,6 +12,8 @@ const STATUS_LABEL: Record<FollowUpStatus, string> = {
   treatment_done:    'Эмчилгээ хийлгэсэн',
   treatment_refused: 'Эмчилгээ хийлгээгүй',
   unclear:           'Тодорхойгүй',
+  treatment_needed:  'Эмчилгээ хийлгэх',
+  postponed:         'Хойшлуулсан',
   superseded:        'Шинэ улиралд шилжсэн',
   season_cleared:    'Харьцангуй эрүүл',
 }
@@ -23,6 +25,8 @@ const STATUS_CLS: Record<FollowUpStatus, string> = {
   treatment_done:    'bg-triage-green-bg text-triage-green',
   treatment_refused: 'bg-triage-red-bg text-triage-red',
   unclear:           'bg-triage-yellow-bg text-triage-yellow',
+  treatment_needed:  'bg-triage-yellow-bg text-triage-yellow',
+  postponed:         'bg-surface-raised text-text-muted',
   superseded:        'bg-surface-raised text-text-muted',
   season_cleared:    'bg-triage-green-bg text-triage-green',
 }

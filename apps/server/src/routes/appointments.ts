@@ -1,10 +1,11 @@
 import { Hono } from 'hono'
 import { and, eq, desc, asc, type SQL } from 'drizzle-orm'
 import { appointments, volunteerDentists, children, schoolClasses, dentistBlocks } from '@pinequest/db/d1'
-import { jitsiRoomName, jitsiRoomUrl } from '@pinequest/core'
+import { jitsiRoomName, jitsiRoomUrl, formatChildName } from '@pinequest/core'
 import { authenticate, authorize } from '../middleware/auth.js'
 import { hasChildAccess } from '../lib/scopeFilter.js'
 import { loadChildSummary } from '../lib/childSummary.js'
+import { recordDentistVerdict } from '../lib/dentistVerdict.js'
 import type { AppEnv } from '../types.js'
 
 export const appointmentRoutes = new Hono<AppEnv>()
@@ -46,9 +47,12 @@ appointmentRoutes.get('/', authenticate, async (c) => {
     .where(where)
     .orderBy(desc(appointments.scheduledAt))
 
-  const data = rows.map(({ firstName, lastName, ...r }) => ({
+  const data = rows.map(({ firstName, lastName, scheduledAt, ...r }) => ({
     ...r,
-    childName: lastName || firstName ? `${lastName ?? ''} ${firstName ?? ''}`.trim() : null,
+    // Return ms epoch (not a Date→ISO string) so clients can compare/sort numerically,
+    // matching AppointmentRow.scheduledAt: number and the /slots route below.
+    scheduledAt: scheduledAt.getTime(),
+    childName: lastName || firstName ? formatChildName({ firstName, lastName }) : null,
     roomUrl: jitsiRoomUrl(r.id),
   }))
   return c.json({ success: true, data })
@@ -128,7 +132,7 @@ appointmentRoutes.post('/', authorize('parent', 'teacher', 'school_doctor', 'scr
 appointmentRoutes.patch('/:id', authorize('dentist', 'admin'), async (c) => {
   const db = c.get('db')
   const payload = c.get('jwtPayload')
-  const { note } = await c.req.json<{ note?: string }>()
+  const { note, outcome } = await c.req.json<{ note?: string; outcome?: string }>()
   const appt = await db.query.appointments.findFirst({ where: eq(appointments.id, c.req.param('id')) })
   if (!appt) return c.json({ success: false, data: null, message: 'not_found' }, 404)
   if (payload.role !== 'admin') {
@@ -136,7 +140,14 @@ appointmentRoutes.patch('/:id', authorize('dentist', 'admin'), async (c) => {
     if (!vol || vol.id !== appt.dentistId) return c.json({ success: false, data: null, message: 'forbidden' }, 403)
   }
   const trimmed = note?.trim() || null
-  const status = appt.status === 'cancelled' ? 'cancelled' : trimmed ? 'completed' : 'scheduled'
+  const verdict = outcome === 'treatment_needed' || outcome === 'postponed' ? outcome : null
+  // A recorded verdict IS the "call finished" signal (a bare note also completes it).
+  const status = appt.status === 'cancelled' ? 'cancelled' : verdict || trimmed ? 'completed' : 'scheduled'
   const [row] = await db.update(appointments).set({ dentistNote: trimmed, status }).where(eq(appointments.id, appt.id)).returning()
+  // The dentist's verdict closes the child's open follow-up episode + emits an audited
+  // event — the ONLY status write the appointed dentist makes.
+  if (verdict) {
+    await recordDentistVerdict(db, appt.childKey, payload.sub, payload.role, trimmed ?? '', verdict)
+  }
   return c.json({ success: true, data: row })
 })

@@ -6,6 +6,7 @@ import Modal from '@/components/ui/Modal'
 import { useMe, useUpdateMe, useSwitchRole } from '@/hooks/useMe'
 import { useBoardStudents } from '@/hooks/useBoard'
 import { useSession } from '@/components/providers'
+import { formatChildName } from '@pinequest/core'
 import ProfileEditForm from './ProfileEditForm'
 
 const ROLE_LABEL: Record<string, string> = {
@@ -107,7 +108,7 @@ const ProfileModal = ({ open, onClose }: Props) => {
               <div className="rounded-2xl border border-primary/30 bg-primary-subtle px-4 py-3">
                 <p className="text-[10px] uppercase tracking-wider text-text-muted">Хүүхэд</p>
                 <p className="mt-0.5 text-[14px] font-semibold text-text-base">
-                  {child.lastName} {child.firstName}
+                  {formatChildName(child)}
                   <span className="ml-1.5 text-[12px] font-normal text-text-muted">· {child.className}</span>
                 </p>
               </div>

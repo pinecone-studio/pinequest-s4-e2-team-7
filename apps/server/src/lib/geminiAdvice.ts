@@ -3,7 +3,7 @@
  * (guidance) гаргана — detection/triage биш. triage логик TS (packages/core) дотор
  * үлдэнэ; загвар/AI зөвхөн илрүүлэлт + зөвлөмж. Prompt → geminiPrompt, parse → geminiParsing.
  */
-import type { InferenceDetection, ScreeningGuidance, SymptomSet, TriageLevel } from '@pinequest/types'
+import type { InferenceDetection, QuestionnaireAnswer, ScreeningGuidance, SymptomSet, TriageLevel } from '@pinequest/types'
 import { buildAdvicePrompt } from './geminiPrompt.js'
 import { GUIDANCE_SCHEMA, arrayBufferToBase64, extractGeminiResponseText, parseGuidance } from './geminiParsing.js'
 
@@ -23,6 +23,7 @@ export const runGeminiAdvice = async (params: {
   triageLevel: TriageLevel
   detections: InferenceDetection[]
   symptoms: SymptomSet
+  rawAnswers?: QuestionnaireAnswer[]
   age?: string
   image?: File
 }): Promise<{ advice: string; guidance?: ScreeningGuidance } | null> => {
@@ -34,6 +35,7 @@ export const runGeminiAdvice = async (params: {
     triageLevel: params.triageLevel,
     detections: params.detections,
     symptoms: params.symptoms,
+    rawAnswers: params.rawAnswers,
     age: params.age ?? '',
   })
 
